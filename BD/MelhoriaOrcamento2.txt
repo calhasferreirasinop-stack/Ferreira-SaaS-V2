@@ -1,0 +1,190 @@
+🚀 PROMPT — Otimização Inteligente de Cortes de Calha
+
+Precisamos implementar um sistema de otimização automática de cortes considerando o comprimento padrão da chapa de calha e a capacidade da dobradeira.
+
+📏 Regras físicas do processo
+✅ Comprimento da chapa (matéria-prima)
+
+Cada chapa de calha possui: 1,20 metros (120 cm)
+
+✅ Capacidade da dobradeira
+
+A dobradeira suporta até 8 metros contínuos por vez
+
+Ou seja, podemos agrupar cortes até esse limite
+
+🎯 Objetivo principal
+
+Ao salvar o orçamento, o sistema deve:
+
+✅ analisar TODOS os cortes de TODAS as dobras do orçamento
+✅ calcular a melhor sequência de produção
+✅ minimizar a sobra de material
+✅ numerar a ordem ideal de fabricação
+✅ exibir esse número ao lado de cada corte (como o usuário marcou em verde)
+
+🧠 Escopo da análise
+
+⚠️ MUITO IMPORTANTE
+
+Um único orçamento pode ter:
+
+várias dobras
+
+vários cortes por dobra
+
+O algoritmo deve:
+
+👉 juntar TODOS os cortes do orçamento
+👉 não otimizar dobra por dobra separadamente
+👉 fazer otimização GLOBAL
+
+📊 Exemplo do comportamento esperado
+
+Lista atual:
+
+Corte 1 — 5,00 m
+
+Corte 2 — 2,00 m
+
+Corte 3 — 12,00 m
+
+Corte 4 — 3,00 m
+
+Corte 5 — 4,00 m
+
+Corte 6 — 7,00 m
+
+O sistema deve:
+
+✅ calcular a melhor ordem de produção
+✅ reduzir desperdício
+✅ gerar sequência numerada
+
+Exemplo visual:
+
+Corte 3 — 12,00 m   → (1)
+Corte 6 — 7,00 m    → (2)
+Corte 1 — 5,00 m    → (3)
+Corte 5 — 4,00 m    → (4)
+Corte 4 — 3,00 m    → (5)
+Corte 2 — 2,00 m    → (6)
+
+(Ordem apenas ilustrativa — deve ser calculada pelo algoritmo)
+
+🧮 Lógica de otimização (obrigatória)
+
+Implementar algoritmo de Cut Optimization / Bin Packing com estas regras:
+
+✅ Passo 1 — Consolidar dados
+
+Ao salvar o orçamento:
+
+coletar todos os cortes
+
+cada corte possui:
+
+comprimento em metros
+
+referência da dobra
+
+✅ Passo 2 — Normalização
+
+Converter tudo para centímetros inteiros para evitar erro de float.
+
+Exemplo:
+
+5,00 m → 500 cm
+
+1,20 m → 120 cm
+
+✅ Passo 3 — Estratégia de otimização
+
+Usar abordagem:
+
+First Fit Decreasing (FFD)
+
+Processo:
+
+ordenar cortes do MAIOR para o MENOR
+
+ir alocando nas barras disponíveis
+
+respeitar limite da matéria-prima
+
+⚠️ Regra da matéria-prima
+
+Cada barra disponível:
+
+tamanho máximo: 120 cm por chapa
+
+O sistema deve:
+
+simular uso das chapas
+
+minimizar sobra total
+
+⚠️ Regra da dobradeira (8 metros)
+
+Durante a ordenação final:
+
+permitir agrupamentos contínuos até 8 metros
+
+evitar sequências que ultrapassem esse limite
+
+se ultrapassar → iniciar novo lote
+
+🔢 Numeração obrigatória
+
+Após calcular a melhor sequência:
+
+O sistema deve:
+
+✅ gerar um número de ordem de produção
+✅ mostrar ao lado de cada corte
+✅ começar do 1
+✅ ser sequencial
+✅ ser persistido no banco
+
+📍 Local de exibição
+
+Na tabela de cortes (lado direito):
+
+Hoje:
+
+Corte 1 — 5.00m
+
+Deve virar:
+
+(3) Corte 1 — 5.00m
+💾 Momento do cálculo
+
+Executar a otimização quando:
+
+✅ salvar orçamento
+✅ atualizar cortes
+✅ remover cortes
+✅ duplicar orçamento
+
+🎛️ Regras de segurança
+
+O sistema deve garantir:
+
+cada dobra tenha pelo menos 1 corte
+
+não perder vínculo corte ↔ dobra
+
+recalcular sempre que houver mudança
+
+manter performance mesmo com muitos cortes
+
+🎯 Objetivo final
+
+Gerar:
+
+✅ menor desperdício possível
+✅ ordem real de produção
+✅ visual claro para fábrica
+✅ automação completa
+
+🔥 Prioridade: ALTA (impacta custo real de material)

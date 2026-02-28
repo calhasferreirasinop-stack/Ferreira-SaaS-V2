@@ -1,0 +1,113 @@
+eu tenho essa imagem que ela e criada no sistema de calhas, eu quero que voce crie um prompt dizendo para ele fazer as seguintes melhorias, se voce veifificar na imagem a soma da peca da um total de 32 cm eu quero que ele gere dentro de um circulo sempre a soma das medidas da dobra, a soma ja e feito em baixo, porem ocorre o arredondamento para nivel de cobranca, eu preciso que o total saia dentro de um circulo pois isso vai facilitar muito no momento da execucao. outra coisa e sobre o circulo amarelo que eu fiz peca para corrigir a geracao das medidas pois em muitas dobras estao saindo uma medida em cima da outra dificultando o entendimento. outra situacao e sobre dobras de calha que comeca de um tamanho e temina de outro, ou seja isso deve ser demostrado aqui na dobra, o fator para cobrar vai ser sempre o maior valor, tendo com base que o restante sera perca, tendo esse senario em mente, supondo que tenha uma calha que comece com 15 cm da forma que esta ai, essa peca seja de 1 metro, no final deste 1 metro ele sera 10 cm, alem de ter uma forma de lancar esta informacao deve abrir um campo para informar um D de Direita ou E de esquerda, oque eu pensei foi: criar um botao com o nome desta situacao, nao sei se o ideal seria caida ou angulo, enfim veja uma nomenclatura profissional, voltando ao raciocinio, quando o cliente selecionar o lado, esse botao deve sempre ficar ativo, ao lado das setas, quando selecionou o lado e clicou sobre este botao, entao o sistema exige que lance 2 medidas sendo uma para ficar no primeiro canto e a outra no segundo canto, nao precisa ficar muito proximo ao canto, tambem deve obrigar a selecionar D ou E esse botao deve ter opcao de clicar ou desclicar, ou seja se o cliente clicar nele sem querer apenas clica novamente que vai continuar a lancar normalmente, Ultima coisa e quando tiver essa situacao na linha da dobra que existir isso entao deve ter um risco no meio dele ou seja se for uma seta para direita entao um risco conforme esse risco de verde, vale lembrar que esse risco sempre deve cruzar a linha para melhor entendimento
+
+
+
+
+
+
+
+PROMPT — Correções no Construtor de Dobras
+
+Precisamos aplicar melhorias visuais e funcionais no construtor de dobras.
+
+✅ 1. Círculo com soma real da peça
+
+Implementar:
+
+mostrar a soma REAL da dobra dentro de um círculo sobre o desenho
+
+NÃO usar valor arredondado
+
+valor arredondado continua apenas no rodapé
+
+Objetivo: facilitar execução em campo.
+
+✅ 2. Correção de sobreposição de medidas
+
+Problema atual: medidas estão se sobrepondo.
+
+Implementar:
+
+auto-posicionamento inteligente
+
+espaçamento mínimo entre cotas
+
+reposicionamento automático quando houver conflito
+
+Regra: nenhuma medida pode sobrepor outra.
+
+✅ 3. Novo modo: Caída Lateral
+
+Criar botão toggle chamado:
+
+Caída Lateral
+
+Comportamento
+
+Quando ativado:
+
+O sistema deve exigir:
+
+seleção do lado (D ou E)
+
+duas medidas:
+
+medida do primeiro canto
+
+medida do segundo canto
+
+Quando desativado:
+
+limpar os valores
+
+voltar ao modo normal
+
+Regra de cobrança
+
+Quando houver Caída Lateral:
+
+usar sempre o MAIOR valor para cobrança
+
+o menor é considerado perda
+
+✅ 4. Indicador visual no segmento
+
+Quando Caída Lateral estiver ativa no trecho:
+
+O sistema deve desenhar:
+
+um risco transversal no meio da linha
+
+o risco deve cruzar completamente o segmento
+
+usar o mesmo padrão visual do risco verde existente
+
+✅ 5. Indicador D ou E ao lado do trecho (NOVO — MUITO IMPORTANTE)
+
+Quando o usuário selecionar D ou E:
+
+O sistema deve:
+
+mostrar a letra escolhida (D ou E)
+
+posicionar ao lado do segmento que possui Caída Lateral
+
+acompanhar o trecho correto
+
+manter boa legibilidade
+
+aparecer somente quando Caída Lateral estiver ativa
+
+🎯 Objetivo final
+
+Melhorar:
+
+leitura em campo
+
+clareza visual
+
+evitar erros de fabricação
+
+identificação rápida de peças com variação
+
+✅ Prioridade alta de UX visual
