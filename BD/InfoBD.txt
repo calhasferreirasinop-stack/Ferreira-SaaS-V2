@@ -1,0 +1,3 @@
+projeto nome: ferreira-saas-v2
+
+Database password: Ferreira@15152026Hugo
