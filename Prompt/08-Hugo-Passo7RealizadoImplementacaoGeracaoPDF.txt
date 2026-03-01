@@ -1,0 +1,11 @@
+Concluí a implementação da Fase 7 (Profissionalização), focada no editor de orçamentos e configurações da empresa:
+
+Página da Empresa (/admin/company): Agora você pode configurar o nome, logo, licença, telefone, impostos padrão e termos de contrato da sua organização.
+Imposto em Porcentagem: Conforme solicitado, o imposto agora é calculado como uma porcentagem (ex: 6.25%). Você pode definir um valor padrão nas configurações da empresa que será aplicado automaticamente a novos orçamentos.
+Recálculo em Tempo Real: No editor de orçamentos, o total agora é atualizado instantaneamente ao alterar a taxa de imposto ou o desconto. Adicionei também um botão "Recalculate" para garantir a consistência dos cálculos.
+Isolamento Multi-tenant: Todas as configurações e orçamentos estão estritamente vinculados ao seu organization_id.
+Nota Importante: Devido a uma instabilidade momentânea na conexão automática com o Supabase, deixei o código pronto e o SQL necessário descrito no walkthrough.md. Caso encontre erros ao salvar as configurações da empresa ou o novo campo de taxa, basta executar o SQL fornecido no editor do Supabase.
+
+Você pode conferir os detalhes no 
+walkthrough.md
+.

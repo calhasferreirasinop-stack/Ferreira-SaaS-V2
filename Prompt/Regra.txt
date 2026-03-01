@@ -1,0 +1,18 @@
+👤 SCRIPT DO HUGO (Atualizado)
+🟢 SEMPRE ANTES DE COMEÇAR A PROGRAMAR
+(Obrigatório para pegar o que o Ihago fez e não dar erro no seu código)
+
+Bash
+git checkout main
+git pull origin main
+git checkout dev-Hugo
+git merge main
+🔵 QUANDO TERMINAR SUAS MELHORIAS
+
+No Antigravity (lado esquerdo), clique em Commit e Sync.
+
+Abra o site do seu projeto no GitHub.
+
+Clique no botão "Compare & pull request" (botão amarelo/verde que aparece no topo).
+
+Clique em "Create pull request" -> "Merge pull request" -> "Confirm merge".

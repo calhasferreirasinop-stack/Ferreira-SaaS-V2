@@ -1,0 +1,9 @@
+Finalizei o Round 8 com melhorias completas de tradução e interface:
+
+Tradução de Serviços: Agora todos os nomes de serviços (como Plumbing, Carpentry, Roofing, etc.) estão traduzidos corretamente em todos os 11 idiomas. O site não mostrará mais nomes em inglês quando um idioma diferente estiver selecionado.
+Página Inicial (Hero) localizada: O título principal "Your Home. Happier.", os botões e os campos de busca agora mudam conforme o idioma escolhido.
+Ajuste no Menu de Idiomas:
+No Celular: Mudei para uma grade de 4 colunas para ficar mais compacto e adicionei rolagem automática. Agora todos os 11 idiomas estão visíveis e fáceis de clicar.
+No Desktop: Aumentei a altura máxima da lista e garanti que a barra de rolagem funcione suavemente.
+Navegação e Avisos: Botões como "Voltar" e mensagens de erro (como "Serviço não encontrado") também foram traduzidos para Português e outros idiomas principais.
+Confira os detalhes atualizados no walkthrough.md. Pode testar a alternância de idiomas agora!

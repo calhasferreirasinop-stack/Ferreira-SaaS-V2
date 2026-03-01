@@ -1,0 +1,11 @@
+Olá! Concluí as tarefas do Round 6, resolvendo os problemas relatados e expandindo significativamente o suporte a idiomas.
+
+Aqui está o que foi feito:
+
+Suporte a 11 Idiomas: Adicionei suporte completo para: Espanhol, Chinês, Francês, Crioulo Haitiano, Vietnamita, Árabe, Russo, Hindi e Italiano, além de Inglês e Português.
+Novo Seletor de Idiomas: O Header agora possui um menu rolável no Desktop e uma grade organizada no Mobile para gerenciar todos os 11 idiomas de forma limpa.
+Correção do Erro de Salvamento (LockManager): Implementei um cliente Supabase específico para operações públicas (supabasePublic) que não tenta persistir a sessão de usuários anônimos. Isso deve eliminar o erro de "LockManager timeout" que ocorria ao salvar leads com imagens.
+Barra de Progresso: Ajustei a lógica para que a barra de progresso chegue a 100% quando você atinge a etapa de revisão e envio.
+Botão de Login: Traduzi os botões que estavam faltando e revisei a lógica de abertura do dropdown para garantir que funcione corretamente em todos os dispositivos.
+Admin i18n: Apliquei traduções também na barra lateral do painel administrativo.
+Você pode conferir todos os detalhes e o resumo técnico no arquivo walkthrough.md. Pronto para o teste final!
