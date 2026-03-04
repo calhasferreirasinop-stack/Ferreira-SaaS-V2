@@ -1926,7 +1926,7 @@ window.onload = function() {
                                             <th className="px-6 py-4">Data</th>
                                             <th className="px-6 py-4 text-right">Valor Total</th>
                                             <th className="px-6 py-4">Status</th>
-                                            <th className="px-6 py-4 flex justify-center">Ações</th>
+                                            <th className="px-6 py-4 text-center">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
@@ -1956,15 +1956,15 @@ window.onload = function() {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <div className="flex flex-wrap items-center justify-center gap-1.5 w-[280px] sm:w-[320px] mx-auto">
+                                                        <div className="flex flex-wrap items-center justify-start 2xl:justify-center gap-1.5 min-w-[200px] w-full max-w-[340px]">
                                                             {(!hasFinance && !hasProd && (q.status === 'draft' || q.status === 'sent')) ? (
                                                                 <button onClick={() => handleEditQuote(q)}
-                                                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Alterar Orçamento">
+                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Alterar Orçamento">
                                                                     <PenLine className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Alterar</span>
                                                                 </button>
                                                             ) : (
                                                                 <button onClick={() => handleViewReport(q)}
-                                                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Visualizar Orçamento">
+                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Visualizar Orçamento">
                                                                     <Eye className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Visualizar</span>
                                                                 </button>
                                                             )}
@@ -1981,13 +1981,20 @@ window.onload = function() {
                                                                         setToast({ msg: err.error || 'Erro', type: 'error' });
                                                                     }
                                                                 }}
-                                                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Criar Nova Versão">
+                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Criar Nova Versão">
                                                                     <RefreshCcw className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Nova Versão</span>
                                                                 </button>
                                                             )}
 
+                                                            {(q.status === 'approved' || q.prod_status === 'accepted' || q.prod_status === 'in_production') && (
+                                                                <button onClick={() => navigate(`/fabricacao/${q.id}`)}
+                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Módulo Fabricação">
+                                                                    <Hammer className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Fabricação</span>
+                                                                </button>
+                                                            )}
+
                                                             <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
-                                                                className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Orçamento Cliente">
+                                                                className="flex items-center gap-1 px-2 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Orçamento Cliente">
                                                                 <FileDown className="w-3.5 h-3.5" /> <span className="hidden sm:inline">PDF</span>
                                                             </button>
 
@@ -2005,7 +2012,7 @@ window.onload = function() {
                                                                     setToast({ msg: 'Erro ao gerar A4 Compacto', type: 'error' });
                                                                 }
                                                             }}
-                                                                className="flex items-center gap-1 px-2.5 py-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="A4 Compacto (Obra)">
+                                                                className="flex items-center gap-1 px-2 py-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="A4 Compacto (Obra)">
                                                                 <Printer className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Obra</span>
                                                             </button>
 
@@ -2015,7 +2022,7 @@ window.onload = function() {
                                                                     setCancelReason('');
                                                                     setCancelReasonText('');
                                                                 }}
-                                                                    className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Cancelar Orçamento">
+                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Cancelar Orçamento">
                                                                     <XCircle className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Cancelar</span>
                                                                 </button>
                                                             )}
