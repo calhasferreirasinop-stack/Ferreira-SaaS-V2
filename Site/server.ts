@@ -2563,6 +2563,145 @@ app.post('/api/quotes/:id/proof', authenticate, upload.single('proof'), async (r
 
 
 // =====================
+// FABRICAÇÃO (PRODUÇÃO)
+// =====================
+app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
+  const { estimateId } = req.params;
+  try {
+    const { data: est, error: estErr } = await supabase
+      .from('estimates')
+      .select('id, clientName, status, items:estimate_items(*)')
+      .eq('id', estimateId)
+      .eq('company_id', req.user.companyId)
+      .single();
+
+    if (estErr || !est) return res.status(404).json({ error: 'Orçamento não encontrado' });
+
+    const { data: po, error: poErr } = await supabase
+      .from('production_orders')
+      .select('*')
+      .eq('estimate_id', estimateId)
+      .eq('company_id', req.user.companyId)
+      .maybeSingle();
+
+    if (est.status !== 'approved' && (!po || !['accepted', 'in_production'].includes(po.status))) {
+      return res.status(400).json({ error: 'Orçamento não está liberado para fabricação' });
+    }
+
+    let { data: prodItems, error: piErr } = await supabase
+      .from('production_items')
+      .select('*')
+      .eq('production_order_id', po?.id)
+      .order('created_at', { ascending: true });
+
+    if (!prodItems || prodItems.length === 0) {
+      if (!po || !po.id) {
+        // Fallback if missing PO manually
+        return res.status(400).json({ error: 'Ordem de produção ausente.' });
+      }
+
+      const newItems: any[] = [];
+
+      for (const item of (est.items || [])) {
+        if ((item.description || '').startsWith('[BEND]')) {
+          try {
+            const bendData = JSON.parse(item.description.substring(7));
+            const lengths = Array.isArray(bendData.lengths) ? bendData.lengths.filter((l: any) => parseFloat(l) > 0) : [];
+            const groupName = bendData.group_name || 'Diversos'; // This is 'comodo'
+
+            for (const len of lengths) {
+              newItems.push({
+                production_order_id: po ? po.id : null,
+                estimate_item_id: item.id,
+                metragem: parseFloat(len),
+                concluido: false,
+                // To avoid altering DB right now, we can omit them, or let DB fail if columns don't exist.
+                // Wait, does production_items have comodo and description?
+                // The prompt says "Campos: id, production_order_id, estimate_item_id, metragem, concluido, concluido_em, created_at."
+                // So we don't have them in DB. We need to attach them dynamically during GET.
+              });
+            }
+          } catch (e) { }
+        }
+      }
+
+      if (newItems.length > 0) {
+        const { data: inserted, error: insErr } = await supabase
+          .from('production_items')
+          .insert(newItems)
+          .select();
+        if (insErr) throw insErr;
+        prodItems = inserted;
+      } else {
+        prodItems = [];
+      }
+    }
+
+    // Attach UI text
+    const enrichedItems = (prodItems || []).map((pi: any) => {
+      const match = est.items.find((i: any) => i.id === pi.estimate_item_id);
+      let desc = 'Dobra Customizada';
+      let comodo = 'Geral';
+      if (match && match.description?.startsWith('[BEND]')) {
+        try {
+          const bData = JSON.parse(match.description.substring(7));
+          if (bData.productName) desc = bData.productName;
+          if (bData.group_name) comodo = bData.group_name;
+        } catch (e) { }
+      }
+      return { ...pi, description: desc, comodo };
+    });
+
+    res.json({
+      clientName: est.clientName,
+      estimate: est,
+      productionOrder: po,
+      items: enrichedItems
+    });
+
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/fabricacao/item/:itemId/toggle', authenticate, async (req: any, res) => {
+  const { itemId } = req.params;
+  const { concluido } = req.body;
+  try {
+    const { data, error } = await supabase
+      .from('production_items')
+      .update({
+        concluido,
+        concluido_em: concluido ? new Date().toISOString() : null
+      })
+      .eq('id', itemId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/fabricacao/order/:orderId/finish', authenticate, async (req: any, res) => {
+  const { orderId } = req.params;
+  try {
+    const { error } = await supabase
+      .from('production_orders')
+      .update({ status: 'ready', updated_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .eq('company_id', req.user.companyId);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =====================
 // INVENTORY Routes (SaaS V2 Map: /api/inventory -> products table)
 // =====================
 app.get('/api/inventory', requireAdmin, async (req: any, res) => {
@@ -2831,6 +2970,15 @@ app.post('/api/admin/migrate', requireMaster, async (req: any, res) => {
       created_at timestamptz DEFAULT now(),
       updated_at timestamptz DEFAULT now()
     )`,
+    `CREATE TABLE IF NOT EXISTS public.production_items (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      production_order_id uuid REFERENCES public.production_orders(id) ON DELETE CASCADE,
+      estimate_item_id uuid,
+      metragem numeric(12,2),
+      concluido boolean DEFAULT false,
+      concluido_em timestamptz,
+      created_at timestamptz DEFAULT now()
+    )`
   ];
 
   const results: { sql: string; ok: boolean; error?: string }[] = [];

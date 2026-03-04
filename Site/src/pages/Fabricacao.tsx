@@ -18,11 +18,14 @@ export default function Fabricacao() {
     const fetchItems = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/production-items/${estimateId}`, { credentials: 'include' });
+            const res = await fetch(`/api/fabricacao/${estimateId}`, { credentials: 'include' });
             if (res.ok) {
                 const data = await res.json();
                 setItems(data.items || []);
                 setClientName(data.clientName || 'Cliente');
+            } else {
+                const err = await res.json();
+                alert(err.error || 'Erro ao carregar fabricação');
             }
         } catch (e) {
             console.error('Erro ao carregar itens:', e);
@@ -33,8 +36,8 @@ export default function Fabricacao() {
 
     const handleToggle = async (item: any) => {
         try {
-            const res = await fetch(`/api/production-items/${item.id}/toggle`, {
-                method: 'PUT',
+            const res = await fetch(`/api/fabricacao/item/${item.id}/toggle`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ concluido: !item.concluido }),
                 credentials: 'include'
@@ -50,13 +53,16 @@ export default function Fabricacao() {
     const handleFinish = async () => {
         setFinishing(true);
         try {
-            const res = await fetch(`/api/production-orders/${estimateId}/finish`, {
+            const res = await fetch(`/api/fabricacao/order/${estimateId}/finish`, {
                 method: 'POST',
                 credentials: 'include'
             });
             if (res.ok) {
                 alert('Produção finalizada com sucesso!');
                 navigate(-1);
+            } else {
+                const err = await res.json();
+                alert(err.error || 'Erro ao finalizar');
             }
         } catch (e) {
             console.error('Erro ao finalizar:', e);

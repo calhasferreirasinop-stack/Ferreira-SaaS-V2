@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import {
     Search, Calendar, DollarSign, Download, Clock, CheckCircle2,
     AlertCircle, Eye, RefreshCcw, Hammer, XCircle, Plus, RotateCcw,
-    Filter, ChevronDown, MoreHorizontal, ArrowUpDown, ChevronRight, X, Package, ClipboardList
+    Filter, ChevronDown, MoreHorizontal, ArrowUpDown, ChevronRight, X, Package, ClipboardList,
+    PenLine, FileDown, Printer
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -230,12 +231,16 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
             {/* BARRA DE FILTROS */}
             <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
                 <div className="flex flex-wrap gap-2">
-                    {['all', 'draft', 'sent', 'approved', 'cancelled'].map(f => (
-                        <button key={f} onClick={() => setStatusFilter(f)}
-                            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all ${statusFilter === f ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                            {f === 'all' ? 'Todos' : STATUS_CONFIG[f]?.label || f}
-                        </button>
-                    ))}
+                    {['all', 'draft', 'sent', 'approved', 'in_production', 'paid', 'expired', 'cancelled'].map(f => {
+                        const count = f === 'all' ? quotes.length : quotes.filter(q => q.status === f).length;
+                        return (
+                            <button key={f} onClick={() => setStatusFilter(f)}
+                                className={`px-4 py-2 rounded-xl text-[11px] font-bold uppercase transition-all flex items-center gap-2 ${statusFilter === f ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                                {f === 'all' ? 'Todos' : STATUS_CONFIG[f]?.label || f}
+                                <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${statusFilter === f ? 'bg-white/20' : 'bg-slate-200 text-slate-400'}`}>{count}</span>
+                            </button>
+                        )
+                    })}
                 </div>
                 <div className="relative w-full md:w-80">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -248,150 +253,146 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
             <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-bold uppercase">
+                        <thead className="bg-slate-50 border-b border-slate-200 uppercase text-[10px] font-black text-slate-500 tracking-widest">
                             <tr>
-                                <th className="px-6 py-4">Cliente / Orçamento</th>
-                                <th className="px-6 py-4">Valor Total</th>
-                                <th className="px-6 py-4">Data Registro</th>
-                                <th className="px-6 py-4 text-center">Status / Financeiro</th>
-                                <th className="px-6 py-4 text-right">Ações</th>
+                                <th className="px-6 py-4">Cliente</th>
+                                <th className="px-6 py-4">Nº Orçamento</th>
+                                <th className="px-6 py-4">Data</th>
+                                <th className="px-6 py-4 text-right">Valor Total</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filtered.length === 0 ? (
-                                <tr><td colSpan={5} className="text-center py-12 text-slate-400 font-medium">Nenhum orçamento encontrado.</td></tr>
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-12 text-center text-slate-400 font-bold">
+                                        Nenhum orçamento encontrado.
+                                    </td>
+                                </tr>
                             ) : (
-                                filtered.map(q => {
-                                    const st = STATUS_CONFIG[q.status] || STATUS_CONFIG.draft;
+                                filtered.map((q) => {
+                                    const fallbackRestante = (q.finalValue || q.totalValue || 0) - (q.fin_paid || 0) - (q.fin_credit || 0);
+                                    const valRestante = q.fin_remaining !== null && q.fin_remaining !== undefined ? q.fin_remaining : Math.max(0, fallbackRestante);
+                                    const isTotalPaid = valRestante < 0.01 && ((q.fin_paid || 0) > 0 || (q.fin_credit || 0) > 0);
+                                    const hasPaid = (q.fin_paid || 0) > 0 || (q.fin_credit || 0) > 0;
+                                    const hasFinance = !!q.fin_id || hasPaid;
+                                    const hasProd = !!q.prod_status;
+                                    const finKey = isTotalPaid ? 'pago' : (hasPaid ? 'parcial' : 'pendente');
 
-                                    // Financeiro do Backend (já calculado com Créditos + Pagamentos)
-                                    const valPago = Number(q.fin_paid || 0);
-                                    const valCredit = Number(q.fin_credit || 0);
-                                    const valTotal = Number(q.finalValue || q.totalValue || 0);
-
-                                    const valRestanteAPI = q.fin_remaining !== null && q.fin_remaining !== undefined ? Number(q.fin_remaining) : null;
-                                    const valRestante = valRestanteAPI !== null ? valRestanteAPI : Math.max(0, valTotal - valPago - valCredit);
-
-                                    // Para botões (Nova Versão vs Reabrir), consideramos apenas pagamentos na CR desta versão.
-                                    const hasPaid = valPago > 0.01;
-                                    const isTotalPaid = valRestante < 0.01 && (hasPaid || valCredit > 0.01);
-
-                                    // Status Financeiro (Badge secundário)
-                                    let finLabel = 'Pendente';
-                                    let finColorClass = 'text-rose-600 bg-rose-50 border-rose-100'; // 🔴 Pendente
-
-                                    if (isTotalPaid) {
-                                        finLabel = 'Pago';
-                                        finColorClass = 'text-emerald-600 bg-emerald-50 border-emerald-100'; // 🟢 Pago
-                                    } else if (hasPaid) {
-                                        finLabel = 'Parcial';
-                                        finColorClass = 'text-blue-600 bg-blue-50 border-blue-100'; // 🔵 Parcial
-                                    }
+                                    const isDraft = q.status === 'draft';
+                                    const stConf = STATUS_CONFIG[q.status] || STATUS_CONFIG['draft'];
+                                    const fnConf = FIN_STATUS_CONFIG[finKey] || FIN_STATUS_CONFIG['pendente'];
 
                                     return (
-                                        <tr key={q.id} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-6 py-2">
-                                                <p className="font-bold text-slate-900 group-hover:text-brand-primary transition-colors">{q.clientName || 'Cliente'}</p>
+                                        <tr key={q.id} className="hover:bg-slate-50/80 transition-all group">
+                                            <td className="px-6 py-4 font-bold text-slate-900 group-hover:text-brand-primary transition-colors">
+                                                {q.clientName}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="font-mono text-slate-500 text-xs">#{String(q.id).substring(0, 8).toUpperCase()}</span>
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-500 font-medium">
+                                                {new Date(q.createdAt).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 text-right font-black text-slate-900">
+                                                {fmt(q.finalValue || q.totalValue)}
+                                            </td>
+                                            <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <p className="text-[10px] text-slate-400 font-mono tracking-tight uppercase">#{String(q.id).substring(0, 8)}</p>
-                                                    {q.production_order && (
-                                                        <span className="flex items-center gap-0.5 text-[9px] font-black text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase border border-indigo-100">
-                                                            <Hammer className="w-2.5 h-2.5" /> Produção
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-2 font-bold text-slate-700">{fmt(valTotal)}</td>
-                                            <td className="px-6 py-2 text-slate-500">
-                                                <div className="flex items-center gap-1.5 font-medium text-xs">
-                                                    <Calendar className="w-3.5 h-3.5 opacity-40" />
-                                                    {new Date(q.createdAt).toLocaleDateString('pt-BR')}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-2 text-center">
-                                                <div className="flex flex-col items-center gap-1">
-                                                    {/* LINHA 1: Status do Orçamento */}
-                                                    <span className={`${st.bg} ${st.color} px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-tight shadow-sm min-w-[85px] text-center`}>
-                                                        {st.label}
+                                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${stConf.bg} ${stConf.color}`}>
+                                                        {stConf.label}
                                                     </span>
-                                                    {/* LINHA 2: Status Financeiro (Ocultar em Rascunho) */}
-                                                    {q.status !== 'draft' && (
-                                                        <span className={`${finColorClass} px-2.5 py-0.5 rounded text-[8px] font-black uppercase border w-full max-w-[85px] text-center mt-1`}>
-                                                            {finLabel}
+                                                    {!isDraft && (
+                                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${fnConf.bg} ${fnConf.color}`}>
+                                                            {fnConf.label}
                                                         </span>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-2">
-                                                <div className="flex items-center justify-end gap-3">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center justify-center gap-2">
                                                     {/* LADO ESQUERDO: Aprovar / Reabrir / Nova Versão */}
-                                                    <div className="flex-1 flex items-center gap-2">
-                                                        {q.status !== 'cancelled' && q.status !== 'canceled' && (
-                                                            <>
-                                                                {hasPaid ? (
+                                                    {q.status !== 'cancelled' && q.status !== 'canceled' && (
+                                                        <>
+                                                            {hasPaid || hasFinance || hasProd ? (
+                                                                <button
+                                                                    onClick={() => handleNewVersionClick(q)}
+                                                                    className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-blue-700 transition-all shadow-sm cursor-pointer flex items-center gap-1 whitespace-nowrap"
+                                                                    title="Nova Versão"
+                                                                >
+                                                                    <RefreshCcw className="w-3 h-3" /> <span className="hidden xl:inline">Nova Versão</span>
+                                                                </button>
+                                                            ) : (
+                                                                (q.status === 'draft' || q.status === 'sent') ? (
                                                                     <button
-                                                                        onClick={() => handleNewVersionClick(q)}
-                                                                        className="bg-blue-600 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-blue-700 transition-all shadow-sm cursor-pointer flex items-center gap-1 whitespace-nowrap"
-                                                                        title="Nova Versão"
+                                                                        onClick={() => handleApprove(q.id)}
+                                                                        className="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
                                                                     >
-                                                                        <RefreshCcw className="w-3 h-3" /> <span className="hidden lg:inline">Nova Versão</span>
+                                                                        Aprovar
                                                                     </button>
                                                                 ) : (
-                                                                    (q.status === 'draft' || q.status === 'sent') ? (
-                                                                        <button
-                                                                            onClick={() => handleApprove(q.id)}
-                                                                            className="bg-emerald-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-emerald-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
-                                                                        >
-                                                                            Aprovar
-                                                                        </button>
-                                                                    ) : (
-                                                                        <button
-                                                                            onClick={() => handleReopen(q.id, false)}
-                                                                            className="bg-slate-700 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-slate-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
-                                                                        >
-                                                                            Reabrir
-                                                                        </button>
-                                                                    )
-                                                                )}
-                                                            </>
-                                                        )}
-                                                    </div>
-
-                                                    {/* LADO DIREITO: Registrar / Cancelar / Relatórios */}
-                                                    <div className="flex items-center gap-2">
-                                                        {q.status !== 'cancelled' && q.status !== 'canceled' ? (
-                                                            <>
-                                                                <button
-                                                                    onClick={() => handleCancel(q.id)}
-                                                                    className="text-rose-400 p-2 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
-                                                                    title="Cancelar"
-                                                                >
-                                                                    <XCircle className="w-4 h-4" />
-                                                                </button>
-
-                                                                {(valRestante > 0.01) && (
                                                                     <button
-                                                                        onClick={() => openPayModal(q)}
-                                                                        className="bg-orange-500 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-orange-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                                                                        onClick={() => handleReopen(q.id, false)}
+                                                                        className="bg-slate-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-slate-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
                                                                     >
-                                                                        Registrar Pagamento
+                                                                        Reabrir
                                                                     </button>
-                                                                )}
-                                                            </>
-                                                        ) : (
-                                                            <span className="text-[9px] font-black text-rose-500 bg-rose-50 px-2 py-1 rounded uppercase">Cancelado</span>
-                                                        )}
+                                                                )
+                                                            )}
+                                                        </>
+                                                    )}
 
-                                                        <div className="flex items-center gap-0.5 border-l border-slate-100 pl-2 ml-1">
+                                                    {/* LADO DIREITO: Separator and other actions */}
+                                                    <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
+                                                        {(!hasFinance && !hasProd && (q.status === 'draft' || q.status === 'sent')) ? (
+                                                            <button onClick={() => navigate(`/orcamento?edit=${q.id}`)}
+                                                                className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-blue-600 rounded-lg transition-all" title="Alterar">
+                                                                <PenLine className="w-4 h-4" />
+                                                            </button>
+                                                        ) : (
                                                             <button onClick={() => navigate(`/orcamento?view=${q.id}`)}
-                                                                className="text-slate-400 p-2 hover:bg-slate-100 rounded-lg transition-all" title="Ver Detalhes">
+                                                                className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-all" title="Visualizar Orçamento">
                                                                 <Eye className="w-4 h-4" />
                                                             </button>
-                                                            <button onClick={() => window.open(`/api/reports/client/${q.id}`, '_blank')}
-                                                                className="text-slate-400 p-2 hover:bg-slate-100 rounded-lg transition-all" title="PDF">
-                                                                <Download className="w-4 h-4" />
+                                                        )}
+
+                                                        {(q.status === 'in_production' || q.prod_status) && (
+                                                            <button onClick={() => navigate(`/fabricacao/${q.id}`)}
+                                                                className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-purple-600 rounded-lg transition-all" title="Módulo Fabricação">
+                                                                <Hammer className="w-4 h-4" />
                                                             </button>
-                                                        </div>
+                                                        )}
+
+                                                        <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
+                                                            className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-emerald-600 rounded-lg transition-all" title="Orçamento Cliente (PDF)">
+                                                            <FileDown className="w-4 h-4" />
+                                                        </button>
+
+                                                        <button onClick={() => navigate(`/orcamento?printCompact=${q.id}`)}
+                                                            className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-amber-600 rounded-lg transition-all" title="A4 Compacto (Obra)">
+                                                            <Printer className="w-4 h-4" />
+                                                        </button>
+
+                                                        {q.status !== 'cancelled' && q.status !== 'canceled' && (valRestante > 0.01) && (
+                                                            <button
+                                                                onClick={() => openPayModal(q)}
+                                                                className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-orange-500 rounded-lg transition-all"
+                                                                title="Registrar Pagamento"
+                                                            >
+                                                                <DollarSign className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+
+                                                        {q.status !== 'cancelled' && q.status !== 'canceled' && (
+                                                            <button
+                                                                onClick={() => handleCancel(q.id)}
+                                                                className="text-slate-400 p-1.5 hover:bg-rose-50 hover:text-rose-500 rounded-lg transition-all cursor-pointer"
+                                                                title="Cancelar Orçamento"
+                                                            >
+                                                                <XCircle className="w-4 h-4" />
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </td>

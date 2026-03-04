@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Trash2, ChevronRight, ChevronLeft, Check, AlertTriangle, Printer, Copy, Send, RefreshCw, Undo2, FileDown, ZoomIn, X, PenLine, Save, List, Eye, CreditCard, Triangle, RotateCcw, Filter, ShoppingCart, GitBranch, Factory } from 'lucide-react';
+import { Plus, Trash2, ChevronRight, ChevronLeft, Check, AlertTriangle, Printer, Copy, Send, RefreshCw, Undo2, FileDown, ZoomIn, X, PenLine, Save, List, Eye, CreditCard, Triangle, RotateCcw, Filter, ShoppingCart, GitBranch, Factory, RefreshCcw, XCircle } from 'lucide-react';
 import { renderToString } from 'react-dom/server';
 import BendCanvas, { Risk, RiskDirection, DIRECTION_ICONS, OPPOSITE_DIRECTION } from '../components/BendCanvas';
 
@@ -1910,53 +1910,115 @@ window.onload = function() {
                                 <Plus className="w-4 h-4" /> Novo Orçamento
                             </button>
                         </div>
-                        <div className="space-y-2">
-                            {myQuotes.map(q => {
-                                const st = STATUS_LABELS[q.status] || STATUS_LABELS.pending;
-                                return (
-                                    <div key={q.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center gap-4 flex-wrap">
-                                        <span className="text-white/40 font-black text-sm">#{q.id}</span>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-white font-bold">{q.clientName || 'Cliente'}</p>
-                                            <p className="text-slate-400 text-xs">{new Date(q.createdAt).toLocaleString('pt-BR')}{q.notes ? ` · ${q.notes.substring(0, 50)}` : ''}</p>
-                                        </div>
-                                        <span className={`text-xs font-bold px-3 py-1 rounded-full text-white ${st.color}`}>{st.label}</span>
-                                        <p className="text-white font-black">R$ {parseFloat(q.finalValue || q.totalValue || 0).toFixed(2)}</p>
-                                        {q.status !== 'paid' && q.status !== 'cancelled' && q.status !== 'finished' && q.status !== 'in_production' && (
-                                            <button onClick={() => handleEditQuote(q)}
-                                                className="text-xs text-blue-400 hover:text-blue-300 font-bold px-2 py-1 border border-blue-400/30 rounded-lg cursor-pointer">
-                                                ✏ Editar
-                                            </button>
-                                        )}
-                                        {q.status !== 'paid' && q.status !== 'cancelled' && q.status !== 'finished' && (
-                                            <button onClick={() => handleCancelQuote(q.id)}
-                                                className="text-xs text-red-400 hover:text-red-300 font-bold px-2 py-1 border border-red-400/30 rounded-lg cursor-pointer">
-                                                Cancelar
-                                            </button>
-                                        )}
-                                        <button onClick={() => handleViewReport(q)}
-                                            className="text-xs text-emerald-400 hover:text-emerald-300 font-bold px-2 py-1 border border-emerald-400/30 rounded-lg cursor-pointer">
-                                            👁️ Relatório
-                                        </button>
-                                        <button onClick={async () => {
-                                            try {
-                                                const r = await fetch(`/api/quotes/${q.id}/bends`, { credentials: 'include' });
-                                                if (!r.ok) throw new Error();
-                                                handleDownloadQuotePDF(q, await r.json());
-                                            } catch { setToast({ msg: 'Erro ao gerar PDF', type: 'error' }); }
-                                        }}
-                                            className="text-xs text-indigo-400 hover:text-indigo-300 font-bold px-2 py-1 border border-indigo-400/30 rounded-lg cursor-pointer">
-                                            📄 PDF
-                                        </button>
-                                        {q.status === 'pending' && (
-                                            <button onClick={() => { setSavedQuote(q); setStep('payment'); }}
-                                                className="text-xs text-green-400 hover:text-green-300 font-bold px-2 py-1 border border-green-400/30 rounded-lg cursor-pointer">
-                                                💳 Pagar
-                                            </button>
-                                        )}
-                                    </div>
-                                );
-                            })}
+                        <div className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-xl mt-4">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left text-slate-300">
+                                    <thead className="bg-slate-800/50 border-b border-white/10 uppercase text-[10px] font-black text-slate-400 tracking-widest">
+                                        <tr>
+                                            <th className="px-6 py-4">Cliente</th>
+                                            <th className="px-6 py-4">Nº Orçamento</th>
+                                            <th className="px-6 py-4">Data</th>
+                                            <th className="px-6 py-4 text-right">Valor Total</th>
+                                            <th className="px-6 py-4">Status</th>
+                                            <th className="px-6 py-4 flex justify-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {myQuotes.map(q => {
+                                            const st = STATUS_LABELS[q.status] || STATUS_LABELS.pending;
+                                            const hasPaid = (q.fin_paid || 0) > 0 || (q.fin_credit || 0) > 0;
+                                            const hasFinance = !!q.fin_id || hasPaid;
+                                            const hasProd = !!q.prod_status;
+
+                                            return (
+                                                <tr key={q.id} className="hover:bg-white/5 transition-all group">
+                                                    <td className="px-6 py-4 font-bold text-white group-hover:text-blue-400 transition-colors whitespace-nowrap">
+                                                        {q.clientName || 'Cliente sem nome'}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="font-mono text-slate-500 text-xs">#{String(q.id).substring(0, 8).toUpperCase()}</span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-slate-400 font-medium whitespace-nowrap">
+                                                        {new Date(q.createdAt).toLocaleDateString('pt-BR')}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right font-black text-white whitespace-nowrap">
+                                                        R$ {parseFloat(q.finalValue || q.totalValue || 0).toFixed(2)}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${st.color}`}>
+                                                            {st.label}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center justify-center gap-1.5">
+                                                            {(!hasFinance && !hasProd && (q.status === 'draft' || q.status === 'sent')) ? (
+                                                                <button onClick={() => handleEditQuote(q)}
+                                                                    className="text-slate-400 p-2 hover:bg-white/10 hover:text-blue-400 rounded-lg transition-all" title="Alterar Orçamento">
+                                                                    <PenLine className="w-4 h-4" />
+                                                                </button>
+                                                            ) : (
+                                                                <button onClick={() => handleViewReport(q)}
+                                                                    className="text-slate-400 p-2 hover:bg-white/10 hover:text-white rounded-lg transition-all" title="Visualizar Orçamento">
+                                                                    <Eye className="w-4 h-4" />
+                                                                </button>
+                                                            )}
+
+                                                            {(hasPaid || hasFinance || hasProd) && (
+                                                                <button onClick={async () => {
+                                                                    if (!confirm('Deseja criar uma nova versão deste orçamento?')) return;
+                                                                    const res = await fetch(`/api/quotes/${q.id}/new-version`, { method: 'POST', credentials: 'include' });
+                                                                    if (res.ok) {
+                                                                        setToast({ msg: 'Nova versão criada!', type: 'success' });
+                                                                        fetch('/api/quotes', { credentials: 'include' }).then(r => r.json()).then(setMyQuotes).catch(() => { });
+                                                                    } else {
+                                                                        const err = await res.json();
+                                                                        setToast({ msg: err.error || 'Erro', type: 'error' });
+                                                                    }
+                                                                }}
+                                                                    className="text-slate-400 p-2 hover:bg-white/10 hover:text-blue-400 rounded-lg transition-all" title="Criar Nova Versão">
+                                                                    <RefreshCcw className="w-4 h-4" />
+                                                                </button>
+                                                            )}
+
+                                                            <div className="w-px h-6 bg-white/10 mx-1"></div>
+
+                                                            <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
+                                                                className="text-slate-400 p-2 hover:bg-white/10 hover:text-emerald-400 rounded-lg transition-all" title="Orçamento Cliente">
+                                                                <FileDown className="w-4 h-4" />
+                                                            </button>
+
+                                                            <button onClick={async () => {
+                                                                const w2 = window.open('', '_blank');
+                                                                w2?.document.write('Buscando dobras...');
+                                                                try {
+                                                                    const r = await fetch(`/api/quotes/${q.id}/bends`, { credentials: 'include' });
+                                                                    if (!r.ok) throw new Error();
+                                                                    const b = await r.json();
+                                                                    w2?.document.write('<br/>Gerando A4 Compacto...');
+                                                                    handleDownloadQuoteCompactPDF(q, b, w2);
+                                                                } catch {
+                                                                    w2?.close();
+                                                                    setToast({ msg: 'Erro ao gerar A4 Compacto', type: 'error' });
+                                                                }
+                                                            }}
+                                                                className="text-slate-400 p-2 hover:bg-white/10 hover:text-amber-400 rounded-lg transition-all" title="A4 Compacto (Obra)">
+                                                                <Printer className="w-4 h-4" />
+                                                            </button>
+
+                                                            {q.status !== 'cancelled' && q.status !== 'canceled' && (
+                                                                <button onClick={() => handleCancelQuote(q.id)}
+                                                                    className="text-slate-400 p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-all" title="Cancelar Orçamento">
+                                                                    <XCircle className="w-4 h-4" />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </motion.div>
                 )}
