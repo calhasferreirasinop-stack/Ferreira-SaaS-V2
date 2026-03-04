@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Trash2, ChevronRight, ChevronLeft, Check, AlertTriangle, Printer, Copy, Send, RefreshCw, Undo2, FileDown, ZoomIn, X, PenLine, Save, List, Eye, CreditCard, Triangle, RotateCcw, Filter, ShoppingCart, GitBranch, Factory, RefreshCcw, XCircle } from 'lucide-react';
+import { Plus, Trash2, ChevronRight, ChevronLeft, Check, AlertTriangle, Printer, Copy, Send, RefreshCw, Undo2, FileDown, ZoomIn, X, PenLine, Save, List, Eye, CreditCard, Triangle, RotateCcw, Filter, ShoppingCart, GitBranch, Factory, RefreshCcw, XCircle, Hammer } from 'lucide-react';
 import { renderToString } from 'react-dom/server';
 import BendCanvas, { Risk, RiskDirection, DIRECTION_ICONS, OPPOSITE_DIRECTION } from '../components/BendCanvas';
 
