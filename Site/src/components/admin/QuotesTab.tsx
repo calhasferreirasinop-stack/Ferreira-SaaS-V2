@@ -37,8 +37,9 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
     const [statusFilter, setStatusFilter] = useState('all');
     const [finStatusFilter, setFinStatusFilter] = useState('all');
 
-    // Payment Modal State
+    // Payment e New Version Modal State
     const [payModalQuote, setPayModalQuote] = useState<any>(null);
+    const [newVersionQuote, setNewVersionQuote] = useState<any>(null);
     const [payForm, setPayForm] = useState({
         valor_pago: '',
         data_pagamento: new Date().toISOString().split('T')[0],
@@ -54,7 +55,12 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
             const matchesStatus = statusFilter === 'all' || q.status === statusFilter;
 
             const hasPaid = (q.fin_paid || 0) > 0;
-            const finKey = q.fin_remaining === 0 ? 'pago' : (hasPaid ? 'parcial' : 'pendente');
+            const hasCredit = (q.fin_credit || 0) > 0;
+            const fallbackRestante = (q.finalValue || q.totalValue || 0) - (q.fin_paid || 0) - (q.fin_credit || 0);
+            const valRestante = q.fin_remaining !== null && q.fin_remaining !== undefined ? q.fin_remaining : Math.max(0, fallbackRestante);
+
+            const isTotalPaid = valRestante < 0.01 && (hasPaid || hasCredit);
+            const finKey = isTotalPaid ? 'pago' : (hasPaid || hasCredit ? 'parcial' : 'pendente');
             const matchesFin = finStatusFilter === 'all' || finKey === finStatusFilter;
 
             return matchesSearch && matchesStatus && matchesFin;
@@ -90,28 +96,25 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
         if (res.ok) { showToast('Orçamento reaberto!', 'success'); fetchData(true); }
     };
 
-    const handleNewVersion = async (q: any) => {
+    const confirmNewVersion = async () => {
+        if (!newVersionQuote) return;
+        const q = newVersionQuote;
         const hasPaid = (q.fin_paid || 0) > 0;
-        const msg = hasPaid
-            ? `⚠️ Existe um pagamento de ${fmt(q.fin_paid)} vinculado.\n\n` +
-            `• O orçamento atual #${String(q.id).substring(0, 8)} será CANCELADO.\n` +
-            `• Um novo orçamento será criado como rascunho.\n` +
-            `• O valor já pgo será convertido em CRÉDITO para a nova versão.\n\n` +
-            `Deseja prosseguir com o versionamento?`
-            : `Deseja criar uma nova versão?\nO orçamento atual será cancelado e uma cópia editável será criada.`;
-
-        if (!confirm(msg)) return;
 
         const res = await fetch(`/api/quotes/${q.id}/new-version`, { method: 'POST', credentials: 'include' });
         if (res.ok) {
-            showToast(hasPaid ? 'Nova versão criada! Crédito transferido.' : 'Nova versão criada!', 'success');
-            // Limpeza automática de registros órfãos após versionamento
+            showToast(hasPaid ? 'Nova versão criada! Crédito financeiro transferido.' : 'Nova versão criada!', 'success');
             fetch('/api/maintenance/cleanup-financial', { method: 'POST', credentials: 'include' }).catch(() => { });
             fetchData(true);
+            setNewVersionQuote(null);
         } else {
             const err = await res.json();
             showToast(err.error || 'Erro ao criar nova versão', 'error');
         }
+    };
+
+    const handleNewVersionClick = (q: any) => {
+        setNewVersionQuote(q);
     };
 
     const handleCancel = async (id: string) => {
@@ -129,7 +132,14 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
         // Cálculo do saldo real no momento da abertura
         const total = q.finalValue || q.totalValue || 0;
         const pago = q.fin_paid || 0;
-        const saldoReal = q.fin_remaining ?? Math.max(0, total - pago);
+        const credito = q.fin_credit || 0;
+
+        let saldoReal = 0;
+        if (q.fin_remaining !== null && q.fin_remaining !== undefined) {
+            saldoReal = q.fin_remaining;
+        } else {
+            saldoReal = Math.max(0, total - pago - credito);
+        }
 
         setPayModalQuote(q);
         setPayForm({
@@ -256,11 +266,15 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
 
                                     // Financeiro do Backend (já calculado com Créditos + Pagamentos)
                                     const valPago = Number(q.fin_paid || 0);
-                                    const valRestante = Number(q.fin_remaining || 0);
+                                    const valCredit = Number(q.fin_credit || 0);
                                     const valTotal = Number(q.finalValue || q.totalValue || 0);
 
+                                    const valRestanteAPI = q.fin_remaining !== null && q.fin_remaining !== undefined ? Number(q.fin_remaining) : null;
+                                    const valRestante = valRestanteAPI !== null ? valRestanteAPI : Math.max(0, valTotal - valPago - valCredit);
+
+                                    // Para botões (Nova Versão vs Reabrir), consideramos apenas pagamentos na CR desta versão.
                                     const hasPaid = valPago > 0.01;
-                                    const isTotalPaid = valRestante < 0.01 && hasPaid;
+                                    const isTotalPaid = valRestante < 0.01 && (hasPaid || valCredit > 0.01);
 
                                     // Status Financeiro (Badge secundário)
                                     let finLabel = 'Pendente';
@@ -314,7 +328,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                                             <>
                                                                 {hasPaid ? (
                                                                     <button
-                                                                        onClick={() => handleNewVersion(q)}
+                                                                        onClick={() => handleNewVersionClick(q)}
                                                                         className="bg-blue-600 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-blue-700 transition-all shadow-sm cursor-pointer flex items-center gap-1 whitespace-nowrap"
                                                                         title="Nova Versão"
                                                                     >
@@ -450,6 +464,67 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* MODAL NOVA VERSÃO */}
+                {newVersionQuote && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl relative border border-slate-100">
+
+                            <div className="absolute top-0 right-0 p-6">
+                                <button type="button" onClick={() => setNewVersionQuote(null)}
+                                    className="text-slate-400 hover:text-slate-600 bg-slate-50 rounded-full w-10 h-10 flex items-center justify-center font-bold pb-1 text-xl cursor-pointer hover:bg-slate-100 transition-all">
+                                    ×
+                                </button>
+                            </div>
+
+                            <div className="mb-6">
+                                <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
+                                    <RefreshCcw className="w-8 h-8" />
+                                </div>
+                                <h3 className="text-2xl font-black text-slate-900 mb-2">Nova Versão</h3>
+                                <p className="text-slate-500 text-sm font-medium">Pedido #{String(newVersionQuote.id).substring(0, 8)} • {newVersionQuote.clientName}</p>
+                            </div>
+
+                            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-8 space-y-3">
+                                {newVersionQuote.fin_paid > 0 ? (
+                                    <>
+                                        <div className="flex items-start gap-3">
+                                            <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-900 mb-1">Pagamento Vinculado Detectado</p>
+                                                <p className="text-xs text-slate-600 leading-relaxed">
+                                                    Existe um pagamento de <span className="font-black text-emerald-600">{fmt(newVersionQuote.fin_paid)}</span> neste orçamento.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <ul className="text-xs text-slate-500 font-medium space-y-2 mt-2 ml-8 list-disc bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                            <li>O orçamento atual será <span className="text-rose-600 font-bold">cancelado</span>.</li>
+                                            <li>Um novo orçamento será criado em estado de <span className="font-bold">rascunho</span>.</li>
+                                            <li>Os pagamentos financeiros serão convertidos em <span className="text-brand-primary font-black">Crédito</span>.</li>
+                                        </ul>
+                                    </>
+                                ) : (
+                                    <div className="flex items-start gap-3">
+                                        <RefreshCcw className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                                        <p className="text-sm text-slate-600 font-medium">
+                                            O orçamento atual será cancelado e uma cópia exata será criada em estado de <span className="font-bold text-slate-900">Rascunho</span>, permitindo novas edições.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button onClick={() => setNewVersionQuote(null)} className="flex-1 bg-slate-100 text-slate-600 py-3.5 rounded-2xl font-black text-xs uppercase hover:bg-slate-200 transition-all cursor-pointer">
+                                    Voltar
+                                </button>
+                                <button onClick={confirmNewVersion} className="flex-1 bg-blue-600 text-white py-3.5 rounded-2xl font-black text-xs uppercase shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all cursor-pointer">
+                                    Confirmar Versão
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
                 )}

@@ -1,0 +1,219 @@
+🎯 TASK: Implementar Integração Dirigida (Fase 1.5) — Envio de Produção para Empresa de Dobra
+
+CONTEXTO
+Estamos evoluindo o SaaS V2 para permitir integração leve entre:
+
+* Empresa Instaladora (calheiro)
+* Empresa de Dobra (fábrica)
+
+Esta NÃO é uma implementação de marketplace completo.
+
+Objetivo:
+Permitir que um orçamento aprovado seja automaticamente enviado para a empresa de dobra vinculada.
+
+Sem busca pública.
+Sem matching automático.
+Sem comissões.
+Sem complexidade desnecessária.
+
+Versão leve e controlada.
+
+---
+
+========================================
+🔹 PARTE 1 — CONFIGURAÇÃO DA EMPRESA
+====================================
+
+Adicionar no painel:
+
+Usuário > Geral
+
+Campo novo:
+
+empresa_dobra_id (opcional)
+
+Tipo: UUID
+Referência: companies.id
+
+Comportamento:
+
+* Listar apenas empresas existentes no sistema
+* Mostrar por company_name
+* Salvar no settings da empresa atual
+* Não permitir alterar company_id manualmente
+
+Se não informado → sistema funciona normalmente.
+
+---
+
+========================================
+🔹 PARTE 2 — CRIAR TABELA production_orders
+===========================================
+
+Nova tabela:
+
+production_orders
+
+Campos:
+
+* id (UUID)
+* company_origin_id (UUID) → empresa instaladora
+* company_target_id (UUID) → empresa de dobra
+* estimate_id (UUID)
+* status (TEXT)
+* total_metros (NUMERIC)
+* total_valor (NUMERIC)
+* created_at (timestamp)
+* updated_at (timestamp)
+
+Status permitidos:
+
+* pending
+* accepted
+* in_production
+* ready
+* delivered
+
+Adicionar CHECK constraint.
+
+Aplicar RLS:
+
+* company_origin_id = user.companyId
+  OR
+* company_target_id = user.companyId
+
+---
+
+========================================
+🔹 PARTE 3 — DISPARO AUTOMÁTICO
+===============================
+
+Quando um orçamento mudar status para:
+
+approved
+
+Verificar:
+
+company.settings.empresa_dobra_id
+
+Se existir:
+
+Criar registro em production_orders com:
+
+* company_origin_id = empresa atual
+* company_target_id = empresa_dobra_id
+* estimate_id
+* total_metros (somatório das dobras)
+* total_valor
+* status = 'pending'
+
+Importante:
+
+Evitar duplicação:
+Se já existir production_order para este estimate_id,
+não criar novamente.
+
+---
+
+========================================
+🔹 PARTE 4 — PAINEL EMPRESA DE DOBRA
+====================================
+
+Criar nova rota:
+
+/app/production
+
+Tela simples:
+
+Título:
+Pedidos de Produção
+
+Listar:
+
+* Empresa origem
+* Número do orçamento
+* Cliente final
+* Total metros
+* Total valor
+* Status
+* Data
+
+Permitir ações:
+
+Se status = pending → botão "Aceitar"
+Se accepted → botão "Iniciar Produção"
+Se in_production → botão "Marcar Pronto"
+Se ready → botão "Entregue"
+
+Atualizar status corretamente.
+
+---
+
+========================================
+🔹 PARTE 5 — VISÃO DO INSTALADOR
+================================
+
+No orçamento:
+
+Se existir production_order:
+
+Exibir badge:
+
+Produção: Pendente / Em Produção / Pronto
+
+Somente leitura.
+Não permitir alterar status pelo instalador.
+
+---
+
+========================================
+🔹 PARTE 6 — SEGURANÇA MULTI-TENANT
+===================================
+
+Regras obrigatórias:
+
+* Nunca aceitar company_id do frontend
+* Sempre usar req.user.companyId
+* Validar que empresa_dobra_id existe
+* Não permitir criar production_order para empresa inexistente
+
+---
+
+========================================
+🔹 PARTE 7 — VALIDAÇÕES IMPORTANTES
+===================================
+
+* Se empresa_dobra_id não existir → não criar pedido
+* Se orçamento não estiver approved → não enviar
+* Se estimate já tiver production_order → bloquear duplicado
+* Garantir integridade relacional
+
+---
+
+========================================
+🔹 TESTES MANUAIS
+=================
+
+1. Empresa A cria orçamento
+2. Aprova orçamento
+3. Sistema cria production_order
+4. Empresa B (dobra) visualiza pedido
+5. Empresa B altera status
+6. Empresa A visualiza atualização
+7. Testar isolamento entre empresas
+
+---
+
+🎯 RESULTADO ESPERADO
+
+Integração leve e funcional entre:
+
+Instalador → Fábrica
+
+Sem marketplace público.
+Sem busca aberta.
+Sem comissões.
+
+Base pronta para futura expansão de rede.
+
+Implementar mantendo arquitetura SaaS V2 intacta.

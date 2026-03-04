@@ -1,0 +1,17 @@
+Instalador aprova orçamento
+    → server.ts detecta status 'approved'
+    → verifica empresa.settings.empresa_dobra_id
+    → cria production_order { status: 'pending' }
+
+Fábrica vê em Admin → Produção (aba) ou /producao (rota)
+    → Aceitar → Iniciar Produção → Marcar Pronto → Entregue
+
+Instalador vê badge automático: "🏭 Produção: Em Produção"
+
+
+Como Testar a Integração
+Admin → Configurações → Geral — role até o card azul "Integração — Empresa de Dobra" e selecione uma empresa diferente da sua
+Abra um orçamento e avance o status para Aprovado
+Verifique a aba Produção — o pedido deve aparecer para a empresa de dobra
+Na empresa de dobra: Admin → Produção → clique ✅ Aceitar → 🏭 Iniciar Produção → 📦 Marcar Pronto → 🚛 Entregue
+No instalador: o badge de status aparece automaticamente em cada orçamento da lista

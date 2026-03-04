@@ -1,0 +1,43 @@
+Te desenhar o Dashboard financeiro ideal
+
+Ou te orientar como preparar isso para virar módulo Premium
+
+Ou organizar tudo em roadmap SaaS profissionalna aba> Admin>Orcamentos
+fazer estas correcos:
+1 o grafico da dobra do canva pode remover desta tela eu nao preciso dele ali
+2 o botao "Marcar Pago" quando clicar nele deve gerar o contas a receber da mesma forma que gerou quando clicou em Aprovar o orcamento, e deve abrir a tela de Pagar que existe no contas a receber para informar  o valor que foi pago e a forma que foi pago.
+
+
+
+1 Na tela de Resumo, o botao "Aprovar Orcamento" mude o nome para "Enviar orcamento". 
+2 Na mesma tela coloque um valor apenas informativo, atualmente tem o valor do custo, coloque o a soma total dele em algum local apenas para o cliente visualizar isso
+3 na tela Admin Orcamentos, pode remover as dobras daquele local eu nao vou utilizar elas ali.
+
+
+mas oque nao ficou claro para min e o seguinte supondo que ele utilize esta opcao: Opção A — Reabrir como Nova Versão (Melhor prática)
+como ele vai duplicar oque aconteceria com esses dados do financeiro que ja existe? o fator que iria gerar um novo eu entendi, oque eu nao consegui ompreender  o fator de ja ter um financeiro lancado, e talvez ate pago, e como iria alterar entao poderia alterar o valor para maior ou menor, no meu pensamento se altera o valor para maior nao tem problema pois so faltaria colocar o valor que falta, porem se alterar para valor menor como que iria ficar o gerenciamento disso?
+
+caso utilize esta opcao Opção B — Permitir reabrir somente se:
+neste e caso acontece alguma dessa situacao que necessite reabrir como por medida incorreta ou algo do tipo?
+
+
+
+
+
+
+crie um prompt para eu implementar isso.
+🟢 Modelo 1 — Cancelar versão anterior
+
+Fluxo:
+
+Criar nova versão
+
+Cancelar orçamento anterior
+
+Se houver financeiro:
+
+Se não houve pagamento → cancelar conta
+
+Se houve pagamento → transformar em crédito
+
+Isso é o mais correto.

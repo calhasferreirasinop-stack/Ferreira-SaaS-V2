@@ -1,0 +1,184 @@
+📌 PROMPT PARA ANTIGRAVITY
+
+(Refatoração da tela de Orçamentos + Controle de Alteração + Módulo Fabricação)
+
+🔵 1️⃣ Refatorar Tela de Listagem de Orçamentos (Central do Usuário)
+
+Reformular completamente a tela de listagem de orçamentos.
+
+🎯 Objetivo:
+
+Melhorar estética
+
+Organizar por status
+
+Tornar ações contextuais
+
+Evitar alterações indevidas
+
+🔹 Layout
+
+Substituir lista simples por layout em GRID (Cards).
+
+Cada card deve conter:
+
+Nome do cliente
+
+Valor total
+
+Data
+
+Badge de status colorido
+
+Botões contextuais
+
+Adicionar filtro superior por status:
+
+Todos | Rascunho | Enviado | Aprovado | Em Produção | Pago | Expirado | Cancelado
+
+Mostrar contador ao lado de cada filtro.
+
+🔵 2️⃣ Regras do Botão “Alterar”
+
+O botão “Alterar” deve obedecer regras rígidas:
+
+Permitir editar apenas se:
+
+status = 'draft'
+OU
+
+status = 'sent'
+E não existir:
+
+registro em accounts_receivable
+
+production_order
+
+Se existir financeiro ou produção:
+
+Remover botão Alterar
+
+Mostrar botão “Visualizar”
+
+Mostrar botão “Criar Nova Versão”
+
+Nunca permitir alterar orçamento:
+
+approved
+
+partial
+
+paid
+
+in_production
+
+canceled
+
+expired
+
+Validação deve ocorrer:
+
+No frontend
+
+No backend
+
+🔵 3️⃣ Criar Botão “Fabricação”
+
+Adicionar botão “Fabricação” no card do orçamento.
+
+Visível apenas se:
+
+status = 'approved'
+OU
+
+production_order.status IN ('accepted','in_production')
+
+🔵 4️⃣ Tela de Fabricação (Nova Rota)
+
+Criar nova rota:
+
+/fabricacao/:estimateId
+
+Tela deve:
+
+Mostrar todas as dobras do orçamento
+
+Agrupar por cômodo (se houver)
+
+Listar cada metragem individualmente
+
+🔹 Cada metragem deve ter:
+
+[ ] checkbox
+Descrição da metragem (ex: 1,20m)
+
+Quando marcar:
+
+Aplicar text-decoration: line-through
+
+Diminuir opacidade
+
+Atualizar contador no topo
+
+Exemplo no topo:
+
+Produção: 5 de 12 concluídas
+
+🔵 5️⃣ Persistência da Produção
+
+Criar nova tabela:
+
+production_items
+
+Campos:
+
+id (uuid)
+
+production_order_id (uuid)
+
+estimate_item_id (uuid ou dobra_id)
+
+metragem (numeric)
+
+concluido (boolean default false)
+
+concluido_em (timestamp)
+
+created_at
+
+Ao abrir tela de fabricação:
+
+Se não existir production_items, gerar automaticamente com base nas dobras
+
+Ao marcar checkbox:
+
+Atualizar campo concluido = true
+
+Registrar concluido_em
+
+🔵 6️⃣ Finalização Automática
+
+Se todas as metragens estiverem concluídas:
+
+Mostrar botão:
+
+“Finalizar Produção”
+
+Ao clicar:
+
+Atualizar production_order.status para 'ready'
+
+Badge atualizar automaticamente
+
+🔵 7️⃣ UX Profissional
+
+Ícones modernos
+
+Layout limpo
+
+Separar bem Comercial / Financeiro / Produção
+
+Reduzir excesso de botões
+
+🎯 Objetivo final:
+Transformar o sistema em ferramenta operacional real de fábrica, não apenas gerador de orçamento.

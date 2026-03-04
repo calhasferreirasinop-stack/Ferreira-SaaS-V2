@@ -1927,12 +1927,13 @@ app.put('/api/quotes/:id/status', authenticate, async (req: any, res) => {
         });
       }
 
-      // 2. Deletar todas as contas a receber (sem pagamentos)
+      // 2. Cancelar todas as contas a receber (sem pagamentos)
       const { error: delErr } = await supabase
         .from('accounts_receivable')
-        .delete()
+        .update({ status: 'canceled' })
         .eq('estimate_id', id)
-        .eq('company_id', req.user.companyId);
+        .eq('company_id', req.user.companyId)
+        .in('status', ['pendente', 'parcial', 'approved']);
 
       if (delErr) {
         console.error('[REABRIR] Erro ao deletar CR:', delErr);
@@ -1961,12 +1962,7 @@ app.put('/api/quotes/:id/status', authenticate, async (req: any, res) => {
       .select('id, valor_pago').eq('estimate_id', id).eq('company_id', req.user.companyId);
 
     if (listAcc && listAcc.length > 0) {
-      const totalPago = listAcc.reduce((acc, curr) => acc + parseFloat(curr.valor_pago || '0'), 0);
-      if (totalPago === 0) {
-        await supabase.from('accounts_receivable').delete().eq('estimate_id', id).eq('company_id', req.user.companyId);
-      } else {
-        await supabase.from('accounts_receivable').update({ status: 'cancelado' }).eq('estimate_id', id).eq('company_id', req.user.companyId);
-      }
+      await supabase.from('accounts_receivable').update({ status: 'canceled' }).eq('estimate_id', id).eq('company_id', req.user.companyId);
     }
     await supabase.from('production_orders').delete().eq('estimate_id', id).eq('status', 'pendente');
   }
@@ -2198,7 +2194,13 @@ app.post('/api/quotes/:id/new-version', authenticate, async (req: any, res) => {
         unit_price: i.unit_price,
         total_price: i.total_price,
       }));
-      await supabase.from('estimate_items').insert(newItems);
+      const { error: itemsErr } = await supabase.from('estimate_items').insert(newItems);
+
+      if (itemsErr) {
+        // Rollback Manual: Deleta o estimate criado
+        await supabase.from('estimates').delete().eq('id', newEstimate.id).eq('company_id', companyId);
+        return res.status(500).json({ error: 'Erro de integridade copiando itens. Rollback executado.' });
+      }
     }
 
     // 7. Tratar registros financeiros do orçamento ORIGINAL
@@ -2288,6 +2290,7 @@ async function debitInventory(estimateId: number, m2Needed: number, userId: stri
 // ==========================================
 
 app.get('/api/financial/receivables', authenticate, async (req: any, res) => {
+  const t0 = Date.now();
   try {
     const { data, error } = await supabase
       .from('accounts_receivable')
@@ -2301,21 +2304,33 @@ app.get('/api/financial/receivables', authenticate, async (req: any, res) => {
       console.error('[FINANCEIRO] Erro Supabase:', error);
       throw error;
     }
+    const t1 = Date.now();
+    console.log(`[FIN_REC_DEBUG] Supabase fetch CRs levou ${t1 - t0}ms, qtde: ${data ? data.length : 0}`);
 
     const accounts = data || [];
     const clientIds = [...new Set(accounts.map(a => a.client_id))].filter(Boolean);
 
     let clientsMap: any = {};
     if (clientIds.length > 0) {
-      const { data: clients } = await supabase.from('clients').select('id, name, phone').in('id', clientIds);
-      (clients || []).forEach(c => clientsMap[c.id] = c);
+      // Chunking if > 80 elements to prevent URL too long issues or slow queries
+      const chunkSize = 80;
+      for (let i = 0; i < clientIds.length; i += chunkSize) {
+        const chunk = clientIds.slice(i, i + chunkSize);
+        const { data: clients } = await supabase.from('clients').select('id, name, phone').in('id', chunk);
+        (clients || []).forEach(c => clientsMap[c.id] = c);
+      }
 
       const missingIds = clientIds.filter(id => !clientsMap[id]);
       if (missingIds.length > 0) {
-        const { data: profiles } = await supabase.from('profiles').select('id, name').in('id', missingIds);
-        (profiles || []).forEach(c => clientsMap[c.id] = c);
+        for (let i = 0; i < missingIds.length; i += chunkSize) {
+          const chunk = missingIds.slice(i, i + chunkSize);
+          const { data: profiles } = await supabase.from('profiles').select('id, name').in('id', chunk);
+          (profiles || []).forEach(c => Object.assign(clientsMap, { [c.id]: c }));
+        }
       }
     }
+    const t2 = Date.now();
+    console.log(`[FIN_REC_DEBUG] Supabase map clients levou ${t2 - t1}ms`);
 
     const payload = accounts.map(a => ({
       ...a,
@@ -2325,6 +2340,7 @@ app.get('/api/financial/receivables', authenticate, async (req: any, res) => {
 
     res.json(payload);
   } catch (err: any) {
+    console.error('[FIN_REC_DEBUG] CATCH Error: ', err.message);
     res.status(500).json({ error: err.message });
   }
 });

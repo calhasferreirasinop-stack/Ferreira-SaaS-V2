@@ -1,0 +1,6 @@
+Se você fez...	Escreva no commit:
+Um novo botão ou funcionalidade	feat: Adicionar botão de aprovacao no orcamento
+Corrigiu um erro ou bug	fix: Corrigir erro visual na listagem de clientes
+Mudou apenas o design (CSS, cores)	style: Ajustar cores e fonte do painel admin
+Limpou ou organizou o código	refactor: Organizar pastas do modulo financeiro
+Configurações ou arquivos do Git chore: Atualizar configuracoes do versionamento
