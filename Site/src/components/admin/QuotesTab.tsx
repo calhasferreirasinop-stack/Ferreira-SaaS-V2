@@ -350,17 +350,17 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex flex-wrap items-center justify-center gap-1.5 w-[280px] mx-auto">
+                                                <div className="flex flex-wrap items-center justify-center gap-1.5 w-[280px] sm:w-[340px] mx-auto">
 
                                                     {(!hasFinance && !hasProd && (q.status === 'draft' || q.status === 'sent')) ? (
                                                         <button onClick={() => navigate(`/orcamento?edit=${q.id}`)}
-                                                            className="flex items-center gap-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Alterar">
-                                                            <PenLine className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Alterar</span>
+                                                            className="flex items-center gap-1 bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Alterar">
+                                                            <PenLine className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Alterar</span>
                                                         </button>
                                                     ) : (
                                                         <button onClick={() => navigate(`/orcamento?view=${q.id}`)}
-                                                            className="flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Visualizar Orçamento">
-                                                            <Eye className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Visualizar</span>
+                                                            className="flex items-center gap-1 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Visualizar Orçamento">
+                                                            <Eye className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Visualizar</span>
                                                         </button>
                                                     )}
 
@@ -369,25 +369,25 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                                             {hasPaid || hasFinance || hasProd ? (
                                                                 <button
                                                                     onClick={() => handleNewVersionClick(q)}
-                                                                    className="flex items-center gap-1.5 bg-purple-100 text-purple-700 hover:bg-purple-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
+                                                                    className="flex items-center gap-1 bg-purple-100 text-purple-700 hover:bg-purple-200 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
                                                                     title="Nova Versão"
                                                                 >
-                                                                    <RefreshCcw className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Nova Versão</span>
+                                                                    <RefreshCcw className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Nova Versão</span>
                                                                 </button>
                                                             ) : (
                                                                 (q.status === 'draft' || q.status === 'sent') ? (
                                                                     <button
                                                                         onClick={() => handleApprove(q.id)}
-                                                                        className="flex items-center gap-1.5 bg-brand-primary text-white hover:bg-blue-700 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap"
+                                                                        className="flex items-center gap-1 bg-brand-primary text-white hover:bg-blue-700 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap"
                                                                     >
-                                                                        <CheckCircle className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Aprovar</span>
+                                                                        <CheckCircle2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Aprovar</span>
                                                                     </button>
                                                                 ) : (
                                                                     <button
                                                                         onClick={() => handleReopen(q.id, false)}
-                                                                        className="flex items-center gap-1.5 bg-slate-700 text-white hover:bg-slate-800 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap"
+                                                                        className="flex items-center gap-1 bg-slate-700 text-white hover:bg-slate-800 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap"
                                                                     >
-                                                                        <RefreshCcw className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Reabrir</span>
+                                                                        <RefreshCcw className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Reabrir</span>
                                                                     </button>
                                                                 )
                                                             )}
@@ -396,38 +396,38 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
 
                                                     {(q.status === 'in_production' || q.prod_status) && (
                                                         <button onClick={() => navigate(`/fabricacao/${q.id}`)}
-                                                            className="flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap" title="Módulo Fabricação">
-                                                            <Hammer className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Fabricação</span>
+                                                            className="flex items-center gap-1 bg-indigo-600 text-white hover:bg-indigo-700 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap" title="Módulo Fabricação">
+                                                            <Hammer className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Fabricação</span>
                                                         </button>
                                                     )}
 
                                                     <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
-                                                        className="flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Orçamento Cliente (PDF)">
-                                                        <FileDown className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Cliente</span>
+                                                        className="flex items-center gap-1 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Orçamento Cliente (PDF)">
+                                                        <FileDown className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Cliente</span>
                                                     </button>
 
                                                     <button onClick={() => navigate(`/orcamento?printCompact=${q.id}`)}
-                                                        className="flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="A4 Compacto (Obra)">
-                                                        <Printer className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Obra</span>
+                                                        className="flex items-center gap-1 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="A4 Compacto (Obra)">
+                                                        <Printer className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Obra</span>
                                                     </button>
 
                                                     {q.status !== 'cancelled' && q.status !== 'canceled' && !isTotalPaid && (
                                                         <button
                                                             onClick={() => openPayModal(q)}
-                                                            className="flex items-center gap-1.5 bg-green-100 text-green-700 hover:bg-green-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
+                                                            className="flex items-center gap-1 bg-green-100 text-green-700 hover:bg-green-200 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
                                                             title="Registrar Pagamento"
                                                         >
-                                                            <DollarSign className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Pagar</span>
+                                                            <DollarSign className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Pagar</span>
                                                         </button>
                                                     )}
 
                                                     {q.status !== 'cancelled' && q.status !== 'canceled' && !hasPaid && !hasFinance && !hasProd && (
                                                         <button
                                                             onClick={() => handleCancelClick(q)}
-                                                            className="flex items-center gap-1.5 bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
+                                                            className="flex items-center gap-1 bg-red-50 text-red-600 hover:bg-red-100 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
                                                             title="Cancelar Orçamento"
                                                         >
-                                                            <XCircle className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Cancelar</span>
+                                                            <XCircle className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Cancelar</span>
                                                         </button>
                                                     )}
                                                 </div>
