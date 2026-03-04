@@ -328,6 +328,49 @@ app.post('/api/setup', async (req: any, res) => {
   });
 });
 
+// Route for manual cleanup of orphaned financial records
+app.post('/api/maintenance/cleanup-financial', requireAdmin, async (req: any, res) => {
+  try {
+    const { data: listAcc } = await supabase
+      .from('accounts_receivable')
+      .select('id, estimate_id, valor_pago')
+      .eq('company_id', req.user.companyId);
+
+    if (!listAcc || listAcc.length === 0) return res.json({ message: 'Nenhuma conta encontrada para limpeza.' });
+
+    const { data: estimates } = await supabase
+      .from('estimates')
+      .select('id, status')
+      .eq('company_id', req.user.companyId);
+
+    const estMap = new Map((estimates || []).map(e => [e.id, e.status]));
+    const activeStatuses = ['approved', 'partial', 'paid', 'in_production', 'finished', 'accepted'];
+
+    const toDelete = listAcc.filter(acc => {
+      const status = estMap.get(acc.estimate_id);
+      const hasNoPayment = parseFloat(acc.valor_pago || '0') === 0;
+      return (!status || !activeStatuses.includes(status)) && hasNoPayment;
+    });
+
+    if (toDelete.length === 0) return res.json({ message: 'Nenhuma conta órfã sem pagamento encontrada.' });
+
+    const idsToDelete = toDelete.map(acc => acc.id);
+    const { error: delErr } = await supabase
+      .from('accounts_receivable')
+      .delete()
+      .in('id', idsToDelete);
+
+    if (delErr) throw delErr;
+
+    res.json({
+      message: `Limpeza concluída! ${idsToDelete.length} registros financeiros órfãos removidos.`,
+      deletedCount: idsToDelete.length
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // =====================
 // AUTH Routes
 // =====================
@@ -733,7 +776,7 @@ app.post('/api/settings', requireAdmin, upload.fields([{ name: 'logo' }, { name:
 // =====================
 app.get('/api/admin/data', requireAdmin, async (req: any, res) => {
   try {
-    const [companyRes, servicesRes, postsRes, galleryRes, testimonialsRes, estimatesRes, productsRes, receivablesRes, prodOrdersRes] =
+    const [companyRes, servicesRes, postsRes, galleryRes, testimonialsRes, estimatesRes, productsRes, receivablesRes, prodOrdersRes, creditsRes] =
       await Promise.all([
         supabase.from('companies').select('settings').eq('id', req.user.companyId).single(),
         supabase.from('services').select('*').eq('company_id', req.user.companyId),
@@ -742,8 +785,9 @@ app.get('/api/admin/data', requireAdmin, async (req: any, res) => {
         supabase.from('testimonials').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
         supabase.from('estimates').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
         supabase.from('products').select('*').eq('company_id', req.user.companyId).order('name', { ascending: true }),
-        supabase.from('accounts_receivable').select('estimate_id, status').eq('company_id', req.user.companyId),
+        supabase.from('accounts_receivable').select('id, estimate_id, status, valor_pago, valor_restante, created_at').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
         supabase.from('production_orders').select('estimate_id, status').or(`company_origin_id.eq.${req.user.companyId},company_target_id.eq.${req.user.companyId}`),
+        supabase.from('credits').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
       ]);
 
     let profilesRes: any = null;
@@ -754,8 +798,59 @@ app.get('/api/admin/data', requireAdmin, async (req: any, res) => {
     if (estimatesRes.error) console.error('Error fetching estimates:', estimatesRes.error);
     if (productsRes.error) console.error('Error fetching products:', productsRes.error);
     if (profilesRes?.error) console.error('Error fetching profiles:', profilesRes.error);
-
     const settings = companyRes.data?.settings || {};
+
+    const allReceivables = (receivablesRes.data || []);
+    const allProdOrders = (prodOrdersRes.data || []);
+    const allCredits = (creditsRes.data || []);
+
+    const estimates = (estimatesRes.data || []).map(q => {
+      let clientName = (Array.isArray(q.profiles) ? q.profiles[0]?.name : q.profiles?.name) || 'Cliente';
+      let notes = q.notes || '';
+      while (notes.startsWith('[CLIENT: ')) {
+        const match = notes.match(/\[CLIENT: (.*?)\]\s?(.*)/);
+        if (match) { clientName = match[1]; notes = (match[2] || '').trim(); } else break;
+      }
+
+      const qId = String(q.id).toLowerCase();
+
+      // 1. Encontrar registro financeiro principal
+      const recs = allReceivables.filter(r => String(r.estimate_id).toLowerCase() === qId);
+      const rec = recs.find(r => !['converted_to_credit', 'canceled', 'cancelled'].includes(r.status)) || recs[0];
+
+      // 2. Encontrar CRÉDITOS disponíveis vindos de versões anteriores (Nova Versão)
+      const creditsForThis = allCredits.filter(c =>
+        (c.estimate_id_origem && String(c.estimate_id_origem).toLowerCase() === String(q.parent_estimate_id).toLowerCase()) &&
+        c.status === 'disponivel'
+      );
+      const totalCredit = creditsForThis.reduce((acc, curr) => acc + Number(curr.valor || 0), 0);
+
+      // 3. Cálculos Dinâmicos
+      const valorTotal = Number(q.final_amount || q.total_amount || 0);
+      const valorJaPagoEmConta = Number(rec?.valor_pago || 0);
+
+      const totalSistematizado = valorJaPagoEmConta + totalCredit;
+      const saldoReal = Math.max(0, valorTotal - totalSistematizado);
+
+      const prod = allProdOrders.find(p => String(p.estimate_id).toLowerCase() === qId);
+
+      // Status Financeiro Dinâmico
+      let finStatus = rec?.status || (totalSistematizado > 0 ? 'parcial' : 'pendente');
+      if (totalSistematizado > 0 && saldoReal < 0.01) finStatus = 'pago';
+
+      return {
+        ...q,
+        clientName,
+        fin_status: finStatus,
+        prod_status: prod ? prod.status : null,
+        fin_remaining: saldoReal,
+        fin_paid: totalSistematizado,
+        fin_id: rec ? rec.id : null,
+        createdAt: q.created_at,
+        totalValue: valorTotal,
+        finalValue: valorTotal
+      };
+    });
 
     res.json({
       settings,
@@ -763,35 +858,7 @@ app.get('/api/admin/data', requireAdmin, async (req: any, res) => {
       posts: postsRes.data || [],
       gallery: galleryRes.data || [],
       testimonials: testimonialsRes.data || [],
-      quotes: (estimatesRes.data || []).map(q => {
-        let clientName = (Array.isArray(q.profiles) ? q.profiles[0]?.name : q.profiles?.name) || 'Cliente';
-        let notes = q.notes || '';
-        while (notes.startsWith('[CLIENT: ')) {
-          const match = notes.match(/\[CLIENT: (.*?)\]\s?(.*)/);
-          if (match) {
-            clientName = match[1];
-            notes = (match[2] || '').trim();
-          } else {
-            break;
-          }
-        }
-        // Find associated receivable
-        const rec = (receivablesRes.data || []).find(r => String(r.estimate_id) === String(q.id));
-        const prod = (prodOrdersRes.data || []).find(p => String(p.estimate_id) === String(q.id));
-
-        return {
-          ...q,
-          clientName,
-          fin_status: rec ? rec.status : null,
-          prod_status: prod ? prod.status : null,
-          fin_remaining: rec ? rec.valor_restante : null,
-          fin_paid: rec ? rec.valor_pago : 0,
-          fin_id: rec ? rec.id : null,
-          createdAt: q.created_at,
-          totalValue: q.total_amount || 0,
-          finalValue: q.final_amount || 0
-        };
-      }),
+      quotes: estimates,
       inventory: (productsRes.data || []).map(p => ({
         ...p,
         price: p.base_cost,
@@ -1842,53 +1909,72 @@ app.put('/api/quotes/:id/status', authenticate, async (req: any, res) => {
   const { status, cancel_reason, cancel_reason_text } = req.body;
   console.log(`[DEBUG_STATUS] Updating quote: ${id} to ${status} | User: ${req.user.id}`);
 
-  // ── LÓGICA DE REABERTURA (status → pending) ─────────────────────────────
-  // Executado ANTES de atualizar o status, para tratar a CR
-  if (status === 'pending') {
-    const { data: existingAcc } = await supabase
+  if (status === 'draft') {
+    // 1. Verificar TODAS as contas a receber deste orçamento
+    const { data: listAcc } = await supabase
       .from('accounts_receivable')
       .select('id, valor_pago')
       .eq('estimate_id', id)
-      .eq('company_id', req.user.companyId)
-      .maybeSingle();
+      .eq('company_id', req.user.companyId);
 
-    if (existingAcc) {
-      const valorPago = parseFloat(existingAcc.valor_pago || '0');
+    if (listAcc && listAcc.length > 0) {
+      const totalPago = listAcc.reduce((acc, curr) => acc + parseFloat(curr.valor_pago || '0'), 0);
 
-      if (valorPago > 0) {
-        // HÁ PAGAMENTO → bloquear: deve usar "Criar Nova Versão"
+      if (totalPago > 0) {
         return res.status(400).json({
           error: 'Existe pagamento registrado neste orçamento. Use "Criar Nova Versão" para reabrir mantendo o crédito.',
           code: 'HAS_FINANCIAL_RECORDS'
         });
-      } else {
-        // SEM PAGAMENTO → deletar a CR e continuar (Reabrir limpo)
-        const { error: delErr } = await supabase
-          .from('accounts_receivable')
-          .delete()
-          .eq('id', existingAcc.id)
-          .eq('company_id', req.user.companyId);
-
-        if (delErr) {
-          console.error('[REABRIR] Erro ao deletar CR:', delErr);
-        } else {
-          console.log(`[REABRIR] ✅ CR ${existingAcc.id} deletada (sem pagamento). Orçamento ${id} reaberto.`);
-        }
       }
+
+      // 2. Deletar todas as contas a receber (sem pagamentos)
+      const { error: delErr } = await supabase
+        .from('accounts_receivable')
+        .delete()
+        .eq('estimate_id', id)
+        .eq('company_id', req.user.companyId);
+
+      if (delErr) {
+        console.error('[REABRIR] Erro ao deletar CR:', delErr);
+        return res.status(400).json({
+          error: 'Não foi possível remover os registros financeiros vinculados. Verifique se há baixas manuais.'
+        });
+      }
+      console.log(`[REABRIR] ✅ ${listAcc.length} CRs removidas. Orçamento ${id} reaberto.`);
     }
+
+    // 3. Limpar ordens de produção que ainda estão pendentes
+    await supabase.from('production_orders')
+      .delete()
+      .eq('estimate_id', id)
+      .eq('company_origin_id', req.user.companyId)
+      .eq('status', 'pendente');
   }
 
   const updateData: any = { status };
   if (status === 'cancelled') {
     updateData.cancel_reason = cancel_reason || 'outro';
     updateData.cancel_reason_text = cancel_reason_text || '';
+
+    // Cleanup financeiro/produção ao cancelar
+    const { data: listAcc } = await supabase.from('accounts_receivable')
+      .select('id, valor_pago').eq('estimate_id', id).eq('company_id', req.user.companyId);
+
+    if (listAcc && listAcc.length > 0) {
+      const totalPago = listAcc.reduce((acc, curr) => acc + parseFloat(curr.valor_pago || '0'), 0);
+      if (totalPago === 0) {
+        await supabase.from('accounts_receivable').delete().eq('estimate_id', id).eq('company_id', req.user.companyId);
+      } else {
+        await supabase.from('accounts_receivable').update({ status: 'cancelado' }).eq('estimate_id', id).eq('company_id', req.user.companyId);
+      }
+    }
+    await supabase.from('production_orders').delete().eq('estimate_id', id).eq('status', 'pendente');
   }
   if (status === 'sent') {
     updateData.data_envio = new Date().toISOString();
   }
-  if (status === 'pending') {
-    // Ao reativar ou reabrir, podemos limpar a data de envio se necessário,
-    // mas a regra diz recalcular nova validade no front.
+  if (status === 'draft') {
+    // Ao reativar ou reabrir, podemos limpar a data de envio se necessário
   }
 
   const { data, error } = await supabase.from('estimates')

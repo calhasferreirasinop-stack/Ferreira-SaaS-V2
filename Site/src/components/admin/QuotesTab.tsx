@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
     Search, Calendar, DollarSign, Download, Clock, CheckCircle2,
-    AlertCircle, Eye, RefreshCcw, Hammer, XCircle, Plus,
+    AlertCircle, Eye, RefreshCcw, Hammer, XCircle, Plus, RotateCcw,
     Filter, ChevronDown, MoreHorizontal, ArrowUpDown, ChevronRight, X, Package, ClipboardList
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -64,7 +64,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
     // Dashboard Stats
     const totalOrcado = quotes.reduce((acc, q) => acc + (q.finalValue || q.totalValue || 0), 0);
     const totalRecebido = quotes.reduce((acc, q) => acc + (q.fin_paid || 0), 0);
-    const totalAReceber = quotes.reduce((acc, q) => acc + (q.fin_remaining || (q.status === 'approved' ? (q.finalValue || q.totalValue) : 0)), 0);
+    const totalAReceber = quotes.reduce((acc, q) => acc + (q.fin_remaining ?? (['approved', 'partial', 'in_production', 'paid'].includes(q.status) ? (q.finalValue || q.totalValue) : 0)), 0);
 
     const handleApprove = async (id: string) => {
         const res = await fetch(`/api/quotes/${id}/status`, {
@@ -78,23 +78,40 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
 
     const handleReopen = async (id: string, hasPaid: boolean) => {
         if (hasPaid) {
-            alert('Não é possível reabrir um orçamento com pagamentos. Use "Nova Versão".');
+            showToast('Não é possível reabrir um orçamento com pagamentos. Use "Nova Versão".', 'error');
             return;
         }
-        if (!confirm('Reabrir orçamento?')) return;
         const res = await fetch(`/api/quotes/${id}/status`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'pending' }),
+            body: JSON.stringify({ status: 'draft' }),
             credentials: 'include'
         });
         if (res.ok) { showToast('Orçamento reaberto!', 'success'); fetchData(true); }
     };
 
     const handleNewVersion = async (q: any) => {
-        if (!confirm(`Deseja criar uma nova versão?\nO crédito de ${fmt(q.fin_paid)} será transferido.`)) return;
+        const hasPaid = (q.fin_paid || 0) > 0;
+        const msg = hasPaid
+            ? `⚠️ Existe um pagamento de ${fmt(q.fin_paid)} vinculado.\n\n` +
+            `• O orçamento atual #${String(q.id).substring(0, 8)} será CANCELADO.\n` +
+            `• Um novo orçamento será criado como rascunho.\n` +
+            `• O valor já pgo será convertido em CRÉDITO para a nova versão.\n\n` +
+            `Deseja prosseguir com o versionamento?`
+            : `Deseja criar uma nova versão?\nO orçamento atual será cancelado e uma cópia editável será criada.`;
+
+        if (!confirm(msg)) return;
+
         const res = await fetch(`/api/quotes/${q.id}/new-version`, { method: 'POST', credentials: 'include' });
-        if (res.ok) { showToast('Nova versão criada!', 'success'); fetchData(true); }
+        if (res.ok) {
+            showToast(hasPaid ? 'Nova versão criada! Crédito transferido.' : 'Nova versão criada!', 'success');
+            // Limpeza automática de registros órfãos após versionamento
+            fetch('/api/maintenance/cleanup-financial', { method: 'POST', credentials: 'include' }).catch(() => { });
+            fetchData(true);
+        } else {
+            const err = await res.json();
+            showToast(err.error || 'Erro ao criar nova versão', 'error');
+        }
     };
 
     const handleCancel = async (id: string) => {
@@ -109,10 +126,14 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
     };
 
     const openPayModal = (q: any) => {
-        const saldo = q.fin_remaining ?? q.finalValue ?? q.totalValue;
+        // Cálculo do saldo real no momento da abertura
+        const total = q.finalValue || q.totalValue || 0;
+        const pago = q.fin_paid || 0;
+        const saldoReal = q.fin_remaining ?? Math.max(0, total - pago);
+
         setPayModalQuote(q);
         setPayForm({
-            valor_pago: String(saldo),
+            valor_pago: String(saldoReal.toFixed(2)),
             data_pagamento: new Date().toISOString().split('T')[0],
             forma_pagamento: '',
             observacao: ''
@@ -165,7 +186,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                 </button>
             </div>
 
-            {/* DASHBOARD (Receivables Style) */}
+            {/* DASHBOARD */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center gap-4">
                     <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
@@ -196,7 +217,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                 </div>
             </div>
 
-            {/* BARRA DE FILTROS (Receivables Style) */}
+            {/* BARRA DE FILTROS */}
             <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
                 <div className="flex flex-wrap gap-2">
                     {['all', 'draft', 'sent', 'approved', 'cancelled'].map(f => (
@@ -213,7 +234,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                 </div>
             </div>
 
-            {/* LISTAGEM (Receivables Style) */}
+            {/* LISTAGEM */}
             <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
@@ -222,87 +243,99 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                 <th className="px-6 py-4">Cliente / Orçamento</th>
                                 <th className="px-6 py-4">Valor Total</th>
                                 <th className="px-6 py-4">Data Registro</th>
-                                <th className="px-6 py-4 text-center">Status</th>
-                                <th className="px-6 py-4 text-center">Financeiro</th>
+                                <th className="px-6 py-4 text-center">Status / Financeiro</th>
                                 <th className="px-6 py-4 text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filtered.length === 0 ? (
-                                <tr><td colSpan={6} className="text-center py-12 text-slate-400 font-medium">Nenhum orçamento encontrado.</td></tr>
+                                <tr><td colSpan={5} className="text-center py-12 text-slate-400 font-medium">Nenhum orçamento encontrado.</td></tr>
                             ) : (
                                 filtered.map(q => {
                                     const st = STATUS_CONFIG[q.status] || STATUS_CONFIG.draft;
-                                    const hasPaid = (q.fin_paid || 0) > 0;
-                                    const finKey = q.fin_remaining === 0 ? 'pago' : (hasPaid ? 'parcial' : 'pendente');
-                                    const finSt = FIN_STATUS_CONFIG[finKey];
-                                    const isApproved = ['approved', 'paid', 'partial', 'in_production'].includes(q.status);
+
+                                    // Financeiro do Backend (já calculado com Créditos + Pagamentos)
+                                    const valPago = Number(q.fin_paid || 0);
+                                    const valRestante = Number(q.fin_remaining || 0);
+                                    const valTotal = Number(q.finalValue || q.totalValue || 0);
+
+                                    const hasPaid = valPago > 0.01;
+                                    const isTotalPaid = valRestante < 0.01 && hasPaid;
+
+                                    // Status Financeiro (Badge secundário)
+                                    let finLabel = 'Pendente';
+                                    let finColorClass = 'text-rose-600 bg-rose-50 border-rose-100'; // 🔴 Pendente
+
+                                    if (isTotalPaid) {
+                                        finLabel = 'Pago';
+                                        finColorClass = 'text-emerald-600 bg-emerald-50 border-emerald-100'; // 🟢 Pago
+                                    } else if (hasPaid) {
+                                        finLabel = 'Parcial';
+                                        finColorClass = 'text-blue-600 bg-blue-50 border-blue-100'; // 🔵 Parcial
+                                    }
 
                                     return (
                                         <tr key={q.id} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-6 py-4">
-                                                <p className="font-bold text-slate-900">{q.clientName || 'Cliente'}</p>
-                                                <p className="text-xs text-slate-400 font-mono">#{String(q.id).substring(0, 8).toUpperCase()}</p>
-                                            </td>
-                                            <td className="px-6 py-4 font-bold text-slate-700">{fmt(q.finalValue || q.totalValue)}</td>
-                                            <td className="px-6 py-4 text-slate-500">
-                                                <div className="flex items-center gap-1.5">
-                                                    <Calendar className="w-3.5 h-3.5 opacity-40" />
-                                                    {new Date(q.createdAt).toLocaleDateString('pt-BR')}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <span className={`${st.bg} ${st.color} px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight`}>
-                                                    {st.label}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <div className="flex flex-col items-center">
-                                                    <span className={`${finSt.bg} ${finSt.color} px-2 py-0.5 rounded text-[9px] font-bold uppercase`}>
-                                                        {finSt.label}
-                                                    </span>
-                                                    {hasPaid && (
-                                                        <span className="text-[9px] text-slate-400 font-bold mt-0.5 leading-none">
-                                                            {fmt(q.fin_paid)} pagos
+                                            <td className="px-6 py-2">
+                                                <p className="font-bold text-slate-900 group-hover:text-brand-primary transition-colors">{q.clientName || 'Cliente'}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-[10px] text-slate-400 font-mono tracking-tight uppercase">#{String(q.id).substring(0, 8)}</p>
+                                                    {q.production_order && (
+                                                        <span className="flex items-center gap-0.5 text-[9px] font-black text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded uppercase border border-indigo-100">
+                                                            <Hammer className="w-2.5 h-2.5" /> Produção
                                                         </span>
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-2 font-bold text-slate-700">{fmt(valTotal)}</td>
+                                            <td className="px-6 py-2 text-slate-500">
+                                                <div className="flex items-center gap-1.5 font-medium text-xs">
+                                                    <Calendar className="w-3.5 h-3.5 opacity-40" />
+                                                    {new Date(q.createdAt).toLocaleDateString('pt-BR')}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-2 text-center">
+                                                <div className="flex flex-col items-center gap-1">
+                                                    {/* LINHA 1: Status do Orçamento */}
+                                                    <span className={`${st.bg} ${st.color} px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-tight shadow-sm min-w-[85px] text-center`}>
+                                                        {st.label}
+                                                    </span>
+                                                    {/* LINHA 2: Status Financeiro */}
+                                                    <span className={`${finColorClass} px-2.5 py-0.5 rounded text-[8px] font-black uppercase border w-full max-w-[85px] text-center`}>
+                                                        {finLabel}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-2">
                                                 <div className="flex items-center justify-end gap-3">
                                                     {/* LADO ESQUERDO: Aprovar / Reabrir / Nova Versão */}
                                                     <div className="flex-1 flex items-center gap-2">
-                                                        {q.status !== 'cancelled' && (
+                                                        {q.status !== 'cancelled' && q.status !== 'canceled' && (
                                                             <>
-                                                                {/* Aprovar - Rascunho/Enviado */}
-                                                                {(q.status === 'draft' || q.status === 'sent') ? (
-                                                                    <button
-                                                                        onClick={() => handleApprove(q.id)}
-                                                                        className="bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-black uppercase hover:bg-emerald-600 transition-all shadow-sm cursor-pointer"
-                                                                    >
-                                                                        Aprovar Orçamento
-                                                                    </button>
-                                                                ) : (
-                                                                    /* Reabrir - No lugar do Aprovar após aprovado */
-                                                                    (['approved', 'partial', 'paid', 'in_production'].includes(q.status)) && (
-                                                                        <button
-                                                                            onClick={() => handleReopen(q.id, hasPaid)}
-                                                                            className="bg-slate-400 text-white px-4 py-2 rounded-xl text-xs font-black uppercase hover:bg-slate-500 transition-all shadow-sm cursor-pointer"
-                                                                        >
-                                                                            Reabrir Orçamento
-                                                                        </button>
-                                                                    )
-                                                                )}
-
-                                                                {/* Nova Versão - Somente se já tiver pago algo */}
-                                                                {hasPaid && (
+                                                                {hasPaid ? (
                                                                     <button
                                                                         onClick={() => handleNewVersion(q)}
-                                                                        className="bg-blue-500 text-white px-3 py-2 rounded-xl text-xs font-black uppercase hover:bg-blue-600 transition-all shadow-sm cursor-pointer"
+                                                                        className="bg-blue-600 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-blue-700 transition-all shadow-sm cursor-pointer flex items-center gap-1 whitespace-nowrap"
                                                                         title="Nova Versão"
                                                                     >
-                                                                        <RefreshCcw className="w-4 h-4" />
+                                                                        <RefreshCcw className="w-3 h-3" /> <span className="hidden lg:inline">Nova Versão</span>
                                                                     </button>
+                                                                ) : (
+                                                                    (q.status === 'draft' || q.status === 'sent') ? (
+                                                                        <button
+                                                                            onClick={() => handleApprove(q.id)}
+                                                                            className="bg-emerald-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-emerald-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                                                                        >
+                                                                            Aprovar
+                                                                        </button>
+                                                                    ) : (
+                                                                        <button
+                                                                            onClick={() => handleReopen(q.id, false)}
+                                                                            className="bg-slate-700 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-slate-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                                                                        >
+                                                                            Reabrir
+                                                                        </button>
+                                                                    )
                                                                 )}
                                                             </>
                                                         )}
@@ -310,45 +343,36 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
 
                                                     {/* LADO DIREITO: Registrar / Cancelar / Relatórios */}
                                                     <div className="flex items-center gap-2">
-                                                        {q.status !== 'cancelled' ? (
+                                                        {q.status !== 'cancelled' && q.status !== 'canceled' ? (
                                                             <>
-                                                                {/* Cancelar (Antes do Registrar) */}
                                                                 <button
                                                                     onClick={() => handleCancel(q.id)}
-                                                                    className="text-rose-500 p-2 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                                                                    className="text-rose-400 p-2 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
                                                                     title="Cancelar"
                                                                 >
-                                                                    <XCircle className="w-5 h-5" />
+                                                                    <XCircle className="w-4 h-4" />
                                                                 </button>
 
-                                                                {/* Registrar Pagamento */}
-                                                                {(['approved', 'partial', 'in_production'].includes(q.status) && (q.fin_remaining > 0 || q.fin_remaining === undefined)) && (
+                                                                {(valRestante > 0.01) && (
                                                                     <button
                                                                         onClick={() => openPayModal(q)}
-                                                                        className="bg-orange-500 text-white px-4 py-2 rounded-xl text-xs font-black uppercase hover:bg-orange-600 transition-all shadow-sm cursor-pointer"
+                                                                        className="bg-orange-500 text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-orange-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
                                                                     >
                                                                         Registrar Pagamento
                                                                     </button>
                                                                 )}
                                                             </>
                                                         ) : (
-                                                            <span className="text-[10px] font-black text-rose-500 bg-rose-50 px-3 py-1 rounded-full uppercase">Cancelado</span>
+                                                            <span className="text-[9px] font-black text-rose-500 bg-rose-50 px-2 py-1 rounded uppercase">Cancelado</span>
                                                         )}
 
-                                                        {/* Relatórios (Sempre Visíveis) */}
-                                                        <div className="flex items-center gap-1 border-l border-slate-100 pl-2 ml-1">
-                                                            <button
-                                                                onClick={() => navigate(`/orcamento?view=${q.id}`)}
-                                                                className="text-slate-400 p-2 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
-                                                                title="Ver Detalhes"
-                                                            >
+                                                        <div className="flex items-center gap-0.5 border-l border-slate-100 pl-2 ml-1">
+                                                            <button onClick={() => navigate(`/orcamento?view=${q.id}`)}
+                                                                className="text-slate-400 p-2 hover:bg-slate-100 rounded-lg transition-all" title="Ver Detalhes">
                                                                 <Eye className="w-4 h-4" />
                                                             </button>
-                                                            <button
-                                                                onClick={() => window.open(`/api/reports/client/${q.id}`, '_blank')}
-                                                                className="text-slate-400 p-2 hover:bg-slate-100 rounded-xl transition-all cursor-pointer"
-                                                                title="Download PDF"
-                                                            >
+                                                            <button onClick={() => window.open(`/api/reports/client/${q.id}`, '_blank')}
+                                                                className="text-slate-400 p-2 hover:bg-slate-100 rounded-lg transition-all" title="PDF">
                                                                 <Download className="w-4 h-4" />
                                                             </button>
                                                         </div>
@@ -364,7 +388,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                 </div>
             </div>
 
-            {/* MODAL PAGAMENTO (Receivables Style) */}
+            {/* MODAL PAGAMENTO */}
             <AnimatePresence>
                 {payModalQuote && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
@@ -384,7 +408,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                             <form onSubmit={handlePaySubmit} className="space-y-6">
                                 <div className="bg-brand-primary/[0.03] border border-brand-primary/10 p-5 rounded-2xl flex justify-between items-center mb-6">
                                     <span className="text-slate-600 font-bold uppercase text-xs">Total Restante</span>
-                                    <span className="text-2xl font-black text-brand-primary tracking-tight">{fmt(payModalQuote.fin_remaining ?? payModalQuote.finalValue ?? payModalQuote.totalValue)}</span>
+                                    <span className="text-2xl font-black text-brand-primary tracking-tight">{fmt(payModalQuote.fin_remaining)}</span>
                                 </div>
 
                                 <div>
