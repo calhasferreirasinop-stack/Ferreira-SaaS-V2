@@ -413,7 +413,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                                             <Printer className="w-4 h-4" />
                                                         </button>
 
-                                                        {q.status !== 'cancelled' && q.status !== 'canceled' && (valRestante > 0.01) && (
+                                                        {q.status !== 'cancelled' && q.status !== 'canceled' && !isTotalPaid && (
                                                             <button
                                                                 onClick={() => openPayModal(q)}
                                                                 className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-orange-500 rounded-lg transition-all"
