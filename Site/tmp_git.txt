@@ -1,0 +1,7 @@
+4164a99 CorrecaoRelatorioETelaOrcamento
+8b80cd0 MelhoriaBanco
+dfc89bf MelhoriaBanco
+9e29e02 Melhoria
+df58e63 Melhoria
+5ff1617 MudancaBanco
+67a05c6 feat: initial multi-tenant SaaS architecture with RLS and automated onboarding
