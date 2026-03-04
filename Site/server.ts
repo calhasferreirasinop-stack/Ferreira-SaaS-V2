@@ -2649,15 +2649,24 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
             const lengths = Array.isArray(bendData.lengths) ? bendData.lengths.filter((l: any) => parseFloat(l) > 0) : [];
 
             for (const len of lengths) {
+              let desc = 'Dobra Customizada';
+              let comodo = 'Sem Grupo';
+              if (bendData.productName) desc = bendData.productName;
+              if (bendData.group_name) comodo = bendData.group_name;
+
               newItems.push({
                 production_order_id: currentPo.id,
-                estimate_item_id: item.id,
+                estimate_id: estimateId,
+                description: desc,
+                comodo: comodo,
                 metragem: Math.abs(parseFloat(len)),
                 concluido: false,
                 company_id: req.user.companyId
               });
             }
-          } catch (e) { }
+          } catch (e) {
+            console.error('Falha ao processar BEND string', e);
+          }
         }
       }
 
@@ -2676,21 +2685,8 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
       }
     }
 
-    // Attach UI text
-    const enrichedItems = (prodItems || []).map((pi: any) => {
-      const match = est.items.find((i: any) => i.id === pi.estimate_item_id);
-      let desc = 'Dobra Customizada';
-      let comodo = 'Geral';
-      if (match && match.description?.startsWith('[BEND]')) {
-        try {
-          const bendStr = match.description.replace('[BEND]', '').trim();
-          const bData = JSON.parse(bendStr);
-          if (bData.productName) desc = bData.productName;
-          if (bData.group_name) comodo = bData.group_name;
-        } catch (e) { }
-      }
-      return { ...pi, description: desc, comodo };
-    });
+    // Attach UI text já persistido
+    const enrichedItems = prodItems || [];
 
     res.json({
       clientName: est.clientName,

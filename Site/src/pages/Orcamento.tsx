@@ -1235,26 +1235,12 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(-
         }, {} as Record<string, any[]>);
 
         const imgRows = (() => {
-            if (!groupByRoom) {
-                // Toggle DESABILITADO: render tudo em um único grid sem grupos
-                const allRows = filteredBends.map((b: any) => {
-                    const i = qBends.findIndex((x: any) => x === b);
-                    const pCount = qBends.filter((item: any, idx: number) => idx < i && item.productType !== 'service').length + 1;
-                    const cuts = Array.isArray(b.lengths) ? b.lengths.filter((l: any) => parseFloat(l) > 0) : [];
-                    const cutsColumn = cuts.length > 0 ? `
-                        <div class="cuts-side">${cuts.map((c: any) => `<div class="cut-line">${parseFloat(c).toFixed(2)}m</div>`).join('')}<div class="cut-divider"></div><div class="cut-total">${(b.totalLengthM || 0).toFixed(2)}m</div></div>` : '';
-                    let svgEl = '';
-                    if (b.svgDataUrl) svgEl = `<img src="${b.svgDataUrl}" class="compact-img"/>`;
-                    else if (b.risks && b.risks.length > 0) { const fs = renderToString(<BendCanvas risks={b.risks} maxWidthCm={120} exportMode={true} />); svgEl = `<div class="compact-img-container">${fs}</div>`; }
-                    const w = b.roundedWidthCm || 0;
-                    return `<div class="bend-layout"><p class="bend-title">Dobra #${pCount} — ${(w / 100).toFixed(2)}m larg.</p><div class="bend-body"><div class="bend-drawing">${svgEl}</div>${cutsColumn}</div></div>`;
-                }).join('');
-                return `<div class="bends-container">${allRows}</div>`;
-            }
-            // Toggle ATIVO: agrupar por cômodo
             return Object.entries(grouped).map(([gName, gBendsValue]) => {
                 const gBends = gBendsValue as any[];
-                const groupTitleHtml = `<h3 class="group-title">🏠 ${gName}</h3>`;
+
+                // Só exibe o título do grupo se não for "Sem Grupo"
+                const groupTitleHtml = gName !== 'Sem Grupo' ? `<h3 class="group-title">🏠 ${gName}</h3>` : '';
+
                 const bRows = gBends.map((b: any) => {
                     const i = qBends.findIndex(x => x === b);
                     const pCount = qBends.filter((item, idx) => idx < i && item.productType !== 'service').length + 1;
