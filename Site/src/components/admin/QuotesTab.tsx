@@ -416,10 +416,11 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                                         {q.status !== 'cancelled' && q.status !== 'canceled' && !isTotalPaid && (
                                                             <button
                                                                 onClick={() => openPayModal(q)}
-                                                                className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-orange-500 rounded-lg transition-all"
+                                                                className="flex items-center gap-1 bg-orange-50 text-orange-600 px-3 py-1.5 hover:bg-orange-100 rounded-lg transition-all font-bold text-[10px] uppercase cursor-pointer"
                                                                 title="Registrar Pagamento"
                                                             >
-                                                                <DollarSign className="w-4 h-4" />
+                                                                <DollarSign className="w-3 h-3" />
+                                                                <span className="whitespace-nowrap">Realizar Pagamento</span>
                                                             </button>
                                                         )}
 
