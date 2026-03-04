@@ -314,10 +314,12 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                                     <span className={`${st.bg} ${st.color} px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-tight shadow-sm min-w-[85px] text-center`}>
                                                         {st.label}
                                                     </span>
-                                                    {/* LINHA 2: Status Financeiro */}
-                                                    <span className={`${finColorClass} px-2.5 py-0.5 rounded text-[8px] font-black uppercase border w-full max-w-[85px] text-center`}>
-                                                        {finLabel}
-                                                    </span>
+                                                    {/* LINHA 2: Status Financeiro (Ocultar em Rascunho) */}
+                                                    {q.status !== 'draft' && (
+                                                        <span className={`${finColorClass} px-2.5 py-0.5 rounded text-[8px] font-black uppercase border w-full max-w-[85px] text-center mt-1`}>
+                                                            {finLabel}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-2">

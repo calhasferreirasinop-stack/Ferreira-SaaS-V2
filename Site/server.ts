@@ -2362,21 +2362,21 @@ app.post('/api/financial/receivables/:id/pay', authenticate, async (req: any, re
     }
 
     // 1. Localizar a Conta a Receber
-    let { data: acc, error: err1 } = await supabase
+    let { data: accList, error: err1 } = await supabase
       .from('accounts_receivable')
       .select('*')
       .or(`id.eq.${id},estimate_id.eq.${id}`)
       .eq('company_id', req.user.companyId)
-      .maybeSingle();
+      .order('created_at', { ascending: false })
+      .limit(1);
 
     if (err1) console.error('[FIN_PAY_DEBUG] Erro ao buscar conta:', err1);
 
-    // GUARDA: não permitir pagamento em CR cancelada ou convertida em crédito
+    let acc = accList && accList.length > 0 ? accList[0] : null;
+
     if (acc && ['cancelled', 'converted_to_credit', 'canceled'].includes(acc.status)) {
-      return res.status(400).json({
-        error: 'Esta conta a receber foi cancelada e não aceita mais pagamentos. Use o orçamento ativo.',
-        code: 'RECEIVABLE_CANCELLED'
-      });
+      console.log(`[FIN_PAY_DEBUG] Conta encontrada estava cancelada. Ignorando para permitir pagamento via Rascunho.`);
+      acc = null;
     }
 
     let estimate_id = acc?.estimate_id || id;
