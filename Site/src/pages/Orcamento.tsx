@@ -1956,16 +1956,16 @@ window.onload = function() {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <div className="flex items-center justify-center gap-1.5">
+                                                        <div className="flex flex-wrap items-center justify-center gap-2 max-w-[260px] mx-auto">
                                                             {(!hasFinance && !hasProd && (q.status === 'draft' || q.status === 'sent')) ? (
                                                                 <button onClick={() => handleEditQuote(q)}
-                                                                    className="text-slate-400 p-2 hover:bg-white/10 hover:text-blue-400 rounded-lg transition-all" title="Alterar Orçamento">
-                                                                    <PenLine className="w-4 h-4" />
+                                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Alterar Orçamento">
+                                                                    <PenLine className="w-3.5 h-3.5" /> Alterar
                                                                 </button>
                                                             ) : (
                                                                 <button onClick={() => handleViewReport(q)}
-                                                                    className="text-slate-400 p-2 hover:bg-white/10 hover:text-white rounded-lg transition-all" title="Visualizar Orçamento">
-                                                                    <Eye className="w-4 h-4" />
+                                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Visualizar Orçamento">
+                                                                    <Eye className="w-3.5 h-3.5" /> Visualizar
                                                                 </button>
                                                             )}
 
@@ -1981,16 +1981,14 @@ window.onload = function() {
                                                                         setToast({ msg: err.error || 'Erro', type: 'error' });
                                                                     }
                                                                 }}
-                                                                    className="text-slate-400 p-2 hover:bg-white/10 hover:text-blue-400 rounded-lg transition-all" title="Criar Nova Versão">
-                                                                    <RefreshCcw className="w-4 h-4" />
+                                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Criar Nova Versão">
+                                                                    <RefreshCcw className="w-3.5 h-3.5" /> Nova Versão
                                                                 </button>
                                                             )}
 
-                                                            <div className="w-px h-6 bg-white/10 mx-1"></div>
-
                                                             <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
-                                                                className="text-slate-400 p-2 hover:bg-white/10 hover:text-emerald-400 rounded-lg transition-all" title="Orçamento Cliente">
-                                                                <FileDown className="w-4 h-4" />
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Orçamento Cliente">
+                                                                <FileDown className="w-3.5 h-3.5" /> PDF
                                                             </button>
 
                                                             <button onClick={async () => {
@@ -2007,8 +2005,8 @@ window.onload = function() {
                                                                     setToast({ msg: 'Erro ao gerar A4 Compacto', type: 'error' });
                                                                 }
                                                             }}
-                                                                className="text-slate-400 p-2 hover:bg-white/10 hover:text-amber-400 rounded-lg transition-all" title="A4 Compacto (Obra)">
-                                                                <Printer className="w-4 h-4" />
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="A4 Compacto (Obra)">
+                                                                <Printer className="w-3.5 h-3.5" /> Obra
                                                             </button>
 
                                                             {q.status !== 'cancelled' && q.status !== 'canceled' && !hasPaid && !hasFinance && !hasProd && (
@@ -2017,8 +2015,8 @@ window.onload = function() {
                                                                     setCancelReason('');
                                                                     setCancelReasonText('');
                                                                 }}
-                                                                    className="text-slate-400 p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-all" title="Cancelar Orçamento">
-                                                                    <XCircle className="w-4 h-4" />
+                                                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Cancelar Orçamento">
+                                                                    <XCircle className="w-3.5 h-3.5" /> Cancelar
                                                                 </button>
                                                             )}
                                                         </div>

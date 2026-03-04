@@ -350,90 +350,86 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    {/* LADO ESQUERDO: Aprovar / Reabrir / Nova Versão */}
+                                                <div className="flex flex-wrap items-center justify-center gap-1.5 w-[280px] mx-auto">
+
+                                                    {(!hasFinance && !hasProd && (q.status === 'draft' || q.status === 'sent')) ? (
+                                                        <button onClick={() => navigate(`/orcamento?edit=${q.id}`)}
+                                                            className="flex items-center gap-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Alterar">
+                                                            <PenLine className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Alterar</span>
+                                                        </button>
+                                                    ) : (
+                                                        <button onClick={() => navigate(`/orcamento?view=${q.id}`)}
+                                                            className="flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Visualizar Orçamento">
+                                                            <Eye className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Visualizar</span>
+                                                        </button>
+                                                    )}
+
                                                     {q.status !== 'cancelled' && q.status !== 'canceled' && (
                                                         <>
                                                             {hasPaid || hasFinance || hasProd ? (
                                                                 <button
                                                                     onClick={() => handleNewVersionClick(q)}
-                                                                    className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-blue-700 transition-all shadow-sm cursor-pointer flex items-center gap-1 whitespace-nowrap"
+                                                                    className="flex items-center gap-1.5 bg-purple-100 text-purple-700 hover:bg-purple-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
                                                                     title="Nova Versão"
                                                                 >
-                                                                    <RefreshCcw className="w-3 h-3" /> <span className="hidden xl:inline">Nova Versão</span>
+                                                                    <RefreshCcw className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Nova Versão</span>
                                                                 </button>
                                                             ) : (
                                                                 (q.status === 'draft' || q.status === 'sent') ? (
                                                                     <button
                                                                         onClick={() => handleApprove(q.id)}
-                                                                        className="bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                                                                        className="flex items-center gap-1.5 bg-brand-primary text-white hover:bg-blue-700 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap"
                                                                     >
-                                                                        Aprovar
+                                                                        <CheckCircle className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Aprovar</span>
                                                                     </button>
                                                                 ) : (
                                                                     <button
                                                                         onClick={() => handleReopen(q.id, false)}
-                                                                        className="bg-slate-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-slate-600 transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                                                                        className="flex items-center gap-1.5 bg-slate-700 text-white hover:bg-slate-800 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap"
                                                                     >
-                                                                        Reabrir
+                                                                        <RefreshCcw className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Reabrir</span>
                                                                     </button>
                                                                 )
                                                             )}
                                                         </>
                                                     )}
 
-                                                    {/* LADO DIREITO: Separator and other actions */}
-                                                    <div className="flex items-center gap-1 border-l border-slate-200 pl-2">
-                                                        {(!hasFinance && !hasProd && (q.status === 'draft' || q.status === 'sent')) ? (
-                                                            <button onClick={() => navigate(`/orcamento?edit=${q.id}`)}
-                                                                className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-blue-600 rounded-lg transition-all" title="Alterar">
-                                                                <PenLine className="w-4 h-4" />
-                                                            </button>
-                                                        ) : (
-                                                            <button onClick={() => navigate(`/orcamento?view=${q.id}`)}
-                                                                className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-all" title="Visualizar Orçamento">
-                                                                <Eye className="w-4 h-4" />
-                                                            </button>
-                                                        )}
-
-                                                        {(q.status === 'in_production' || q.prod_status) && (
-                                                            <button onClick={() => navigate(`/fabricacao/${q.id}`)}
-                                                                className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-purple-600 rounded-lg transition-all" title="Módulo Fabricação">
-                                                                <Hammer className="w-4 h-4" />
-                                                            </button>
-                                                        )}
-
-                                                        <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
-                                                            className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-emerald-600 rounded-lg transition-all" title="Orçamento Cliente (PDF)">
-                                                            <FileDown className="w-4 h-4" />
+                                                    {(q.status === 'in_production' || q.prod_status) && (
+                                                        <button onClick={() => navigate(`/fabricacao/${q.id}`)}
+                                                            className="flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap" title="Módulo Fabricação">
+                                                            <Hammer className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Fabricação</span>
                                                         </button>
+                                                    )}
 
-                                                        <button onClick={() => navigate(`/orcamento?printCompact=${q.id}`)}
-                                                            className="text-slate-400 p-1.5 hover:bg-slate-100 hover:text-amber-600 rounded-lg transition-all" title="A4 Compacto (Obra)">
-                                                            <Printer className="w-4 h-4" />
+                                                    <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
+                                                        className="flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Orçamento Cliente (PDF)">
+                                                        <FileDown className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Cliente</span>
+                                                    </button>
+
+                                                    <button onClick={() => navigate(`/orcamento?printCompact=${q.id}`)}
+                                                        className="flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="A4 Compacto (Obra)">
+                                                        <Printer className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Obra</span>
+                                                    </button>
+
+                                                    {q.status !== 'cancelled' && q.status !== 'canceled' && !isTotalPaid && (
+                                                        <button
+                                                            onClick={() => openPayModal(q)}
+                                                            className="flex items-center gap-1.5 bg-green-100 text-green-700 hover:bg-green-200 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
+                                                            title="Registrar Pagamento"
+                                                        >
+                                                            <DollarSign className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Pagar</span>
                                                         </button>
+                                                    )}
 
-                                                        {q.status !== 'cancelled' && q.status !== 'canceled' && !isTotalPaid && (
-                                                            <button
-                                                                onClick={() => openPayModal(q)}
-                                                                className="flex items-center gap-1 bg-orange-50 text-orange-600 px-3 py-1.5 hover:bg-orange-100 rounded-lg transition-all font-bold text-[10px] uppercase cursor-pointer"
-                                                                title="Registrar Pagamento"
-                                                            >
-                                                                <DollarSign className="w-3 h-3" />
-                                                                <span className="whitespace-nowrap">Realizar Pagamento</span>
-                                                            </button>
-                                                        )}
-
-                                                        {q.status !== 'cancelled' && q.status !== 'canceled' && (
-                                                            <button
-                                                                onClick={() => handleCancelClick(q)}
-                                                                className="text-slate-400 p-1.5 hover:bg-rose-50 hover:text-rose-500 rounded-lg transition-all cursor-pointer"
-                                                                title="Cancelar Orçamento"
-                                                            >
-                                                                <XCircle className="w-4 h-4" />
-                                                            </button>
-                                                        )}
-                                                    </div>
+                                                    {q.status !== 'cancelled' && q.status !== 'canceled' && !hasPaid && !hasFinance && !hasProd && (
+                                                        <button
+                                                            onClick={() => handleCancelClick(q)}
+                                                            className="flex items-center gap-1.5 bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
+                                                            title="Cancelar Orçamento"
+                                                        >
+                                                            <XCircle className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Cancelar</span>
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
