@@ -2602,7 +2602,7 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
       .from('production_orders')
       .select('*')
       .eq('estimate_id', estimateId)
-      .eq('company_id', req.user.companyId)
+      .eq('company_origin_id', req.user.companyId)
       .maybeSingle();
 
     // Removendo bloqueio para permitir fabricacao em qualquer status nao cancelado
@@ -2617,7 +2617,8 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
       const { data: newPo, error: newPoErr } = await supabase
         .from('production_orders')
         .insert({
-          company_id: req.user.companyId,
+          company_origin_id: req.user.companyId,
+          company_target_id: req.user.companyId,
           estimate_id: estimateId,
           client_name: est.clientName || 'Cliente',
           status: 'in_production',
