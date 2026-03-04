@@ -2011,7 +2011,7 @@ window.onload = function() {
                                                                 <Printer className="w-4 h-4" />
                                                             </button>
 
-                                                            {q.status !== 'cancelled' && q.status !== 'canceled' && (
+                                                            {q.status !== 'cancelled' && q.status !== 'canceled' && !hasPaid && !hasFinance && !hasProd && (
                                                                 <button onClick={() => {
                                                                     setCancelModalQuote(q);
                                                                     setCancelReason('');
