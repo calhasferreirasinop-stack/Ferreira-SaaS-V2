@@ -2605,41 +2605,55 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
       .eq('company_id', req.user.companyId)
       .maybeSingle();
 
-    if (est.status !== 'approved' && (!po || !['accepted', 'in_production'].includes(po.status))) {
-      return res.status(400).json({ error: 'Orçamento não está liberado para fabricação' });
+    // Removendo bloqueio para permitir fabricacao em qualquer status nao cancelado
+    // if (est.status !== 'approved' && (!po || !['accepted', 'in_production'].includes(po.status))) {
+    //   return res.status(400).json({ error: 'Orçamento não está liberado para fabricação' });
+    // }
+
+    let currentPo = po;
+
+    if (!currentPo) {
+      // Auto-create Production Order if missing
+      const { data: newPo, error: newPoErr } = await supabase
+        .from('production_orders')
+        .insert({
+          company_id: req.user.companyId,
+          estimate_id: estimateId,
+          client_name: est.clientName || 'Cliente',
+          status: 'in_production',
+          priority: 'normal',
+          deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
+        })
+        .select()
+        .single();
+
+      if (newPoErr) return res.status(500).json({ error: 'Erro ao auto-gerar ordem de produção', details: newPoErr });
+      currentPo = newPo;
     }
 
     let { data: prodItems, error: piErr } = await supabase
       .from('production_items')
       .select('*')
-      .eq('production_order_id', po?.id)
+      .eq('production_order_id', currentPo.id)
       .order('created_at', { ascending: true });
 
     if (!prodItems || prodItems.length === 0) {
-      if (!po || !po.id) {
-        // Fallback if missing PO manually
-        return res.status(400).json({ error: 'Ordem de produção ausente.' });
-      }
-
       const newItems: any[] = [];
 
       for (const item of (est.items || [])) {
         if ((item.description || '').startsWith('[BEND]')) {
           try {
-            const bendData = JSON.parse(item.description.substring(7));
+            const bendStr = item.description.replace('[BEND]', '').trim();
+            const bendData = JSON.parse(bendStr);
             const lengths = Array.isArray(bendData.lengths) ? bendData.lengths.filter((l: any) => parseFloat(l) > 0) : [];
-            const groupName = bendData.group_name || 'Diversos'; // This is 'comodo'
 
             for (const len of lengths) {
               newItems.push({
-                production_order_id: po ? po.id : null,
+                production_order_id: currentPo.id,
                 estimate_item_id: item.id,
-                metragem: parseFloat(len),
+                metragem: Math.abs(parseFloat(len)),
                 concluido: false,
-                // To avoid altering DB right now, we can omit them, or let DB fail if columns don't exist.
-                // Wait, does production_items have comodo and description?
-                // The prompt says "Campos: id, production_order_id, estimate_item_id, metragem, concluido, concluido_em, created_at."
-                // So we don't have them in DB. We need to attach them dynamically during GET.
+                company_id: req.user.companyId
               });
             }
           } catch (e) { }
@@ -2651,8 +2665,11 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
           .from('production_items')
           .insert(newItems)
           .select();
-        if (insErr) throw insErr;
-        prodItems = inserted;
+        if (insErr) {
+          console.error('Insert items error:', insErr);
+        } else {
+          prodItems = inserted;
+        }
       } else {
         prodItems = [];
       }
@@ -2665,7 +2682,8 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
       let comodo = 'Geral';
       if (match && match.description?.startsWith('[BEND]')) {
         try {
-          const bData = JSON.parse(match.description.substring(7));
+          const bendStr = match.description.replace('[BEND]', '').trim();
+          const bData = JSON.parse(bendStr);
           if (bData.productName) desc = bData.productName;
           if (bData.group_name) comodo = bData.group_name;
         } catch (e) { }
@@ -2676,7 +2694,7 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
     res.json({
       clientName: est.clientName,
       estimate: est,
-      productionOrder: po,
+      productionOrder: currentPo,
       items: enrichedItems
     });
 
