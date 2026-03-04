@@ -1,11 +1,19 @@
 {
   "name": "ferreira-saas-v2",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Ferreira SaaS V2 - Multi-tenant Architecture",
   "scripts": {
-    "version:patch": "npm version patch",
-    "version:minor": "npm version minor",
-    "version:major": "npm version major",
-    "db:migrate": "supabase db push"
+    "release": "standard-version",
+    "release:patch": "standard-version --release-as patch",
+    "release:minor": "standard-version --release-as minor",
+    "release:major": "standard-version --release-as major",
+    "db:migrate": "supabase db push",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.4.3",
+    "@commitlint/config-conventional": "^20.4.3",
+    "husky": "^9.1.7",
+    "standard-version": "^9.5.0"
   }
 }
