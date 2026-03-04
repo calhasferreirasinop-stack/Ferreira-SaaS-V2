@@ -124,6 +124,12 @@ export default function Orcamento() {
     const [libraryZoom, setLibraryZoom] = useState<SavedBend | null>(null);
     const [loadingQuoteId, setLoadingQuoteId] = useState<string | number | null>(null);
 
+    // Cancellation states
+    const [cancelModalQuote, setCancelModalQuote] = useState<any>(null);
+    const [cancelReason, setCancelReason] = useState<string>('');
+    const [cancelReasonText, setCancelReasonText] = useState<string>('');
+    const [canceling, setCanceling] = useState(false);
+
     // ── Client autocomplete ───────────────────────────────────────────────────
     const [allClients, setAllClients] = useState<any[]>([]);
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
