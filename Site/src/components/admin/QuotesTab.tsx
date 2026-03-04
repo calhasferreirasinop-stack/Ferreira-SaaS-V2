@@ -1,462 +1,384 @@
-import React, { useState, useEffect } from 'react';
-import { Eye, Check, X, Package, ChevronDown, Percent, PenLine, ZoomIn, RefreshCw, RotateCcw, FileDown } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+    Search, Calendar, DollarSign, Download, Clock, CheckCircle,
+    AlertCircle, Eye, RefreshCcw, Hammer, XCircle, Plus,
+    FileText, Package, CheckCircle2, X
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const DIRECTION_ICONS: Record<string, string> = {
-    left: '←', right: '→', up: '↑', down: '↓',
-    upLeft: '↖', upRight: '↗', downLeft: '↙', downRight: '↘',
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
+    draft: { label: 'Rascunho', color: 'bg-slate-100 text-slate-500', icon: Clock },
+    sent: { label: 'Enviado', color: 'bg-blue-100 text-blue-600', icon: Eye },
+    approved: { label: 'Pronto para Envio', color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2 },
+    in_production: { label: 'Em Produção', color: 'bg-purple-100 text-purple-700', icon: Hammer },
+    paid: { label: 'Pago', color: 'bg-green-500 text-white', icon: CheckCircle2 },
+    partial: { label: 'Pago Parcial', color: 'bg-amber-500 text-white', icon: DollarSign },
+    expired: { label: 'Expirado', color: 'bg-orange-100 text-orange-700', icon: AlertCircle },
+    cancelled: { label: 'Cancelado', color: 'bg-red-100 text-red-700', icon: XCircle },
+    canceled: { label: 'Cancelado', color: 'bg-red-100 text-red-700', icon: XCircle },
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-    rascunho: { label: 'Rascunho', color: 'bg-slate-100 text-slate-500' },
-    pending: { label: 'Aguardando Pgto', color: 'bg-yellow-100 text-yellow-700' },
-    paid: { label: 'Pago', color: 'bg-green-100 text-green-700' },
-    in_production: { label: 'Em Produção', color: 'bg-blue-100 text-blue-700' },
-    finished: { label: 'Finalizado', color: 'bg-slate-100 text-slate-600' },
-    cancelled: { label: 'Cancelado', color: 'bg-red-100 text-red-700' },
-};
-
-const ALL_STATUSES = [
-    { value: 'pending', label: '⏳ Aguardando Pagamento' },
-    { value: 'paid', label: '✅ Pago' },
-    { value: 'in_production', label: '🏭 Em Produção' },
-    { value: 'finished', label: '🎯 Finalizado' },
-    { value: 'cancelled', label: '❌ Cancelado' },
-];
-
-interface Props {
+interface QuotesTabProps {
     quotes: any[];
-    currentUser: any;
-    onSave: () => void;
-    showToast: (msg: string, type: 'success' | 'error') => void;
+    fetchData: (s?: boolean) => void;
+    showToast: (m: string, t: 'success' | 'error') => void;
 }
 
-const emptyManual = { clientName: '', totalValue: '', totalM2: '', notes: '', status: 'paid' };
+export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabProps) {
+    const navigate = useNavigate();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeFilter, setActiveFilter] = useState('all');
 
-export default function QuotesTab({ quotes, currentUser, onSave, showToast }: Props) {
-    const [expandedId, setExpandedId] = useState<number | null>(null);
-    const [bendsMap, setBendsMap] = useState<Record<number, any[]>>({});
-    const [loadingBends, setLoadingBends] = useState<number | null>(null);
-    const [zoomImg, setZoomImg] = useState<string | null>(null);
-    const [discountModal, setDiscountModal] = useState<any>(null);
-    const [discountVal, setDiscountVal] = useState('');
-    const [discountReason, setDiscountReason] = useState('');
-    const [showCreate, setShowCreate] = useState(false);
-    const [manualForm, setManualForm] = useState(emptyManual);
-    const [creating, setCreating] = useState(false);
-    const [reopenConfirm, setReopenConfirm] = useState<any>(null);
-    const [statusFilter, setStatusFilter] = useState('all');
+    // Payment Modal State
+    const [payModalQuote, setPayModalQuote] = useState<any>(null);
+    const [payForm, setPayForm] = useState({
+        valor_pago: '',
+        data_pagamento: new Date().toISOString().split('T')[0],
+        forma_pagamento: '',
+        observacao: ''
+    });
+    const [paying, setPaying] = useState(false);
 
-    const isAdminOrMaster = currentUser?.role === 'admin' || currentUser?.role === 'master';
-    const isMaster = currentUser?.role === 'master';
+    const filtered = quotes.filter(q => {
+        const matchesSearch = (q.clientName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (q.id || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = activeFilter === 'all' || q.status === activeFilter;
+        return matchesSearch && matchesFilter;
+    });
 
-    const handleDownloadPDF = async (q: any, qBends: any[]) => {
-        let sett: Record<string, string> = {};
-        try { const r = await fetch('/api/admin/data', { credentials: 'include' }); if (r.ok) { const d = await r.json(); sett = d.settings || {}; } } catch { }
-        const pm2 = parseFloat(sett.pricePerM2 || '50');
-        const imgRows = qBends.map((b: any, i: number) => {
-            const cuts = Array.isArray(b.lengths) ? b.lengths.filter((l: any) => parseFloat(l) > 0) : [];
-            const cutsHtml = cuts.length > 0 ? `<table class="cuts-table"><thead><tr><th colspan="2">Cortes</th></tr></thead><tbody>${cuts.map((c: any, ci: number) => `<tr><td>Corte ${ci + 1}</td><td class="cut-val">${parseFloat(c).toFixed(2)}m</td></tr>`).join('')}<tr class="cut-total"><td>Metros corridos</td><td class="cut-val">${(b.totalLengthM || 0).toFixed(2)}m</td></tr></tbody></table>` : '';
-            const img = b.svgDataUrl ? `<img src="${b.svgDataUrl}" style="width:100%;max-height:180px;object-fit:contain;background:#1e293b;border-radius:8px"/>` : '';
-            return `<div style="margin:16px 0;page-break-inside:avoid"><p style="font-weight:bold;margin:0 0 8px;font-size:14px">Dobra #${i + 1} \u2014 <span class="medida">${((b.roundedWidthCm || 0) / 100).toFixed(2)}m larg.</span></p><div style="display:flex;gap:16px;align-items:flex-start">${img ? `<div style="flex:1">${img}</div>` : ''}${cutsHtml ? `<div style="flex:0 0 200px">${cutsHtml}</div>` : ''}</div></div>`;
-        }).join('');
-        const rows = qBends.map((b: any, i: number) => {
-            const lengths = Array.isArray(b.lengths) ? b.lengths : [];
-            const totalLen = b.totalLengthM || lengths.filter((l: any) => parseFloat(l) > 0).reduce((a: number, c: any) => a + parseFloat(c), 0);
-            const w = b.roundedWidthCm || 0; const m2 = b.m2 || (w / 100 * totalLen);
-            return `<tr><td>#${i + 1}</td><td>${(b.risks || []).map((r: any) => `${DIRECTION_ICONS[r.direction] || ''} ${r.sizeCm}cm`).join(', ')}</td><td class="medida">${(w / 100).toFixed(2)}m</td><td class="metros">${lengths.filter((l: any) => parseFloat(l) > 0).join('+')}=${totalLen.toFixed(2)}m</td><td>${m2.toFixed(4)}</td><td>R$${(m2 * pm2).toFixed(2)}</td></tr>`;
-        }).join('');
-        const tM2 = parseFloat(q.totalM2 || 0); const tVal = parseFloat(q.finalValue || q.totalValue || 0);
-        const stLabel = (STATUS_CONFIG[q.status]?.label || q.status).toUpperCase();
-        const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Or\u00e7amento #${q.id}</title><style>
-body{font-family:Arial,sans-serif;padding:24px;color:#111;max-width:900px;margin:auto}
-h1{font-size:20px;margin-bottom:4px}
-.status{display:inline-block;background:#fef3c7;color:#92400e;border:2px solid #f59e0b;font-weight:bold;font-size:13px;padding:6px 14px;border-radius:8px;margin:8px 0}
-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
-th{background:#1e293b;color:#fff;text-align:left;padding:10px}
-td{padding:8px;border-bottom:1px solid #e8e8e8}
-tr:nth-child(even) td{background:#f8fafc}
-.big{font-size:18px;font-weight:bold;color:#16a34a}
-.metros{font-size:16px;font-weight:bold;background:#eef2ff;border:2px solid #6366f1;padding:6px 12px;border-radius:6px;color:#4338ca}
-.medida{font-size:14px;font-weight:bold;color:#1e40af}
-.cuts-table{width:100%;border-collapse:collapse;margin:0;font-size:13px;border:2px solid #6366f1;border-radius:8px;overflow:hidden}
-.cuts-table th{background:#4338ca;color:#fff;padding:6px 10px;font-size:12px;text-align:center}
-.cuts-table td{padding:6px 10px;border-bottom:1px solid #e0e7ff;background:#eef2ff}
-.cuts-table .cut-val{font-weight:bold;color:#4338ca;text-align:right;font-size:15px}
-.cuts-table .cut-total{background:#c7d2fe}
-.cuts-table .cut-total td{font-weight:900;border-bottom:none;font-size:14px}
-.report-header{display:flex;align-items:center;gap:16px;border-bottom:2px solid #e2e8f0;padding-bottom:16px;margin-bottom:16px}
-.report-header img{height:50px;object-fit:contain}
-.report-header .info{font-size:11px;color:#64748b}
-.report-footer{border-top:2px solid #e2e8f0;padding-top:12px;margin-top:24px;text-align:center;font-size:11px;color:#94a3b8}
-@media print{body{padding:8px}}
-</style></head><body>
-${sett.reportLogo || sett.reportCompanyName ? `<div class="report-header">${sett.reportLogo ? `<img src="${sett.reportLogo}" alt="Logo"/>` : ''}<div><strong style="font-size:16px">${sett.reportCompanyName || ''}</strong><div class="info">${[sett.reportPhone, sett.reportEmail].filter(Boolean).join(' | ')}${sett.reportAddress ? `<br/>${sett.reportAddress}` : ''}${sett.reportHeaderText ? `<br/>${sett.reportHeaderText}` : ''}</div></div></div>` : ''}
-<h1>Or\u00e7amento #${q.id} \u2014 ${sett.reportCompanyName || 'Ferreira Calhas'}</h1>
-<p style="color:#555;font-size:12px">${new Date(q.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-<p>Cliente: <b>${q.clientName || ''}</b>${q.notes ? ` | Obs: ${q.notes}` : ''}</p>
-<div class="status">\u23f3 STATUS: ${stLabel}</div>
-${imgRows}
-<table><thead><tr><th>#</th><th>Riscos</th><th>Largura</th><th style="background:#4338ca">Metros corridos</th><th>m\u00b2</th><th>Valor</th></tr></thead><tbody>${rows}</tbody>
-<tfoot>
-<tr><td colspan="4" align="right">Total m\u00b2:</td><td colspan="2"><b>${tM2.toFixed(4)} m\u00b2</b></td></tr>
-<tr><td colspan="4" align="right">Pre\u00e7o/m\u00b2:</td><td colspan="2">R$ ${pm2.toFixed(2)}</td></tr>
-<tr><td colspan="4" align="right" style="font-size:18px;font-weight:900">TOTAL:</td><td colspan="2" class="big">R$ ${tVal.toFixed(2)}</td></tr>
-</tfoot></table>
-${sett.reportFooterText ? `<div class="report-footer">${sett.reportFooterText}</div>` : ''}
-<p style="margin-top:16px;color:#888;font-size:11px">Gerado em ${new Date().toLocaleString('pt-BR')}</p>
-</body></html>`;
-        const b2 = new Blob([html], { type: 'text/html' });
-        const bUrl = URL.createObjectURL(b2);
-        const w2 = window.open(bUrl, '_blank');
-        if (w2) setTimeout(() => URL.revokeObjectURL(bUrl), 10000);
-    };
+    const getCount = (status: string) => quotes.filter(q => q.status === status).length;
 
-    // Load bends when a quote is expanded
-    useEffect(() => {
-        if (expandedId == null || bendsMap[expandedId]) return;
-        setLoadingBends(expandedId);
-        fetch(`/api/quotes/${expandedId}/bends`, { credentials: 'include' })
-            .then(r => r.ok ? r.json() : [])
-            .then(data => { setBendsMap(prev => ({ ...prev, [expandedId]: data })); })
-            .catch(() => setBendsMap(prev => ({ ...prev, [expandedId]: [] })))
-            .finally(() => setLoadingBends(null));
-    }, [expandedId]);
-
-    const updateStatus = async (id: number, status: string) => {
+    const handleApprove = async (id: string) => {
+        if (!confirm('Deseja aprovar este orçamento? Isso gerará automaticamente um registro financeiro.')) return;
         const res = await fetch(`/api/quotes/${id}/status`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status }), credentials: 'include',
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'approved' }),
+            credentials: 'include'
         });
-        if (res.ok) { showToast('Status atualizado!', 'success'); onSave(); }
-        else showToast('Erro ao atualizar status', 'error');
+        if (res.ok) { showToast('Orçamento aprovado!', 'success'); fetchData(true); }
     };
 
-    const applyDiscount = async () => {
-        if (!discountModal) return;
-        const res = await fetch(`/api/quotes/${discountModal.id}/discount`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ discountValue: parseFloat(discountVal), reason: discountReason }),
-            credentials: 'include',
+    const handleReopen = async (id: string) => {
+        if (!confirm('Deseja reabrir este orçamento? O registro financeiro pendente será removido.')) return;
+        const res = await fetch(`/api/quotes/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'pending' }),
+            credentials: 'include'
         });
-        if (res.ok) {
-            showToast('Desconto aplicado!', 'success');
-            setDiscountModal(null); setDiscountVal(''); setDiscountReason('');
-            onSave();
-        } else showToast('Erro ao aplicar desconto', 'error');
+        if (res.ok) { showToast('Orçamento reaberto!', 'success'); fetchData(true); }
     };
 
-    const handleCreateManual = async () => {
-        if (!manualForm.clientName || !manualForm.totalValue) return showToast('Preencha cliente e valor', 'error');
-        setCreating(true);
+    const handleNewVersion = async (id: string) => {
+        if (!confirm('Criar uma nova versão?\nO orçamento atual será cancelado e o saldo pago será transferido como crédito.')) return;
+        const res = await fetch(`/api/quotes/${id}/new-version`, { method: 'POST', credentials: 'include' });
+        if (res.ok) { showToast('Nova versão criada!', 'success'); fetchData(true); }
+    };
+
+    const handleCancel = async (id: string) => {
+        if (!confirm('Deseja cancelar este orçamento?')) return;
+        const res = await fetch(`/api/quotes/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'cancelled' }),
+            credentials: 'include'
+        });
+        if (res.ok) { showToast('Orçamento cancelado.', 'success'); fetchData(true); }
+    };
+
+    const openPayModal = (q: any) => {
+        const saldo = q.fin_remaining ?? q.finalValue ?? q.totalValue;
+        setPayModalQuote(q);
+        setPayForm({
+            valor_pago: String(saldo),
+            data_pagamento: new Date().toISOString().split('T')[0],
+            forma_pagamento: '',
+            observacao: ''
+        });
+    };
+
+    const handlePaySubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!payModalQuote) return;
+
+        const arId = payModalQuote.fin_id || payModalQuote.id;
+        const valParsed = parseFloat(payForm.valor_pago.replace(',', '.'));
+        const saldoMax = payModalQuote.fin_remaining ?? payModalQuote.finalValue ?? payModalQuote.totalValue;
+
+        if (valParsed > parseFloat(saldoMax) + 0.01) {
+            showToast('Valor não pode ser maior que o saldo restante.', 'error');
+            return;
+        }
+
+        setPaying(true);
         try {
-            const res = await fetch('/api/quotes', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    clientName: manualForm.clientName,
-                    notes: '[MANUAL] ' + (manualForm.notes || ''),
-                    totalValue: parseFloat(manualForm.totalValue),
-                    totalM2: parseFloat(manualForm.totalM2) || 0,
-                    bends: [], adminCreated: true,
-                }),
-                credentials: 'include',
+            const res = await fetch(`/api/financial/receivables/${arId}/pay`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...payForm, valor_pago: valParsed }),
+                credentials: 'include'
             });
-            if (!res.ok) throw new Error((await res.json()).error);
-            const q = await res.json();
-            if (manualForm.status !== 'pending') {
-                await fetch(`/api/quotes/${q.id}/status`, {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: manualForm.status }), credentials: 'include',
-                });
+            if (res.ok) {
+                showToast('Pagamento registrado!', 'success');
+                setPayModalQuote(null);
+                fetchData(true);
+            } else {
+                const data = await res.json();
+                showToast(data.error || 'Erro ao pagar', 'error');
             }
-            showToast('Orçamento criado!', 'success');
-            setManualForm(emptyManual); setShowCreate(false); onSave();
-        } catch (e: any) { showToast(e.message || 'Erro ao criar', 'error'); }
-        finally { setCreating(false); }
+        } catch {
+            showToast('Erro de conexão', 'error');
+        } finally {
+            setPaying(false);
+        }
     };
 
-    const filteredQuotes = statusFilter === 'all' ? quotes : quotes.filter(q => q.status === statusFilter);
+    const filters = [
+        { id: 'all', label: 'Todos' },
+        { id: 'draft', label: 'Rascunhos' },
+        { id: 'approved', label: 'Aprovados' },
+        { id: 'paid', label: 'Pagos' },
+        { id: 'cancelled', label: 'Cancelados' },
+    ];
+
+    const fmt = (v: number) => `R$ ${(Number(v) || 0).toFixed(2)}`;
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-300">
-            {/* Zoom modal */}
-            {zoomImg && (
-                <div className="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4" onClick={() => setZoomImg(null)}>
-                    <button className="absolute top-4 right-4 text-white p-2 bg-white/10 rounded-full cursor-pointer"><X className="w-6 h-6" /></button>
-                    <img src={zoomImg} alt="Dobra zoom" className="max-w-full max-h-full rounded-2xl" onClick={e => e.stopPropagation()} />
-                </div>
-            )}
-
-            <div className="flex justify-between items-center flex-wrap gap-3">
-                <h2 className="text-2xl font-bold">Orçamentos</h2>
-                <div className="flex gap-2 flex-wrap">
-                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-                        className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary">
-                        <option value="all">Todos os status</option>
-                        {ALL_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                    </select>
-                    {isAdminOrMaster && (
-                        <button onClick={() => setShowCreate(!showCreate)}
-                            className="bg-brand-primary text-white px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 text-sm cursor-pointer">
-                            <PenLine className="w-4 h-4" /> Lançar Manual
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {showCreate && isAdminOrMaster && (
-                <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 space-y-4">
-                    <h3 className="font-bold text-slate-900 flex items-center gap-2"><PenLine className="w-4 h-4 text-brand-primary" />Lançamento Manual</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {[
-                            { label: 'Nome do Cliente *', key: 'clientName', ph: 'Ex: João Silva' },
-                            { label: 'Valor Total (R$) *', key: 'totalValue', ph: 'Ex: 450.00', type: 'number' },
-                            { label: 'Quantidade m² de calha', key: 'totalM2', ph: 'Ex: 3.5', type: 'number' },
-                            { label: 'Observações', key: 'notes', ph: 'Ex: calha 6m galvanizada' },
-                        ].map(f => (
-                            <div key={f.key}>
-                                <label className="text-xs font-bold text-slate-500 uppercase block mb-1">{f.label}</label>
-                                <input type={f.type || 'text'} value={(manualForm as any)[f.key]} placeholder={f.ph}
-                                    onChange={e => setManualForm({ ...manualForm, [f.key]: e.target.value })}
-                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-primary" />
-                            </div>
-                        ))}
+        <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+            {/* Header & Search */}
+            <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-brand-primary/10 rounded-2xl">
+                            <FileText className="w-6 h-6 text-brand-primary" />
+                        </div>
                         <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Status Inicial</label>
-                            <select value={manualForm.status} onChange={e => setManualForm({ ...manualForm, status: e.target.value })}
-                                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-primary">
-                                {ALL_STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                            </select>
+                            <h2 className="text-xl font-black text-slate-900">Central de Orçamentos</h2>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Gestão Operacional</p>
                         </div>
                     </div>
-                    <div className="flex gap-3">
-                        <button onClick={() => { setShowCreate(false); setManualForm(emptyManual); }}
-                            className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-sm text-slate-600 cursor-pointer">Cancelar</button>
-                        <button onClick={handleCreateManual} disabled={creating}
-                            className="px-6 py-2.5 bg-brand-primary text-white rounded-xl font-bold text-sm cursor-pointer hover:opacity-90 disabled:opacity-50 flex items-center gap-2">
-                            <Check className="w-4 h-4" /> {creating ? 'Criando…' : 'Criar Orçamento'}
+
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                            <input
+                                placeholder="Filtrar por nome ou código..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="pl-11 pr-6 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-brand-primary outline-none transition-all w-72 shadow-inner"
+                            />
+                        </div>
+                        <button onClick={() => navigate('/orcamento')} className="bg-brand-primary text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-brand-primary/20 cursor-pointer">
+                            <Plus className="w-4 h-4" /> Novo Pedido
                         </button>
                     </div>
                 </div>
-            )}
 
-            {discountModal && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl p-8 max-w-sm w-full space-y-4 shadow-2xl">
-                        <h3 className="font-bold text-xl flex items-center gap-2"><Percent className="w-5 h-5 text-brand-primary" />Aplicar Desconto</h3>
-                        <p className="text-sm text-slate-500">Orçamento #{discountModal.id} — Valor: R$ {parseFloat(discountModal.totalValue || 0).toFixed(2)}</p>
-                        <input type="number" placeholder="Valor do desconto (R$)" value={discountVal}
-                            onChange={e => setDiscountVal(e.target.value)}
-                            className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 focus:ring-2 focus:ring-brand-primary outline-none" />
-                        <input type="text" placeholder="Motivo do desconto" value={discountReason}
-                            onChange={e => setDiscountReason(e.target.value)}
-                            className="w-full bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 focus:ring-2 focus:ring-brand-primary outline-none" />
-                        <div className="flex gap-3">
-                            <button onClick={() => setDiscountModal(null)} className="flex-1 py-2.5 bg-slate-100 rounded-xl font-bold text-slate-600 cursor-pointer hover:bg-slate-200">Cancelar</button>
-                            <button onClick={applyDiscount} className="flex-1 py-2.5 bg-brand-primary text-white rounded-xl font-bold cursor-pointer hover:opacity-90">Confirmar</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Stats bar */}
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 text-center text-xs">
-                {ALL_STATUSES.map(s => {
-                    const count = quotes.filter(q => q.status === s.value).length;
-                    const cfg = STATUS_CONFIG[s.value];
-                    return (
-                        <button key={s.value} onClick={() => setStatusFilter(prev => prev === s.value ? 'all' : s.value)}
-                            className={`rounded-xl p-2 border cursor-pointer transition-all ${statusFilter === s.value ? 'ring-2 ring-brand-primary' : ''} ${cfg.color} border-transparent`}>
-                            <p className="font-black text-lg">{count}</p>
-                            <p className="font-bold opacity-70 text-[10px] leading-tight">{cfg.label}</p>
+                {/* Filter Pills */}
+                <div className="flex items-center gap-3 mt-8 overflow-x-auto pb-2 scrollbar-none">
+                    {filters.map(f => (
+                        <button
+                            key={f.id}
+                            onClick={() => setActiveFilter(f.id)}
+                            className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-black transition-all whitespace-nowrap border cursor-pointer
+                                ${activeFilter === f.id
+                                    ? 'bg-slate-900 text-white border-slate-900 shadow-lg'
+                                    : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'}`}
+                        >
+                            {f.label}
+                            {activeFilter === f.id && <span className="ml-1 opacity-60">{f.id === 'all' ? quotes.length : getCount(f.id)}</span>}
                         </button>
-                    );
-                })}
+                    ))}
+                </div>
             </div>
 
-            {/* Quotes list */}
-            <div className="space-y-3">
-                {filteredQuotes.length === 0 && <p className="text-slate-400 text-center py-8">Nenhum orçamento encontrado.</p>}
-                {filteredQuotes.map(q => {
-                    const st = STATUS_CONFIG[q.status] || STATUS_CONFIG.pending;
-                    const isExpanded = expandedId === q.id;
-                    const bends = bendsMap[q.id] || [];
-                    return (
-                        <div key={q.id} className="bg-white border border-slate-100 rounded-2xl overflow-hidden hover:shadow-sm transition-all">
-                            {/* Row */}
-                            <div className="p-4 flex items-center gap-4 flex-wrap cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : q.id)}>
-                                <span className="font-black text-slate-300 text-sm">#{q.id}</span>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-bold text-slate-900 flex items-center gap-2">{q.clientName || 'Cliente'}{q.notes?.startsWith('[MANUAL]') && <span className="text-[10px] bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">MANUAL</span>}</p>
-                                    <p className="text-xs text-slate-400">{new Date(q.createdAt).toLocaleString('pt-BR')}{q.notes ? ` · ${q.notes.replace('[MANUAL] ', '').substring(0, 40)}` : ''}</p>
-                                </div>
-                                <span className={`text-xs font-bold px-3 py-1 rounded-full ${st.color}`}>{st.label}</span>
-                                <div className="text-right">
-                                    <p className="font-black text-slate-900">R$ {parseFloat(q.finalValue || q.totalValue || 0).toFixed(2)}</p>
-                                    <p className="text-xs text-slate-400">{parseFloat(q.totalM2 || 0).toFixed(4)} m²</p>
-                                </div>
-                                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            {/* List */}
+            <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <th className="px-8 py-4">Cliente / Código</th>
+                                <th className="px-8 py-4">Data</th>
+                                <th className="px-8 py-4">Valor Total</th>
+                                <th className="px-8 py-4">Status</th>
+                                <th className="px-8 py-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {filtered.map(q => {
+                                const st = STATUS_CONFIG[q.status] || STATUS_CONFIG.draft;
+                                const hasPaid = (q.fin_paid || 0) > 0;
+                                const canReopen = (q.status === 'approved' || q.status === 'sent') && !hasPaid;
+                                const showNewVersion = (q.status === 'approved' || q.status === 'paid' || q.status === 'partial') && hasPaid;
+
+                                return (
+                                    <tr key={q.id} className="hover:bg-slate-50/50 transition-colors group">
+                                        <td className="px-8 py-5 flex items-center gap-4">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${st.color} bg-opacity-10 text-slate-900 flex-shrink-0`}>
+                                                <st.icon className="w-5 h-5" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h4 className="font-black text-slate-900 truncate text-sm">{q.clientName || 'Cliente'}</h4>
+                                                <p className="text-[10px] font-mono text-slate-400 uppercase tracking-tighter">ORC-{q.id.substring(0, 8).toUpperCase()}</p>
+                                            </div>
+                                        </td>
+
+                                        <td className="px-8 py-5 text-slate-500 text-xs font-bold">
+                                            {new Date(q.createdAt).toLocaleDateString('pt-BR')}
+                                        </td>
+
+                                        <td className="px-8 py-5">
+                                            <p className="text-sm font-black text-slate-700">R$ {parseFloat(q.finalValue || q.totalValue || 0).toFixed(2)}</p>
+                                            {hasPaid && (
+                                                <p className="text-[9px] font-bold text-emerald-500 uppercase">Pago: R$ {parseFloat(q.fin_paid).toFixed(2)}</p>
+                                            )}
+                                        </td>
+
+                                        <td className="px-8 py-5">
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight ${st.color}`}>
+                                                <div className="w-1 h-1 rounded-full bg-current" />
+                                                {st.label}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-8 py-5">
+                                            <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {(q.status === 'draft' || q.status === 'sent') && (
+                                                    <>
+                                                        <button onClick={() => handleApprove(q.id)} title="Aprovar Orçamento"
+                                                            className="p-2.5 bg-brand-primary/10 text-brand-primary rounded-xl hover:bg-brand-primary hover:text-white transition-all cursor-pointer">
+                                                            <CheckCircle2 className="w-4 h-4" />
+                                                        </button>
+                                                        <button onClick={() => handleCancel(q.id)} title="Cancelar"
+                                                            className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all cursor-pointer">
+                                                            <XCircle className="w-4 h-4" />
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {canReopen && (
+                                                    <button onClick={() => handleReopen(q.id)} title="Reabrir (Rascunho)"
+                                                        className="p-2.5 bg-blue-50 text-blue-500 rounded-xl hover:bg-blue-500 hover:text-white transition-all cursor-pointer">
+                                                        <RefreshCcw className="w-4 h-4" />
+                                                    </button>
+                                                )}
+
+                                                {showNewVersion && (
+                                                    <button onClick={() => handleNewVersion(q.id)} title="Criar Nova Versão"
+                                                        className="p-2.5 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition-all cursor-pointer">
+                                                        <RefreshCcw className="w-4 h-4" />
+                                                    </button>
+                                                )}
+
+                                                <button onClick={() => openPayModal(q)} title="Registrar Pagamento"
+                                                    className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all cursor-pointer">
+                                                    <DollarSign className="w-4 h-4" />
+                                                </button>
+
+                                                <button onClick={() => navigate(`/orcamento?${(q.status === 'draft' || q.status === 'sent') ? 'edit' : 'view'}=${q.id}`)}
+                                                    className="p-2.5 bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-900 hover:text-white transition-all cursor-pointer">
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+
+                                                <button onClick={() => window.open(`/api/reports/client/${q.id}`, '_blank')}
+                                                    className="p-2.5 bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-900 hover:text-white transition-all cursor-pointer">
+                                                    <Download className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {filtered.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[3.5rem] border border-dashed border-slate-200 shadow-sm">
+                    <Package className="w-12 h-12 text-slate-200 mb-4" />
+                    <p className="text-slate-400 font-black text-sm uppercase tracking-widest">Nenhum orçamento encontrado</p>
+                </div>
+            )}
+
+            {/* PAYMENT MODAL (Identical to ReceivablesTab) */}
+            <AnimatePresence>
+                {payModalQuote && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl relative">
+
+                            <div className="absolute top-0 right-0 p-6">
+                                <button type="button" onClick={() => setPayModalQuote(null)}
+                                    className="text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl cursor-pointer hover:bg-slate-200 transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
 
-                            {/* Expanded detail */}
-                            {isExpanded && (
-                                <div className="border-t border-slate-100 p-5 space-y-5 bg-slate-50">
-                                    {/* Bend photos — MOST IMPORTANT */}
-                                    {loadingBends === q.id ? (
-                                        <div className="flex items-center gap-2 text-slate-400 text-sm">
-                                            <RefreshCw className="w-4 h-4 animate-spin" /> Carregando dobras...
-                                        </div>
-                                    ) : bends.length > 0 ? (
-                                        <div>
-                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">📐 Dobras ({bends.length})</p>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                                {bends.map((b: any, i: number) => (
-                                                    <div key={b.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                                                        {b.svgDataUrl ? (
-                                                            <div className="relative group cursor-pointer" onClick={() => setZoomImg(b.svgDataUrl)}>
-                                                                <img src={b.svgDataUrl} alt={`Dobra ${i + 1}`}
-                                                                    className="w-full object-contain group-hover:opacity-90 transition-opacity"
-                                                                    style={{ height: 120, background: '#1e293b' }} />
-                                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                    <ZoomIn className="w-6 h-6 text-white" />
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="h-20 bg-slate-100 flex items-center justify-center text-slate-400 text-xs">Sem imagem</div>
-                                                        )}
-                                                        <div className="p-3">
-                                                            <p className="font-bold text-slate-800 text-sm">Dobra {b.bendOrder}</p>
-                                                            <p className="text-xs text-slate-500 mt-0.5">
-                                                                {(b.roundedWidthCm / 100).toFixed(2)}m × {b.totalLengthM?.toFixed(2)}m
-                                                            </p>
-                                                            <p className="text-xs text-blue-600 font-bold">{b.m2?.toFixed(4)} m²</p>
-                                                            {b.risks && Array.isArray(b.risks) && (
-                                                                <p className="text-xs text-slate-400 mt-1 truncate">
-                                                                    {b.risks.map((r: any) => `${r.direction} ${r.sizeCm}cm`).join(' · ')}
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <p className="text-xs text-slate-400 italic">Orçamento manual — sem dobras cadastradas.</p>
-                                    )}
+                            <h3 className="text-2xl font-black text-slate-900 mb-1">Registrar Pagamento</h3>
+                            <p className="text-slate-400 text-sm mb-8 font-medium">Orçamento #{String(payModalQuote.id).substring(0, 8)} • {payModalQuote.clientName}</p>
 
-                                    {/* Info row */}
-                                    <div className="flex flex-wrap gap-4 text-sm">
-                                        {q.pixProofUrl && (
-                                            <a href={q.pixProofUrl} target="_blank" rel="noopener"
-                                                className="flex items-center gap-2 text-sm font-bold text-brand-primary bg-brand-primary/10 px-4 py-2 rounded-xl w-fit">
-                                                <Eye className="w-4 h-4" /> Ver Comprovante PIX
-                                            </a>
-                                        )}
-                                        <button onClick={() => handleDownloadPDF(q, bends)}
-                                            className="flex items-center gap-2 text-sm font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl cursor-pointer hover:bg-indigo-100">
-                                            <FileDown className="w-4 h-4" /> Baixar PDF
-                                        </button>
-                                        {q.discountValue > 0 && (
-                                            <p className="text-slate-500">Desconto: <span className="text-red-500 font-bold">-R$ {parseFloat(q.discountValue).toFixed(2)}</span></p>
-                                        )}
-                                        {q.notes && <p className="text-slate-600 italic">"{q.notes}"</p>}
-                                    </div>
-
-                                    {/* Status actions */}
-                                    {isAdminOrMaster && (
-                                        <div>
-                                            <p className="text-xs font-bold text-slate-400 uppercase mb-2">Alterar Status</p>
-                                            <div className="flex flex-wrap gap-2">
-                                                {q.status !== 'paid' && (
-                                                    <button onClick={() => updateStatus(q.id, 'paid')}
-                                                        className="px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-xl hover:bg-green-600 cursor-pointer flex items-center gap-1">
-                                                        <Check className="w-3.5 h-3.5" /> Marcar Pago
-                                                    </button>
-                                                )}
-                                                {q.status !== 'in_production' && (
-                                                    <button onClick={() => updateStatus(q.id, 'in_production')}
-                                                        className="px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-xl hover:bg-blue-600 cursor-pointer flex items-center gap-1">
-                                                        <Package className="w-3.5 h-3.5" /> Enviar Produção
-                                                    </button>
-                                                )}
-                                                {q.status !== 'finished' && (
-                                                    <button onClick={() => updateStatus(q.id, 'finished')}
-                                                        className="px-3 py-1.5 bg-slate-700 text-white text-xs font-bold rounded-xl hover:bg-slate-800 cursor-pointer flex items-center gap-1">
-                                                        <Check className="w-3.5 h-3.5" /> Finalizar
-                                                    </button>
-                                                )}
-                                                {q.status !== 'pending' && (
-                                                    <button onClick={() => {
-                                                        if (['paid', 'in_production', 'finished'].includes(q.status)) {
-                                                            setReopenConfirm(q);
-                                                        } else {
-                                                            updateStatus(q.id, 'pending');
-                                                        }
-                                                    }}
-                                                        className="px-3 py-1.5 bg-yellow-500 text-white text-xs font-bold rounded-xl hover:bg-yellow-600 cursor-pointer flex items-center gap-1">
-                                                        <RotateCcw className="w-3.5 h-3.5" /> Reabrir
-                                                    </button>
-                                                )}
-                                                {q.status !== 'cancelled' && (
-                                                    <button onClick={() => updateStatus(q.id, 'cancelled')}
-                                                        className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-xl hover:bg-red-600 cursor-pointer flex items-center gap-1">
-                                                        <X className="w-3.5 h-3.5" /> Cancelar
-                                                    </button>
-                                                )}
-                                                {isMaster && q.status !== 'paid' && (
-                                                    <button onClick={() => setDiscountModal(q)}
-                                                        className="px-3 py-1.5 bg-purple-500 text-white text-xs font-bold rounded-xl hover:bg-purple-600 cursor-pointer flex items-center gap-1">
-                                                        <Percent className="w-3.5 h-3.5" /> Desconto
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                    {/* User can cancel unpaid quotes */}
-                                    {!isAdminOrMaster && q.status !== 'paid' && q.status !== 'cancelled' && q.status !== 'finished' && (
-                                        <div>
-                                            <button onClick={() => updateStatus(q.id, 'cancelled')}
-                                                className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-xl hover:bg-red-600 cursor-pointer flex items-center gap-1">
-                                                <X className="w-3.5 h-3.5" /> Cancelar Orçamento
-                                            </button>
-                                        </div>
-                                    )}
+                            <form onSubmit={handlePaySubmit} className="space-y-6">
+                                <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl flex justify-between items-center mb-6">
+                                    <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Saldo Restante</span>
+                                    <span className="text-2xl font-black text-brand-primary">{fmt(payModalQuote.fin_remaining ?? payModalQuote.finalValue ?? payModalQuote.totalValue)}</span>
                                 </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
 
-            {/* Reopen confirmation modal */}
-            {reopenConfirm && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl p-8 max-w-md w-full space-y-4 shadow-2xl">
-                        <h3 className="font-bold text-xl flex items-center gap-2 text-amber-600">
-                            ⚠️ Atenção — Reabrir Orçamento
-                        </h3>
-                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2">
-                            <p className="text-sm text-amber-800 font-bold">Orçamento #{reopenConfirm.id} — {reopenConfirm.clientName}</p>
-                            <p className="text-sm text-amber-700">Este orçamento já possui <strong>pagamento efetuado</strong> ou está em produção/finalizado.</p>
-                            <p className="text-sm text-amber-700">Ao reabrir:</p>
-                            <ul className="text-sm text-amber-700 list-disc pl-5 space-y-1">
-                                <li>O registro financeiro será <strong>removido</strong></li>
-                                <li>O estoque consumido será <strong>devolvido</strong></li>
-                                <li>As movimentações de estoque serão <strong>excluídas</strong></li>
-                                <li>A diferença será <strong>adicionada/recarregada</strong> ao reprocessar</li>
-                            </ul>
-                        </div>
-                        <p className="text-sm text-slate-600">Tem certeza que deseja reabrir este orçamento?</p>
-                        <div className="flex gap-3">
-                            <button onClick={() => setReopenConfirm(null)}
-                                className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-sm text-slate-600 cursor-pointer">Cancelar</button>
-                            <button onClick={() => { updateStatus(reopenConfirm.id, 'pending'); setReopenConfirm(null); }}
-                                className="flex-1 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm cursor-pointer flex items-center justify-center gap-2">
-                                <RotateCcw className="w-4 h-4" /> Confirmar Reabertura
-                            </button>
-                        </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-1 block mb-2 tracking-widest">Valor do Pagamento</label>
+                                    <div className="relative">
+                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 font-black text-lg">R$</span>
+                                        <input type="number" step="0.01" min="0.01" required autoFocus
+                                            value={payForm.valor_pago} onChange={e => setPayForm({ ...payForm, valor_pago: e.target.value })}
+                                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-12 pr-6 py-4 text-xl font-black text-slate-900 outline-none focus:border-brand-primary transition-all shadow-inner" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-1 block mb-2 tracking-widest">Data</label>
+                                        <div className="relative">
+                                            <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                            <input type="date" required value={payForm.data_pagamento} onChange={e => setPayForm({ ...payForm, data_pagamento: e.target.value })}
+                                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-sm font-bold text-slate-700 outline-none focus:border-brand-primary transition-all appearance-none" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase ml-1 block mb-2 tracking-widest">Forma</label>
+                                        <select value={payForm.forma_pagamento} onChange={e => setPayForm({ ...payForm, forma_pagamento: e.target.value })} required
+                                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-sm font-black text-slate-700 outline-none focus:border-brand-primary transition-all appearance-none cursor-pointer">
+                                            <option value="">Selecione...</option>
+                                            <option value="pix">PIX</option>
+                                            <option value="dinheiro">Dinheiro</option>
+                                            <option value="cartao_credito">Cartão de Crédito</option>
+                                            <option value="cartao_debito">Cartão de Débito</option>
+                                            <option value="boleto">Boleto</option>
+                                            <option value="transferencia">Transferência</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase ml-1 block mb-2 tracking-widest">Observação</label>
+                                    <textarea rows={2} placeholder="Ex: Pagamento parcial referente ao sinal..."
+                                        value={payForm.observacao} onChange={e => setPayForm({ ...payForm, observacao: e.target.value })}
+                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-sm font-medium text-slate-700 outline-none focus:border-brand-primary transition-all resize-none shadow-inner" />
+                                </div>
+
+                                <div className="pt-4">
+                                    <button type="submit" disabled={paying}
+                                        className="w-full bg-brand-primary text-white py-5 rounded-[1.5rem] font-black text-sm shadow-xl shadow-brand-primary/20 hover:opacity-90 disabled:opacity-50 transition-all cursor-pointer">
+                                        {paying ? 'Processando...' : 'Confirmar Recebimento'}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
                     </div>
-                </div>
-            )}
+                )}
+            </AnimatePresence>
         </div>
     );
 }

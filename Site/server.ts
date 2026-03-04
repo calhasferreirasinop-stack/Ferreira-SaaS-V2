@@ -733,16 +733,18 @@ app.post('/api/settings', requireAdmin, upload.fields([{ name: 'logo' }, { name:
 // =====================
 app.get('/api/admin/data', requireAdmin, async (req: any, res) => {
   try {
-    const [companyRes, servicesRes, postsRes, galleryRes, testimonialsRes, estimatesRes, productsRes, receivablesRes] = await Promise.all([
-      supabase.from('companies').select('settings').eq('id', req.user.companyId).single(),
-      supabase.from('services').select('*').eq('company_id', req.user.companyId),
-      supabase.from('posts').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
-      supabase.from('gallery').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
-      supabase.from('testimonials').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
-      supabase.from('estimates').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
-      supabase.from('products').select('*').eq('company_id', req.user.companyId).order('name', { ascending: true }),
-      supabase.from('accounts_receivable').select('estimate_id, status').eq('company_id', req.user.companyId),
-    ]);
+    const [companyRes, servicesRes, postsRes, galleryRes, testimonialsRes, estimatesRes, productsRes, receivablesRes, prodOrdersRes] =
+      await Promise.all([
+        supabase.from('companies').select('settings').eq('id', req.user.companyId).single(),
+        supabase.from('services').select('*').eq('company_id', req.user.companyId),
+        supabase.from('posts').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
+        supabase.from('gallery').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
+        supabase.from('testimonials').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
+        supabase.from('estimates').select('*').eq('company_id', req.user.companyId).order('created_at', { ascending: false }),
+        supabase.from('products').select('*').eq('company_id', req.user.companyId).order('name', { ascending: true }),
+        supabase.from('accounts_receivable').select('estimate_id, status').eq('company_id', req.user.companyId),
+        supabase.from('production_orders').select('estimate_id, status').or(`company_origin_id.eq.${req.user.companyId},company_target_id.eq.${req.user.companyId}`),
+      ]);
 
     let profilesRes: any = null;
     if (req.user.role === 'master' || req.user.role === 'admin') {
@@ -775,12 +777,15 @@ app.get('/api/admin/data', requireAdmin, async (req: any, res) => {
         }
         // Find associated receivable
         const rec = (receivablesRes.data || []).find(r => String(r.estimate_id) === String(q.id));
+        const prod = (prodOrdersRes.data || []).find(p => String(p.estimate_id) === String(q.id));
 
         return {
           ...q,
           clientName,
           fin_status: rec ? rec.status : null,
+          prod_status: prod ? prod.status : null,
           fin_remaining: rec ? rec.valor_restante : null,
+          fin_paid: rec ? rec.valor_pago : 0,
           fin_id: rec ? rec.id : null,
           createdAt: q.created_at,
           totalValue: q.total_amount || 0,
@@ -2836,17 +2841,11 @@ app.get('/api/financial/summary', requireAdmin, async (req: any, res) => {
 // Auto-migration: cria tabela se não existir
 async function ensureProductionOrdersTable() {
   try {
-    // Testa se tabela existe fazendo SELECT
     const { error } = await supabase.from('production_orders').select('id').limit(1);
     if (!error) { console.log('✅ production_orders: tabela OK'); return; }
 
     console.log('🔧 Criando tabela production_orders...');
-    // Usar supabase-admin via rpc exec se disponivel
-    // Como não temos DDL via REST, logamos instrução para o operador
     console.log(`
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠ EXECUTE ESTE SQL NO SUPABASE SQL EDITOR:
-
 CREATE TABLE IF NOT EXISTS production_orders (
     id                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     company_origin_id UUID NOT NULL,
@@ -2866,10 +2865,36 @@ CREATE TABLE IF NOT EXISTS production_orders (
 CREATE INDEX IF NOT EXISTS idx_prod_orders_origin  ON production_orders(company_origin_id);
 CREATE INDEX IF NOT EXISTS idx_prod_orders_target  ON production_orders(company_target_id);
 ALTER TABLE production_orders DISABLE ROW LEVEL SECURITY;
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     `);
   } catch (e) {
     console.error('production_orders check error:', e);
+  }
+}
+
+async function ensureProductionItemsTable() {
+  try {
+    const { error } = await supabase.from('production_items').select('id').limit(1);
+    if (!error) { console.log('✅ production_items: tabela OK'); return; }
+
+    console.log('🔧 Criando tabela production_items...');
+    console.log(`
+CREATE TABLE IF NOT EXISTS production_items (
+    id                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    estimate_id       UUID NOT NULL,
+    company_id        UUID NOT NULL,
+    description       TEXT,
+    metragem         NUMERIC(10,4),
+    comodo           TEXT DEFAULT 'Geral',
+    concluido        BOOLEAN DEFAULT false,
+    concluido_em     TIMESTAMPTZ,
+    created_at       TIMESTAMPTZ DEFAULT NOW(),
+    updated_at       TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_prod_items_estimate ON production_items(estimate_id);
+ALTER TABLE production_items DISABLE ROW LEVEL SECURITY;
+    `);
+  } catch (e) {
+    console.error('production_items check error:', e);
   }
 }
 
@@ -3086,6 +3111,7 @@ async function performWhatsAppSend(phone: string, text: string, settings: any) {
 
 async function startServer() {
   await ensureProductionOrdersTable();
+  await ensureProductionItemsTable();
 
   // Iniciar rotinas de automação (WhatsApp e Expiração)
   setInterval(() => {

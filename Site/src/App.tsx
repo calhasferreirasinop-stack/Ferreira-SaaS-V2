@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Orcamento from './pages/Orcamento';
 import TestHarness from './pages/TestHarness';
 import Production from './pages/Production';
+import Fabricacao from './pages/Fabricacao';
 
 function AppContent() {
   const location = useLocation();
@@ -51,6 +52,11 @@ function AppContent() {
           <Route path="/producao" element={
             <ErrorBoundary>
               <Production />
+            </ErrorBoundary>
+          } />
+          <Route path="/fabricacao/:estimateId" element={
+            <ErrorBoundary>
+              <Fabricacao />
             </ErrorBoundary>
           } />
           <Route path="*" element={<Navigate to="/" replace />} />

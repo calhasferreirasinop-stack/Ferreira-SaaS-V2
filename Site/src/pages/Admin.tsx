@@ -707,26 +707,26 @@ export default function Admin() {
 
               {/* ─── QUOTES ─── */}
               {activeTab === 'quotes' && (
-                <QuotesTab quotes={quotes} currentUser={currentUser} onSave={() => fetchData(true)} showToast={showToast} />
+                <QuotesTab quotes={quotes} fetchData={fetchData} showToast={showToast} />
               )}
 
               {/* ─── INVENTORY ─── */}
-              {activeTab === 'inventory' && isMaster && (
+              {activeTab === 'inventory' && isAdmin && (
                 <InventoryTab inventory={inventory} onSave={() => fetchData(true)} showToast={showToast} />
               )}
 
               {/* ─── FINANCIAL ─── */}
-              {activeTab === 'financial' && isMaster && (
+              {activeTab === 'financial' && isAdmin && (
                 <FinancialTab showToast={showToast} />
               )}
 
               {/* ─── RECEIVABLES ─── */}
-              {activeTab === 'receivables' && isMaster && (
+              {activeTab === 'receivables' && isAdmin && (
                 <ReceivablesTab showToast={showToast} />
               )}
 
               {/* ─── REPORTS ─── */}
-              {activeTab === 'reports' && isMaster && (
+              {activeTab === 'reports' && isAdmin && (
                 <ReportTab showToast={showToast} />
               )}
 
