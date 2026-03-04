@@ -1953,19 +1953,40 @@ app.put('/api/quotes/:id/status', authenticate, async (req: any, res) => {
   }
 
   const updateData: any = { status };
-  if (status === 'cancelled') {
+  if (status === 'cancelled' || status === 'canceled') {
+    // 1. Verificar registros financeiros e de produção que impedem o cancelamento
+    const { data: existingAR } = await supabase.from('accounts_receivable')
+      .select('id, valor_pago')
+      .eq('estimate_id', id)
+      .eq('company_id', req.user.companyId)
+      .not('status', 'in', '(\'cancelled\',\'canceled\')');
+
+    const { data: existingPO } = await supabase.from('production_orders')
+      .select('id, status')
+      .eq('estimate_id', id)
+      .eq('company_origin_id', req.user.companyId);
+
+    // Soma valores pagos apenas nas contas ativas
+    const totalPago = existingAR?.reduce((acc, curr) => acc + parseFloat(curr.valor_pago || '0'), 0) || 0;
+
+    // Qualquer conta a receber ATIVA (mesmo sem pagamento) impede o cancelamento
+    if (existingAR && existingAR.length > 0) {
+      return res.status(400).json({ error: 'Não é possível cancelar um orçamento que possui contas a receber ativas ou pagamentos registrados. Reabra o orçamento ou cancele o financeiro primeiro.' });
+    }
+
+    if (totalPago > 0) {
+      return res.status(400).json({ error: 'Orçamento possui pagamentos registrados e não pode ser cancelado.' });
+    }
+
+    if (existingPO && existingPO.length > 0) {
+      return res.status(400).json({ error: 'Orçamento já foi enviado para a produção e não pode ser cancelado.' });
+    }
+
     updateData.cancel_reason = cancel_reason || 'outro';
     updateData.cancel_reason_text = cancel_reason_text || '';
-
-    // Cleanup financeiro/produção ao cancelar
-    const { data: listAcc } = await supabase.from('accounts_receivable')
-      .select('id, valor_pago').eq('estimate_id', id).eq('company_id', req.user.companyId);
-
-    if (listAcc && listAcc.length > 0) {
-      await supabase.from('accounts_receivable').update({ status: 'canceled' }).eq('estimate_id', id).eq('company_id', req.user.companyId);
-    }
-    await supabase.from('production_orders').delete().eq('estimate_id', id).eq('status', 'pendente');
+    updateData.canceled_at = new Date().toISOString();
   }
+
   if (status === 'sent') {
     updateData.data_envio = new Date().toISOString();
   }

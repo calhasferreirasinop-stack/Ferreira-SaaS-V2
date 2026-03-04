@@ -2006,7 +2006,11 @@ window.onload = function() {
                                                             </button>
 
                                                             {q.status !== 'cancelled' && q.status !== 'canceled' && (
-                                                                <button onClick={() => handleCancelQuote(q.id)}
+                                                                <button onClick={() => {
+                                                                    setCancelModalQuote(q);
+                                                                    setCancelReason('');
+                                                                    setCancelReasonText('');
+                                                                }}
                                                                     className="text-slate-400 p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-all" title="Cancelar Orçamento">
                                                                     <XCircle className="w-4 h-4" />
                                                                 </button>
@@ -2022,6 +2026,106 @@ window.onload = function() {
                         </div>
                     </motion.div>
                 )}
+
+                {/* MODAL DE CANCELAMENTO CENTRAL */}
+                <AnimatePresence>
+                    {cancelModalQuote && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                                className="bg-slate-800 rounded-[2rem] p-8 w-full max-w-md shadow-2xl relative border border-white/10">
+                                <div className="absolute top-0 right-0 p-6">
+                                    <button onClick={() => setCancelModalQuote(null)} className="p-2 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-all cursor-pointer">
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center">
+                                        <XCircle className="w-7 h-7 text-red-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black text-white">Cancelar Orçamento</h3>
+                                        <p className="text-sm font-bold text-white/40 uppercase tracking-widest mt-1">
+                                            Ref: #{String(cancelModalQuote.id).substring(0, 8).toUpperCase()}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <form onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    if (!cancelModalQuote) return;
+                                    if (!cancelReason) {
+                                        setToast({ msg: 'Selecione um motivo para o cancelamento.', type: 'error' });
+                                        return;
+                                    }
+                                    if (cancelReason === 'outro' && !cancelReasonText.trim()) {
+                                        setToast({ msg: 'Descreva o motivo do cancelamento.', type: 'error' });
+                                        return;
+                                    }
+
+                                    setCanceling(true);
+                                    try {
+                                        const res = await fetch(`/api/quotes/${cancelModalQuote.id}/status`, {
+                                            method: 'PUT',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                status: 'cancelled',
+                                                cancel_reason: cancelReason,
+                                                cancel_reason_text: cancelReasonText
+                                            }),
+                                            credentials: 'include'
+                                        });
+                                        if (res.ok) {
+                                            setToast({ msg: 'Orçamento cancelado.', type: 'success' });
+                                            fetch('/api/quotes', { credentials: 'include' }).then(r => r.json()).then(setMyQuotes).catch(() => { });
+                                            setCancelModalQuote(null);
+                                        } else {
+                                            const err = await res.json();
+                                            setToast({ msg: err.error || 'Erro ao cancelar orçamento.', type: 'error' });
+                                        }
+                                    } catch (error) {
+                                        setToast({ msg: 'Erro de comunicação com o servidor.', type: 'error' });
+                                    } finally {
+                                        setCanceling(false);
+                                    }
+                                }} className="space-y-4 text-left">
+                                    <div>
+                                        <label className="text-xs font-bold text-white/50 uppercase ml-1 block mb-3 tracking-wider">Motivo do Cancelamento</label>
+                                        <div className="space-y-2">
+                                            {[
+                                                { id: 'cliente_desistiu', label: 'Cliente desistiu' },
+                                                { id: 'perdeu_concorrencia', label: 'Perdeu para concorrência' },
+                                                { id: 'preco_alto', label: 'Preço alto' },
+                                                { id: 'servico_adiado', label: 'Serviço adiado' },
+                                                { id: 'outro', label: 'Outro' }
+                                            ].map(opt => (
+                                                <label key={opt.id} className="flex items-center p-3 border border-white/10 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-colors">
+                                                    <input type="radio" name="cancel_reason" value={opt.id} checked={cancelReason === opt.id} onChange={() => setCancelReason(opt.id)} className="w-4 h-4 text-red-500 border-white/20 focus:ring-red-500 bg-transparent" />
+                                                    <span className="ml-3 text-sm font-medium text-white/90">{opt.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {cancelReason === 'outro' && (
+                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                                            <label className="text-xs font-bold text-white/50 uppercase ml-1 block mb-2 tracking-wider mt-4">Descreva o motivo (obrigatório)</label>
+                                            <textarea required value={cancelReasonText} onChange={e => setCancelReasonText(e.target.value)} rows={3}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:ring-2 focus:ring-red-500/20 placeholder-white/20"
+                                                placeholder="Detalhes..." />
+                                        </motion.div>
+                                    )}
+
+                                    <div className="pt-4">
+                                        <button type="submit" disabled={canceling} className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-500/20 disabled:opacity-50 transition-all cursor-pointer">
+                                            {canceling ? 'Cancelando...' : 'Confirmar Cancelamento'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
 
                 {/* ══ STEP 1: BENDS ══ */}
                 {

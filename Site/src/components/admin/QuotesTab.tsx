@@ -118,15 +118,54 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
         setNewVersionQuote(q);
     };
 
-    const handleCancel = async (id: string) => {
-        if (!confirm('Deseja cancelar este orçamento?')) return;
-        const res = await fetch(`/api/quotes/${id}/status`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'cancelled' }),
-            credentials: 'include'
-        });
-        if (res.ok) { showToast('Orçamento cancelado.', 'success'); fetchData(true); }
+    const [cancelModalQuote, setCancelModalQuote] = useState<any>(null);
+    const [cancelReason, setCancelReason] = useState<string>('');
+    const [cancelReasonText, setCancelReasonText] = useState<string>('');
+    const [canceling, setCanceling] = useState(false);
+
+    const handleCancelClick = (q: any) => {
+        setCancelModalQuote(q);
+        setCancelReason('');
+        setCancelReasonText('');
+    };
+
+    const handleCancelSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!cancelModalQuote) return;
+        if (!cancelReason) {
+            showToast('Selecione um motivo para o cancelamento.', 'error');
+            return;
+        }
+        if (cancelReason === 'outro' && !cancelReasonText.trim()) {
+            showToast('Descreva o motivo do cancelamento.', 'error');
+            return;
+        }
+
+        setCanceling(true);
+        try {
+            const res = await fetch(`/api/quotes/${cancelModalQuote.id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status: 'cancelled',
+                    cancel_reason: cancelReason,
+                    cancel_reason_text: cancelReasonText
+                }),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                showToast('Orçamento cancelado.', 'success');
+                fetchData(true);
+                setCancelModalQuote(null);
+            } else {
+                const err = await res.json();
+                showToast(err.error || 'Erro ao cancelar orçamento.', 'error');
+            }
+        } catch (error) {
+            showToast('Erro de comunicação com o servidor.', 'error');
+        } finally {
+            setCanceling(false);
+        }
     };
 
     const openPayModal = (q: any) => {
@@ -386,7 +425,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
 
                                                         {q.status !== 'cancelled' && q.status !== 'canceled' && (
                                                             <button
-                                                                onClick={() => handleCancel(q.id)}
+                                                                onClick={() => handleCancelClick(q)}
                                                                 className="text-slate-400 p-1.5 hover:bg-rose-50 hover:text-rose-500 rounded-lg transition-all cursor-pointer"
                                                                 title="Cancelar Orçamento"
                                                             >
@@ -404,6 +443,69 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                     </table>
                 </div>
             </div>
+
+            {/* MODAL DE CANCELAMENTO */}
+            <AnimatePresence>
+                {cancelModalQuote && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl relative border border-slate-100">
+                            <div className="absolute top-0 right-0 p-6">
+                                <button onClick={() => setCancelModalQuote(null)} className="p-2 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-full transition-all cursor-pointer">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center">
+                                    <XCircle className="w-7 h-7 text-red-500" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-800">Cancelar Orçamento</h3>
+                                    <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">
+                                        Ref: #{String(cancelModalQuote.id).substring(0, 8).toUpperCase()}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleCancelSubmit} className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1 block mb-3 tracking-wider">Motivo do Cancelamento</label>
+                                    <div className="space-y-2">
+                                        {[
+                                            { id: 'cliente_desistiu', label: 'Cliente desistiu' },
+                                            { id: 'perdeu_concorrencia', label: 'Perdeu para concorrência' },
+                                            { id: 'preco_alto', label: 'Preço alto' },
+                                            { id: 'servico_adiado', label: 'Serviço adiado' },
+                                            { id: 'outro', label: 'Outro' }
+                                        ].map(opt => (
+                                            <label key={opt.id} className="flex items-center p-3 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                                                <input type="radio" name="cancel_reason" value={opt.id} checked={cancelReason === opt.id} onChange={() => setCancelReason(opt.id)} className="w-4 h-4 text-red-500 border-slate-300 focus:ring-red-500" />
+                                                <span className="ml-3 text-sm font-medium text-slate-700">{opt.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {cancelReason === 'outro' && (
+                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1 block mb-2 tracking-wider mt-4">Descreva o motivo (obrigatório)</label>
+                                        <textarea required value={cancelReasonText} onChange={e => setCancelReasonText(e.target.value)} rows={3}
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-red-500/20"
+                                            placeholder="Detalhes..." />
+                                    </motion.div>
+                                )}
+
+                                <div className="pt-4">
+                                    <button type="submit" disabled={canceling} className="w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-500/20 disabled:opacity-50 transition-all cursor-pointer">
+                                        {canceling ? 'Cancelando...' : 'Confirmar Cancelamento'}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* MODAL PAGAMENTO */}
             <AnimatePresence>
