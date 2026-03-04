@@ -1986,7 +1986,7 @@ window.onload = function() {
                                                                 </button>
                                                             )}
 
-                                                            {(q.status === 'approved' || q.prod_status === 'accepted' || q.prod_status === 'in_production') && (
+                                                            {q.status !== 'cancelled' && q.status !== 'canceled' && (
                                                                 <button onClick={() => navigate(`/fabricacao/${q.id}`)}
                                                                     className="flex items-center gap-1 px-2 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Módulo Fabricação">
                                                                     <Hammer className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Fabricação</span>
