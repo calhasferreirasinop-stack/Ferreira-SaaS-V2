@@ -37,14 +37,12 @@ const supabaseUrl = sanitizeEnv(process.env.SUPABASE_URL);
 const supabaseServiceKey = sanitizeEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
 const supabaseAnonKey = sanitizeEnv(process.env.SUPABASE_ANON_KEY);
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env');
-  // Em Vercel, o log acima ajudará a encontrar o erro, mas não matamos o processo para não quebrar o builder.
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: { persistSession: false }
-});
+// Inicialização segura do Supabase (Evita crash no Vercel se as chaves demorarem a carregar)
+const supabase = createClient(
+  supabaseUrl || 'https://placeholder-if-missing.supabase.co',
+  supabaseServiceKey || 'placeholder-key',
+  { auth: { persistSession: false } }
+);
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
 if (!process.env.VERCEL) {
