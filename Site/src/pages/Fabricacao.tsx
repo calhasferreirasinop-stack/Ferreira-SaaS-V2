@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle2, Factory, ArrowLeft, RefreshCw, CheckCircle, Package } from 'lucide-react';
+import { CheckCircle2, Factory, ArrowLeft, RefreshCw, CheckCircle, Package, Save, RotateCcw } from 'lucide-react';
 
 export default function Fabricacao() {
     const { estimateId } = useParams();
@@ -121,11 +121,17 @@ export default function Fabricacao() {
                             <CheckCircle2 className="w-5 h-5" /> {finishing ? 'Processando...' : 'Finalizar Produção'}
                         </button>
                     ) : (
-                        <div className="text-right">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Progresso</p>
-                            <div className="w-32 h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
-                                <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${(completedCount / totalCount) * 100 || 0}%` }} />
+                        <div className="flex items-center gap-6">
+                            <div className="text-right">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Progresso</p>
+                                <div className="w-32 h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
+                                    <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${(completedCount / totalCount) * 100 || 0}%` }} />
+                                </div>
                             </div>
+                            <button onClick={() => navigate(-1)}
+                                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all cursor-pointer border border-slate-200 shadow-sm">
+                                <Save className="w-4 h-4" /> Salvar Sair
+                            </button>
                         </div>
                     )}
                 </div>
@@ -165,6 +171,13 @@ export default function Fabricacao() {
                                                         </p>
                                                     )}
                                                 </div>
+                                                {item.concluido && (
+                                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <span className="flex items-center gap-1 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">
+                                                            <RotateCcw className="w-3 h-3" /> Desfazer
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

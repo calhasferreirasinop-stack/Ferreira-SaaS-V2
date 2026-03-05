@@ -355,6 +355,25 @@ export default function Orcamento() {
     const [editServiceVal, setEditServiceVal] = useState('');
     const [editServiceQtyStr, setEditServiceQtyStr] = useState('1');
 
+    const handleResetQuote = () => {
+        setBends([]);
+        setCurrentRisks([]);
+        setStep('bends');
+        setEditingQuoteId(null);
+        setSavedQuote(null);
+        setNotes('');
+        setClientName('');
+        setClientSearch('');
+        setSelectedClientId(null);
+        setSelectedProductId(null);
+        setSelectedProductName('');
+        setOverridePricePerM2('');
+        setOverrideCostPerM2('');
+        setDiscountAmount('');
+        setGroupByRoom(false);
+        setCurrentGroupName('');
+        setLastGroupName('');
+    };
 
     useEffect(() => {
         if (!toast) return;
@@ -621,8 +640,8 @@ export default function Orcamento() {
             product_id: selectedProductId || undefined,
             productType: 'product',
             group_name: groupByRoom
-                ? (currentGroupName.trim() || lastGroupName || 'CÔMODO 1')
-                : `DOBRA #${bendCount + 1}`
+                ? (currentGroupName.trim() || lastGroupName || `CÔMODO ${bends.length + 1}`)
+                : ''
         };
         // Recalc m2 if lengths were preserved
         if (savedLengths !== null && savedLengths.some(l => parseFloat(l) > 0)) {
@@ -692,6 +711,7 @@ export default function Orcamento() {
                     pricePerM2Override: overridePricePerM2 || undefined,
                     costPerM2Override: overrideCostPerM2 || undefined,
                     discount_amount: parseFloat(discountAmount) || 0,
+                    isGrouped: groupByRoom,
                     notes,
                     bends: currentBends.map(b => ({
                         productType: b.productType || 'product',
@@ -717,8 +737,8 @@ export default function Orcamento() {
             }
             const quote = await res.json();
             setSavedQuote(quote);
+            setEditingQuoteId(quote.id);
             setStep('payment');
-            setEditingQuoteId(null);
             setToast({ msg: editingQuoteId ? 'Orçamento atualizado!' : 'Orçamento salvo!', type: 'success' });
             fetch('/api/quotes', { credentials: 'include' }).then(r => r.json()).then(setMyQuotes).catch(() => { });
         } catch (err: any) {
@@ -743,6 +763,7 @@ export default function Orcamento() {
                     clientId: selectedClientId || undefined,
                     productId: selectedProductId || undefined,
                     discount_amount: parseFloat(discountAmount) || 0,
+                    isGrouped: groupByRoom,
                     notes,
                     status: 'rascunho',
                     bends: bends.map(b => ({
@@ -763,6 +784,9 @@ export default function Orcamento() {
                 }),
             });
             if (res.ok) {
+                const quote = await res.json();
+                setEditingQuoteId(quote.id);
+                setSavedQuote(quote);
                 setToast({ msg: editingQuoteId ? 'Rascunho atualizado!' : 'Rascunho salvo! Continue depois.', type: 'success' });
                 fetch('/api/quotes', { credentials: 'include' }).then(r => r.json()).then(setMyQuotes).catch(() => { });
             } else setToast({ msg: 'Erro ao salvar rascunho', type: 'error' });
@@ -898,6 +922,7 @@ export default function Orcamento() {
             setOverridePricePerM2(q.price_per_m2 || settings.pricePerM2 || '');
             setOverrideCostPerM2(q.cost_per_m2 || settings.costPerM2 || '');
             setDiscountAmount(String(q.discount_amount || ''));
+            setGroupByRoom(!!(q.is_grouped));
             setEditingQuoteId(id);
             setShowMyQuotes(false);
             setStep('bends');
@@ -1227,7 +1252,7 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(-
         // but here we just follow the user "exclude services and include cost"
         const filteredBends = qBends.filter(b => b.productType !== 'service');
 
-        const isGroupedQuote = filteredBends.some(b => b.group_name && b.group_name.trim() !== '' && b.group_name !== 'Sem Grupo');
+        const isGroupedQuote = q && typeof q.is_grouped === 'boolean' ? q.is_grouped : groupByRoom;
 
         const grouped = filteredBends.reduce((acc, b) => {
             const key = isGroupedQuote ? (b.group_name || 'Sem Grupo') : 'Sem Grupo';
@@ -1333,7 +1358,7 @@ window.onload = function() {
         const opt = calculateOptimization(qBends.filter(b => b.productType !== 'service').map(b => ({ ...b, id: b.id || Math.random().toString(), lengths: b.lengths || [] })));
 
         const filteredBends = qBends.filter(b => b.productType !== 'service');
-        const isGroupedQuote = filteredBends.some(b => b.group_name && b.group_name.trim() !== '' && b.group_name !== 'Sem Grupo');
+        const isGroupedQuote = q && typeof q.is_grouped === 'boolean' ? q.is_grouped : groupByRoom;
 
         const grouped = qBends.reduce((acc, b) => {
             const key = isGroupedQuote ? (b.group_name || 'Sem Grupo') : 'Sem Grupo';
@@ -1904,7 +1929,7 @@ window.onload = function() {
                         className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-bold text-white flex items-center gap-2"><List className="w-5 h-5" /> Meus Orçamentos</h2>
-                            <button onClick={() => setShowMyQuotes(false)}
+                            <button onClick={() => { handleResetQuote(); setShowMyQuotes(false); }}
                                 className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl flex items-center gap-2 text-sm cursor-pointer">
                                 <Plus className="w-4 h-4" /> Novo Orçamento
                             </button>
@@ -3179,7 +3204,7 @@ window.onload = function() {
                                         </div>
                                         <div className="flex gap-3 flex-wrap">
                                             {editingQuoteId && (
-                                                <button onClick={() => { setBends([]); setCurrentRisks([]); setEditingQuoteId(null); setShowMyQuotes(true); }}
+                                                <button onClick={() => { handleResetQuote(); setShowMyQuotes(true); }}
                                                     className="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-2xl flex items-center gap-2 font-bold cursor-pointer transition-all">
                                                     <List className="w-4 h-4" /> Voltar para Listagem
                                                 </button>
@@ -3435,9 +3460,7 @@ window.onload = function() {
                         const waLink = clientPhone ? `https://wa.me/${clientPhone}?text=${waMsg}` : null;
 
                         const resetAll = () => {
-                            setBends([]); setStep('bends'); setSavedQuote(null);
-                            setNotes(''); setClientName(''); setClientSearch('');
-                            setSelectedClientId(null); setSelectedProductId(null); setSelectedProductName('');
+                            handleResetQuote();
                         };
 
                         return (

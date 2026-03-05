@@ -1445,7 +1445,8 @@ app.post('/api/quotes', authenticate, async (req: any, res) => {
     price_per_m2: pricePerM2Override || null,
     cost_per_m2: costPerM2Override || null,
     notes: quoteNotes,
-    status: finalStatus
+    status: finalStatus,
+    is_grouped: req.body.isGrouped || false
   }).select().single();
 
   if (eError) return res.status(500).json({ error: eError.message });
@@ -1528,7 +1529,8 @@ app.put('/api/quotes/:id', authenticate, async (req: any, res) => {
     price_per_m2: pricePerM2Override || null,
     cost_per_m2: costPerM2Override || null,
     notes: quoteNotes,
-    status: finalStatus
+    status: finalStatus,
+    is_grouped: req.body.isGrouped || false
   }).eq('id', id).eq('company_id', cid).select().single();
 
   if (eError) return res.status(500).json({ error: eError.message });
@@ -2629,7 +2631,7 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
         .from('production_orders')
         .insert({
           company_origin_id: req.user.companyId,
-          company_target_id: req.user.companyId,
+          company_target_id: req.user.companyId, // CORRECAO: Era obrigatório
           estimate_id: estimateId,
           client_name: clientDispName,
           status: 'in_production'
@@ -2658,18 +2660,30 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
             const bendData = JSON.parse(bendStr);
             const lengths = Array.isArray(bendData.lengths) ? bendData.lengths.filter((l: any) => parseFloat(l) > 0) : [];
 
-            for (const len of lengths) {
-              let desc = 'Dobra Customizada';
-              let comodo = 'Sem Grupo';
-              if (bendData.productName) desc = bendData.productName;
-              if (bendData.group_name) comodo = bendData.group_name;
+            let desc = 'Dobra Customizada';
+            let comodo = 'Sem Grupo';
+            if (bendData.productName) desc = bendData.productName;
+            if (bendData.group_name) comodo = bendData.group_name;
 
+            if (lengths.length > 0) {
+              for (const len of lengths) {
+                newItems.push({
+                  production_order_id: currentPo.id,
+                  estimate_id: estimateId,
+                  description: desc,
+                  comodo: comodo,
+                  metragem: Math.abs(parseFloat(len)),
+                  concluido: false,
+                  company_id: req.user.companyId
+                });
+              }
+            } else {
               newItems.push({
                 production_order_id: currentPo.id,
                 estimate_id: estimateId,
                 description: desc,
                 comodo: comodo,
-                metragem: Math.abs(parseFloat(len)),
+                metragem: Math.abs(parseFloat(bendData.totalLengthM)) || 1, // Se não tiver metragem definida, considera 1 ou totalLengthM
                 concluido: false,
                 company_id: req.user.companyId
               });
@@ -2686,6 +2700,7 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
           .insert(newItems)
           .select();
         if (insErr) {
+          fs.appendFileSync(path.join(process.cwd(), 'log_fabricacao.txt'), JSON.stringify(insErr, null, 2) + '\n');
           console.error('Insert items error:', insErr);
         } else {
           prodItems = inserted;
