@@ -3147,14 +3147,23 @@ app.post('/api/admin/migrate', requireMaster, async (req: any, res) => {
 // =====================
 app.post('/api/report-settings', requireAdmin, upload.single('reportLogoFile'), async (req: any, res) => {
   try {
-    const { reportCompanyName, reportHeaderText, reportFooterText, reportPhone, reportEmail, reportAddress, reportPaymentTerms, reportExecDays, reportValidityDays } = req.body;
+    const {
+      reportCompanyName, reportHeaderText, reportFooterText, reportPhone, reportEmail, reportAddress,
+      reportPaymentTerms, reportExecDays, reportValidityDays,
+      pricePerM2, costPerM2, lowStockAlertM2, defaultValidadeDays,
+      whatsappAutomationEnabled, whatsappApiUrl, whatsappApiKey, whatsappMsgLembrete, whatsappMsgAnteExpiracao, whatsappMsgEnvio,
+      pixKey
+    } = req.body;
     const { data: company } = await supabase.from('companies').select('settings').eq('id', req.user.companyId).single();
     const settings = company?.settings || {};
 
     const updatedSettings = {
       ...settings,
       reportCompanyName, reportHeaderText, reportFooterText, reportPhone, reportEmail, reportAddress,
-      reportPaymentTerms, reportExecDays, reportValidityDays
+      reportPaymentTerms, reportExecDays, reportValidityDays,
+      pricePerM2, costPerM2, lowStockAlertM2, defaultValidadeDays,
+      whatsappAutomationEnabled, whatsappApiUrl, whatsappApiKey, whatsappMsgLembrete, whatsappMsgAnteExpiracao, whatsappMsgEnvio,
+      pixKey
     };
 
     if (req.file) {
