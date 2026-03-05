@@ -455,6 +455,30 @@ app.post('/api/maintenance/cleanup-financial', requireAdmin, async (req: any, re
 // AUTH Routes
 // =====================
 
+// Endpoint de diagnóstico - identifica o erro REAL no Vercel
+app.get('/api/debug/status', async (req, res) => {
+  const info: any = {
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV,
+    isVercel: !!process.env.VERCEL,
+    supabase: {
+      hasUrl: !!supabaseUrl && supabaseUrl.length > 10,
+      hasServiceKey: !!supabaseServiceKey && supabaseServiceKey.length > 10,
+      hasAnonKey: !!supabaseAnonKey && supabaseAnonKey.length > 10,
+      urlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'MISSING'
+    }
+  };
+
+  // Testa conexão com Supabase
+  try {
+    const { data, error } = await supabase.from('profiles').select('id').limit(1);
+    info.dbTest = error ? `ERRO: ${error.message}` : 'OK';
+  } catch (e: any) {
+    info.dbTest = `EXCEPTION: ${e.message}`;
+  }
+
+  res.json(info);
+});
 
 
 app.post('/api/login', async (req, res) => {
