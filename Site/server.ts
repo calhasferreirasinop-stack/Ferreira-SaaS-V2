@@ -528,7 +528,7 @@ app.post('/api/auth/google/sync', async (req, res) => {
           id: user.id,
           username: user.email,
           name: user.user_metadata?.full_name || user.email?.split('@')[0],
-          role: 'MASTER',
+          role: 'master',
           company_id: companyId
         }])
         .select()
@@ -559,7 +559,26 @@ app.post('/api/auth/google/sync', async (req, res) => {
 
       if (updateErr) throw updateErr;
       profile = updateProfile;
-      role = 'MASTER';
+      role = 'master';
+    }
+
+    // --- GARANTIA DE SEED E ROLE (Item 1, 3 e 4) ---
+    // Como existe um Trigger no banco que cria o profile/company antes desta rota rodar,
+    // precisamos garantir o seed e o role MASTER aqui fora dos blocos IF.
+    if (profile && profile.company_id) {
+      // 1. Popular produtos padrão (seedDefaultProducts já checa se deve inserir)
+      await seedDefaultProducts(profile.company_id);
+
+      // 2. Garantir que o primeiro usuário seja 'master' (o Trigger cria como 'admin')
+      if (profile.role === 'admin') {
+        const { data: upgradedProfile } = await supabase
+          .from('profiles')
+          .update({ role: 'master' })
+          .eq('id', profile.id)
+          .select()
+          .single();
+        if (upgradedProfile) profile = upgradedProfile;
+      }
     }
 
     // Retorna igual ao login normal com o cache interno / cookie de sessão multi-tenant
