@@ -4,10 +4,10 @@ import { Lock, User, Hammer } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 const createSupabaseClient = () => {
-  // @ts-ignore
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  // @ts-ignore
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  // Limpar possíveis aspas ou espaços colados por engano no Vercel
+  const sanitize = (val: any) => typeof val === 'string' ? val.replace(/['"]+/g, '').trim() : val;
+  const url = sanitize(import.meta.env.VITE_SUPABASE_URL);
+  const key = sanitize(import.meta.env.VITE_SUPABASE_ANON_KEY);
 
   if (!url || !key) {
     console.warn("[SUPABASE] Chaves de configuração ausentes no frontend.");

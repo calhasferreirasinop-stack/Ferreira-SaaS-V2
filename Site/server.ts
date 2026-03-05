@@ -31,8 +31,9 @@ app.use((req, res, next) => {
 });
 
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const sanitizeEnv = (val: string | undefined) => val ? val.replace(/['"]+/g, '').trim() : '';
+const supabaseUrl = sanitizeEnv(process.env.SUPABASE_URL);
+const supabaseServiceKey = sanitizeEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env');
