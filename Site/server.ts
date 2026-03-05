@@ -1,6 +1,6 @@
 import express from 'express';
-// Trigger Vercel Build - Novo Deploy Forçado
-import { createServer as createViteServer } from 'vite';
+// O Vite agora será carregado apenas quando necessário (Modo Dev)
+// import { createServer as createViteServer } from 'vite'; 
 import { createClient } from '@supabase/supabase-js';
 import multer from 'multer';
 import path from 'path';
@@ -3899,15 +3899,22 @@ async function startServer() {
 
   runAutomationRoutines().catch(console.error); // Executar imediatamente ao iniciar
 
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import('vite');
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'custom'
+    });
     app.use(vite.middlewares);
-  } else if (!process.env.VERCEL) {
-    // Solo servir estático se NÃO estiver no Vercel (ex: rodando node server.ts em VPS)
-    // No Vercel, o próprio Vercel serve a pasta 'dist' nativamente.
+    console.log('⚡ Modo Desenvolvimento: Vite Middleware carregado.');
+  }
+  // Solo servir estático se NÃO estiver no Vercel (ex: rodando node server.ts em VPS)
+  // No Vercel, o próprio Vercel serve a pasta 'dist' nativamente.
+  if (!process.env.VERCEL) { // This if condition was missing in the provided snippet, adding it back for correctness
     app.use(express.static('dist'));
     app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
   }
+
 
   // Só rodar o listen manual se NÃO estiver no Vercel
   if (!process.env.VERCEL) {
