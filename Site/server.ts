@@ -3889,15 +3889,18 @@ async function performWhatsAppSend(phone: string, text: string, settings: any) {
 }
 
 async function startServer() {
-  await ensureProductionOrdersTable();
-  await ensureProductionItemsTable();
+  // No Vercel, não rodamos verificações de tabela ou intervalos em cada requisição
+  if (!process.env.VERCEL) {
+    await ensureProductionOrdersTable();
+    await ensureProductionItemsTable();
 
-  // Iniciar rotinas de automação (WhatsApp e Expiração)
-  setInterval(() => {
-    runAutomationRoutines().catch(console.error);
-  }, 1000 * 60 * 60); // A cada 1 hora
+    // Iniciar rotinas de automação (Apenas em servidor real/local)
+    setInterval(() => {
+      runAutomationRoutines().catch(console.error);
+    }, 1000 * 60 * 60); // A cada 1 hora
 
-  runAutomationRoutines().catch(console.error); // Executar imediatamente ao iniciar
+    runAutomationRoutines().catch(console.error); // Executar imediatamente ao iniciar
+  }
 
   if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const { createServer: createViteServer } = await import('vite');
