@@ -4,7 +4,10 @@ import { Lock, User, Hammer } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 // @ts-ignore
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+// @ts-ignore
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function Login() {
   const [username, setUsername] = useState('');
