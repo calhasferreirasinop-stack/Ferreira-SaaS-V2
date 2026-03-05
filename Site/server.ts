@@ -52,6 +52,46 @@ async function seedDatabase() {
   console.log('ℹ️ Seed skip (Handled by Migration 005 and Auth Triggers)');
 }
 
+/**
+ * Popula automaticamente uma nova company com produtos e serviços padrão (Item 3)
+ */
+async function seedDefaultProducts(companyId: string) {
+  try {
+    // 1. Verificar se já existem produtos (Evita duplicidade - Item 4)
+    const { count, error: countErr } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true })
+      .eq('company_id', companyId);
+
+    if (countErr) throw countErr;
+    if (count && count > 0) return; // Já possui produtos
+
+    console.log(`[SEED] Populando produtos padrão para a nova company: ${companyId}`);
+
+    const defaultItems = [
+      // PRODUTOS
+      { company_id: companyId, name: 'Calha Moldura', type: 'produto' },
+      { company_id: companyId, name: 'Condutor', type: 'produto' },
+      { company_id: companyId, name: 'Calha Agua Furtada', type: 'produto' },
+      { company_id: companyId, name: 'Calha Chalé', type: 'produto' },
+      { company_id: companyId, name: 'Calha Cocho', type: 'produto' },
+      { company_id: companyId, name: 'Rufos', type: 'produto' },
+      // SERVIÇOS
+      { company_id: companyId, name: 'Reparo', type: 'servico' },
+      { company_id: companyId, name: 'Servico', type: 'servico' },
+      { company_id: companyId, name: 'Pintura', type: 'servico' },
+      { company_id: companyId, name: 'Troca de Telhado', type: 'servico' }
+    ];
+
+    const { error } = await supabase.from('products').insert(defaultItems);
+    if (error) throw error;
+
+    console.log(`[SEED] Sucesso: ${defaultItems.length} itens criados para ${companyId}`);
+  } catch (err) {
+    console.error('[SEED_ERROR] Falha ao popular produtos padrão:', err);
+  }
+}
+
 
 // Multer
 const storage = multer.diskStorage({
@@ -478,6 +518,9 @@ app.post('/api/auth/google/sync', async (req, res) => {
       if (companyErr) throw companyErr;
       companyId = newCompany.id;
 
+      // Popular produtos padrão para nova empresa (Item 1 & 3)
+      await seedDefaultProducts(companyId);
+
       // Cria o novo Profile daquele usuário (Master da própria company)
       const { data: newProfile, error: profileErr } = await supabase
         .from('profiles')
@@ -503,6 +546,9 @@ app.post('/api/auth/google/sync', async (req, res) => {
 
       if (companyErr) throw companyErr;
       companyId = newCompany.id;
+
+      // Popular produtos padrão para nova empresa (Item 1 & 3)
+      await seedDefaultProducts(companyId);
 
       const { data: updateProfile, error: updateErr } = await supabase
         .from('profiles')
