@@ -1,0 +1,27 @@
+faca uma melhoria:
+1 na tela http://localhost:3000/admin Orcamento> tem 3 campos o Total Orcado (esta correto) Agora o Total Recebito e Total Recebito e Total a receber pode remover desta teladeixe apenas o total orcado, Vale apenas para lembrar que nao se deve duplicar os valores, por exemplo quando tiver um orcamento que ele ja tiver um pagamento e ele fizer um nova versao, deve somar apenas a diferenca nao deve somar o valor de novo orcamento ok.
+2 No cadastro rapido de cliente na tela de criar o orcamento, quando eu clico para filtrar o codigo do pais o fundo esta de branco assim como o numero do pais tambem fica invisivel, eu so consigo ver quando eu passo o mouse em cima que fica sinza ai eu consigo ver. corrija este problema.
+3 quando um orcamento estiver sendo feito, e ele estiver sido marcado como (Agrupar por comodo), e o produto for do tipo Produto, o sistema deve obrigar informar o comodo, nao pode deixar salvar zerado, caso for servico desconsidera o agrupamento.
+4 Quando eu estou clicando em novo orcamento eu ja percebi que o sistema fica como se gosse travado, nao deixa eu informar o cliente. se eu aperto um Alt+Tab, e Volto na tela com Alt+Tab novamente ai o sistema deixa digitar o cliente.
+5 Na tela Resumo, deixe as casas decimais apenas .00 nao coloque mais casa decimal porquena vida real nao controla mais que centavos demostre o valor ja arredondado para caso for aplicar o desconto ja sair com o valor correto.
+8 O botao Nova Versao nao deve demostrar nesta tela http://localhost:3000/orcamento.
+ele deve estar disponivel apenas em http://localhost:3000/admin orcamento.
+
+2 Observei que quando faz um orcamento e clica em Fabricacao, mesmo nao alterando nada e apenas clicando em salvar e sair, quando volta no orcamento para alterar o sistema nao deixa digitar as metragem ou valor, isso esta acontecendo quando tem fabricacao ativa Obs (ao lado de cada campo onde digita os valores la tem uma seta onde pode informar o valor, caso utilizasse ela funcionaria mas isso fica inviavel).
+4Tem um erro quando cria uma nova versao, ele esta vindo com o status Rascunho esta certo, porem quando se trata de um orcamento que foi feito oriundo a Nova Versao deve deixar fazer alteracoes enquando estiver com status Rascunho, atualmente ele fica com Status Rascunho porem nao aparece Editar, o botao nos botoes de acoes na tela de Orcamento nao aparece o EDITAR aparece VISUALIZAR ou seja nao deixa eu editar um orcamento que tenha sido criado a partir de uma Nova Versao.
+6 Na tela Gestao de Orcamentos, eu percebi que o botao Nova versao esta aparecendo quando apenas aprova o orcamento. esta errado! ele deve aparecer apenas quando existir algum pagamento, seja parcial ou total. quando apenas aprovar o orcamento deve aparecer apenas o botao Reabrir e o botao Nova versao nao deve aparecer.
+7 quando houver algum pagamento entao o botao reabrir nao deve aparecer na tela Gestao de Orcamento, entao verifique o status financeiro, se ouver pagamento como Parcial ou Pago nao se pode aparecer o botao Reabrir.
+1 na tela do resumo, quando abrir tela, busque o valor da venda M2 que foi definido la na tela Parametros, eu percebi que o sistema esta fazendo o calculo correto, porem eu preciso que o Valor Venda (m²) venha la da tela de parametros possibilitando editar Atualmente ele esta vindo em branco, a mesma coisa para o campo Custo (m²) esta vindo em branco busque o valor la da tela parametron.
+2 Na tela Resumo o local onde digita o valor esta com a cor de fundo da mesma cor da pagina coloque um sinza mais claro igual esta no campo Custo (m²).
+4 Erro gravissimo, quando existe um orcamento que foi informado os Agrupamento por Comodo e ja tem um pagamento para o mesmo, e se cria a Nova Versao, o orcamento esta perdendo o Agrupamento por comodo isso jamais pode acontecer pois ja foi realizado um orcamento certinho por comodo (lembrando que essa regra se aplica quando for um orcamento agrupado por comodo). Outra Observacao que eu vi, e que ele esta trazendo as dobras corretas com os comodo, porem no relatorio alguma coisa ele esta se perdendo, precisa colocar uma condicao no relatorio para verificar se a dobra fabricada existe agrupamento por comodo, ou entao colocar para na hora que clicar em nova versao, ele copiar o orcamento igualzinho pois ele nao deve estar copiando o campo que armazena o valor Agrupar por comodo.
+
+
+
+Obs, gerou outro relatorio. 3 Na tela Gestao e Orcamento quando estou clicando no icone Obra ( Deve gerar o Relatorio A4 para Obra) o relatorio e obra ainda nao esta sendo gerado, faca com que ele gera corretamente
+
+
+
+
+
+
+

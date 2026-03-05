@@ -2,7 +2,7 @@
 
 (Refatoração da tela de Orçamentos + Controle de Alteração + Módulo Fabricação)
 
-🔵 1️⃣ Refatorar Tela de Listagem de Orçamentos (Central do Usuário)
+🔵 1️⃣ Refatorar Tela de Listagem de Orçamentos (http://localhost:3000/orcamento)
 
 Reformular completamente a tela de listagem de orçamentos.
 
@@ -18,9 +18,9 @@ Evitar alterações indevidas
 
 🔹 Layout
 
-Substituir lista simples por layout em GRID (Cards).
+Substituir lista simples por layout em GRID (tabela).
 
-Cada card deve conter:
+deve conter:
 
 Nome do cliente
 
