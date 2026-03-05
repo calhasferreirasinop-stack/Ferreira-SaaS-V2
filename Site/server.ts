@@ -511,7 +511,7 @@ app.post('/api/login', async (req, res) => {
     res.cookie('session', sessionData, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000
     });
     res.json({ success: true, role: profile.role, name: profile.name, companyId: profile.company_id, id: profile.id });
