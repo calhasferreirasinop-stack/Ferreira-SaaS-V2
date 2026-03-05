@@ -3,11 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, User, Hammer } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
-// @ts-ignore
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-// @ts-ignore
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+const getSupabase = () => {
+  try {
+    // @ts-ignore
+    const url = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+    // @ts-ignore
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY || 'dummy_anon_key';
+    return createClient(url, key);
+  } catch (e) {
+    console.error('Supabase init error', e);
+    return null;
+  }
+};
+
+const supabase = getSupabase();
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -44,6 +53,10 @@ export default function Login() {
     };
     check();
 
+    if (!supabase) {
+      setChecking(false);
+      return;
+    }
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         setLoading(true);
@@ -183,6 +196,11 @@ export default function Login() {
           <button type="button" disabled={loading}
             onClick={async () => {
               setLoading(true);
+              if (!supabase) {
+                setError('Erro técnico: O login com Google não foi configurado corretamente (Chaves ausentes).');
+                setLoading(false);
+                return;
+              }
               const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
