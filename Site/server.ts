@@ -618,14 +618,13 @@ app.post('/api/auth/google/sync', async (req, res) => {
       role = 'master';
     }
 
-    // --- GARANTIA DE SEED E ROLE (Item 1, 3 e 4) ---
-    // Como existe um Trigger no banco que cria o profile/company antes desta rota rodar,
-    // precisamos garantir o seed e o role MASTER aqui fora dos blocos IF.
+    // --- GARANTIA DE SEED E ROLE ---
+    // O seed roda em background (fire-and-forget) para não travar o Vercel (timeout 10s)
     if (profile && profile.company_id) {
-      // 1. Popular produtos padrão (seedDefaultProducts já checa se deve inserir)
-      await seedDefaultProducts(profile.company_id);
+      // Seed em background - não bloqueia a resposta
+      seedDefaultProducts(profile.company_id).catch(e => console.error('[SEED_BG_ERROR]', e));
 
-      // 2. Garantir que o primeiro usuário seja 'master' (o Trigger cria como 'admin')
+      // Garantir role master (o Trigger cria como 'admin')
       if (profile.role === 'admin') {
         const { data: upgradedProfile } = await supabase
           .from('profiles')
@@ -637,12 +636,12 @@ app.post('/api/auth/google/sync', async (req, res) => {
       }
     }
 
-    // Retorna igual ao login normal com o cache interno / cookie de sessão multi-tenant
+    // Responde imediatamente com o cookie de sessão
     const sessionData = Buffer.from(JSON.stringify({ userId: profile.id })).toString('base64');
     res.cookie('session', sessionData, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000
     });
 
