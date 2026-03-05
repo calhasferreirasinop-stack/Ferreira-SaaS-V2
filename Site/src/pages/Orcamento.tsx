@@ -301,9 +301,15 @@ export default function Orcamento() {
         setOptResult(calculateOptimization(bends));
     }, [bends]);
 
-    // Auto-scroll para a seção de totais ao entrar no resumo
+    // Auto-scroll para a seção de totais ao entrar no resumo e atualizar settings
     useEffect(() => {
         if (step === 'summary') {
+            // Re-busca settings ao entrar no resumo para garantir que o preço M2 esteja atualizado (Item 1)
+            fetch('/api/settings').then(r => r.json()).then(d => {
+                setSettings(d);
+                // Se NÃO houver override manual, o sistema usará o novo valor dos settings automaticamente via variável pricePerM2
+            }).catch(() => { });
+
             // Pequeno delay para o DOM renderizar antes do scroll
             const t = setTimeout(() => {
                 summaryTotalsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1966,7 +1972,8 @@ window.onload = function() {
                                             const st = STATUS_LABELS[q.status] || STATUS_LABELS.pending;
                                             const hasPaid = (q.fin_paid || 0) > 0 || (q.fin_credit || 0) > 0;
                                             const hasFinance = !!q.fin_id || hasPaid;
-                                            const hasProd = !!q.prod_status;
+                                            const hasProd = !!q.production_order;
+                                            const isDraft = q.status === 'draft' || q.status === 'rascunho';
 
                                             return (
                                                 <tr key={q.id} className="hover:bg-white/5 transition-all group">
@@ -1989,7 +1996,7 @@ window.onload = function() {
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <div className="flex flex-wrap items-center justify-start 2xl:justify-center gap-1.5 min-w-[200px] w-full max-w-[340px]">
-                                                            {(!hasFinance && !hasProd && (q.status === 'draft' || q.status === 'sent')) ? (
+                                                            {(q.status === 'draft' || q.status === 'rascunho' || (!hasFinance && !hasProd && q.status === 'sent')) ? (
                                                                 <button onClick={() => handleEditQuote(q)}
                                                                     className="flex items-center gap-1 px-2 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Alterar Orçamento">
                                                                     <PenLine className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Alterar</span>

@@ -300,7 +300,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                     const isTotalPaid = valRestante < 0.01 && ((q.fin_paid || 0) > 0 || (q.fin_credit || 0) > 0);
                                     const hasPaid = (q.fin_paid || 0) > 0 || (q.fin_credit || 0) > 0;
                                     const hasFinance = !!q.fin_id || hasPaid;
-                                    const hasProd = !!q.prod_status;
+                                    const hasProd = !!q.production_order;
                                     const finKey = isTotalPaid ? 'pago' : (hasPaid ? 'parcial' : 'pendente');
 
                                     const isDraft = q.status === 'draft';
@@ -336,8 +336,8 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-wrap items-center justify-center gap-1.5 w-[280px] sm:w-[340px] mx-auto">
 
-                                                    {/* Se o status for Rascunho (draft), SEMPRE permitimos Alterar, independente de histórico (visto que rascunhos de nova versão precisam ser editáveis) */}
-                                                    {(q.status === 'draft' || (!hasFinance && !hasProd && q.status === 'sent')) ? (
+                                                    {/* Botão Alterar vs Visualizar */}
+                                                    {(q.status === 'draft' || q.status === 'rascunho' || (!hasPaid && !hasProd && q.status === 'sent')) ? (
                                                         <button onClick={() => navigate(`/orcamento?edit=${q.id}`)}
                                                             className="flex items-center gap-1 bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Alterar">
                                                             <PenLine className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Alterar</span>
@@ -351,7 +351,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
 
                                                     {q.status !== 'cancelled' && q.status !== 'canceled' && (
                                                         <>
-                                                            {(hasPaid || hasFinance || hasProd) && (
+                                                            {(hasPaid || hasProd) && (
                                                                 <button
                                                                     onClick={() => handleNewVersionClick(q)}
                                                                     className="flex items-center gap-1 bg-purple-100 text-purple-700 hover:bg-purple-200 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap"
@@ -370,7 +370,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                                                 </button>
                                                             )}
 
-                                                            {(q.status !== 'draft' && q.status !== 'sent') && (
+                                                            {(q.status !== 'draft' && q.status !== 'rascunho' && q.status !== 'sent' && !hasPaid) && (
                                                                 <button
                                                                     onClick={() => handleReopen(q.id, false)}
                                                                     className="flex items-center gap-1 bg-slate-700 text-white hover:bg-slate-800 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer shadow-sm whitespace-nowrap"

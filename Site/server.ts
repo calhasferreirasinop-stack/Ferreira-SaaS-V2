@@ -1462,7 +1462,7 @@ app.get('/api/quotes', authenticate, async (req: any, res) => {
     const fin_remaining = ar !== null ? parseFloat(ar.valor_restante ?? '0') : null;
     const fin_paid = ar !== null ? parseFloat(ar.valor_pago ?? '0') : 0;
     const fin_total = ar !== null ? parseFloat(ar.valor_total ?? '0') : 0;
-    const fin_ar_id = ar?.id || null;
+    const fin_id = ar?.id || null;
     const fin_credit = credit ? parseFloat(credit.valor || '0') : 0;
 
     return {
@@ -1477,7 +1477,7 @@ app.get('/api/quotes', authenticate, async (req: any, res) => {
       fin_remaining,
       fin_paid,
       fin_total,
-      fin_ar_id,
+      fin_id,
       fin_credit,
       production_order: po
     };
@@ -2008,6 +2008,138 @@ app.get('/api/quotes/:id/client-report', async (req: any, res) => {
   res.send(html);
 });
 
+// ── Relatório A4 Compacto para Obra ──────────────────────────────────────────
+app.get('/api/quotes/:id/report', authenticate, async (req: any, res) => {
+  const id = req.params.id;
+  const companyId = req.user.companyId;
+
+  // 1. Buscar orçamento + itens
+  const { data: quote, error } = await supabase
+    .from('estimates')
+    .select('*, items:estimate_items(*)')
+    .eq('id', id)
+    .eq('company_id', companyId)
+    .single();
+
+  if (error || !quote) return res.status(404).send('Orçamento não encontrado');
+
+  // 2. Buscar settings para o logo/nome
+  const { data: company } = await supabase.from('companies').select('settings').eq('id', companyId).single();
+  const s: any = company?.settings || {};
+
+  // 3. Processar itens
+  const bends = (quote.items || []).filter((i: any) => i.description.startsWith('[BEND] ')).map((i: any) => {
+    try { return { ...JSON.parse(i.description.substring(7)), id: i.id }; } catch { return null; }
+  }).filter(Boolean);
+
+  const services = (quote.items || []).filter((i: any) => i.description.startsWith('[SERVICE] ')).map((i: any) => ({
+    description: i.description.replace('[SERVICE] ', ''),
+    quantity: i.quantity,
+    value: i.unit_price,
+    total: i.total_price
+  }));
+
+  const quoteNum = String(id).substring(0, 8).toUpperCase();
+
+  // 4. Gerar HTML Compacto
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório Obra - #${quoteNum}</title>
+  <style>
+    body { font-family: sans-serif; color: #333; margin: 20px; font-size: 13px; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+    .logo { max-height: 50px; }
+    .title { font-size: 18px; font-weight: bold; color: #2563eb; }
+    .quote-info { text-align: right; }
+    .section-title { background: #f8fafc; padding: 5px 10px; font-weight: bold; border-left: 4px solid #2563eb; margin: 20px 0 10px; text-transform: uppercase; font-size: 11px; }
+    .bend-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .bend-card { border: 1px solid #eee; border-radius: 8px; padding: 10px; page-break-inside: avoid; }
+    .bend-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; margin-bottom: 5px; }
+    .bend-details { color: #666; font-size: 10px; margin-bottom: 5px; }
+    .lengths { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+    .len-tag { background: #eee; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; }
+    .footer { margin-top: 30px; text-align: center; border-top: 1px solid #eee; padding-top: 10px; color: #999; font-size: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { text-align: left; background: #f8fafc; padding: 8px; border-bottom: 1px solid #eee; font-size: 10px; }
+    td { padding: 8px; border-bottom: 1px solid #eee; }
+    @media print { .no-print { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="margin-bottom: 20px;">
+    <button onclick="window.print()" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Imprimir Relatório de Obra</button>
+  </div>
+
+  <div class="header">
+    <div>
+      ${s.reportLogo ? `<img src="${s.reportLogo}" class="logo">` : ''}
+      <div class="title">RELATÓRIO DE OBRA</div>
+      <div style="font-size: 10px; color: #666;">${s.reportCompanyName || ''}</div>
+    </div>
+    <div class="quote-info">
+      <div style="font-weight: bold; font-size: 14px;">Orçamento #${quoteNum}</div>
+      <div>Data: ${new Date(quote.created_at).toLocaleDateString()}</div>
+    </div>
+  </div>
+
+  <div class="section-title">Itens de Produção (Dobras)</div>
+  <div class="bend-grid">
+    ${bends.map((b: any, idx: number) => `
+      <div class="bend-card">
+        <div class="bend-header">
+          <span>ITEM #${idx + 1} - ${b.productName || 'Personalizado'}</span>
+          <span>${b.m2?.toFixed(2)} m²</span>
+        </div>
+        <div class="bend-details">
+          Largura: ${b.roundedWidthCm}mm | Riscos: ${(b.risks || []).length}
+        </div>
+        <div style="font-size: 9px; color: #888;">
+          ${(b.risks || []).map((r: any) => `${r.direction === 'up' ? '↑' : r.direction === 'down' ? '↓' : '→'} ${r.sizeCm}`).join(' · ')}
+        </div>
+        <div class="lengths">
+          ${(b.lengths || []).map((l: any) => `<span class="len-tag">${Number(l).toFixed(2)}m</span>`).join('')}
+        </div>
+      </div>
+    `).join('')}
+  </div>
+
+  ${services.length > 0 ? `
+    <div class="section-title">Serviços / Mão de Obra</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th style="text-align: center;">Qtd</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${services.map((s: any) => `
+          <tr>
+            <td>${s.description}</td>
+            <td style="text-align: center; font-weight: bold;">${s.quantity}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  ` : ''}
+
+  ${quote.notes ? `
+    <div class="section-title">Observações</div>
+    <div style="padding: 10px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; font-style: italic; white-space: pre-wrap;">${quote.notes}</div>
+  ` : ''}
+
+  <div class="footer">
+    ${s.reportCompanyName || ''} - Gerado em ${new Date().toLocaleString()}
+  </div>
+</body>
+</html>`;
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(html);
+});
+
 app.put('/api/quotes/:id/status', authenticate, async (req: any, res) => {
   const id = req.params.id; // UUID
   const { status, cancel_reason, cancel_reason_text } = req.body;
@@ -2300,6 +2432,7 @@ app.post('/api/quotes/:id/new-version', authenticate, async (req: any, res) => {
         parent_estimate_id: originId,
         origin_estimate_id: rootOriginId,
         is_latest_version: true,
+        is_grouped: origin.is_grouped || false
       })
       .select()
       .single();
