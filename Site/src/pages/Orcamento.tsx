@@ -1227,19 +1227,22 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(-
         // but here we just follow the user "exclude services and include cost"
         const filteredBends = qBends.filter(b => b.productType !== 'service');
 
+        const isGroupedQuote = filteredBends.some(b => b.group_name && b.group_name.trim() !== '' && b.group_name !== 'Sem Grupo');
+
         const grouped = filteredBends.reduce((acc, b) => {
-            const key = b.group_name || 'Sem Grupo';
+            const key = isGroupedQuote ? (b.group_name || 'Sem Grupo') : 'Sem Grupo';
             if (!acc[key]) acc[key] = [];
             acc[key].push(b);
             return acc;
         }, {} as Record<string, any[]>);
 
+
         const imgRows = (() => {
             return Object.entries(grouped).map(([gName, gBendsValue]) => {
                 const gBends = gBendsValue as any[];
 
-                // Só exibe o título do grupo se não for "Sem Grupo"
-                const groupTitleHtml = gName !== 'Sem Grupo' ? `<h3 class="group-title">🏠 ${gName}</h3>` : '';
+                // Só exibe o título do grupo se não for "Sem Grupo" e isGroupedQuote for true
+                const groupTitleHtml = (isGroupedQuote && gName !== 'Sem Grupo') ? `<h3 class="group-title">🏠 ${gName}</h3>` : '';
 
                 const bRows = gBends.map((b: any) => {
                     const i = qBends.findIndex(x => x === b);
@@ -1329,16 +1332,20 @@ window.onload = function() {
         const pm2 = parseFloat(settings.pricePerM2 || '50');
         const opt = calculateOptimization(qBends.filter(b => b.productType !== 'service').map(b => ({ ...b, id: b.id || Math.random().toString(), lengths: b.lengths || [] })));
 
+        const filteredBends = qBends.filter(b => b.productType !== 'service');
+        const isGroupedQuote = filteredBends.some(b => b.group_name && b.group_name.trim() !== '' && b.group_name !== 'Sem Grupo');
+
         const grouped = qBends.reduce((acc, b) => {
-            const key = b.group_name || 'Sem Grupo';
+            const key = isGroupedQuote ? (b.group_name || 'Sem Grupo') : 'Sem Grupo';
             if (!acc[key]) acc[key] = [];
             acc[key].push(b);
             return acc;
         }, {} as Record<string, any[]>);
 
+
         const imgRows = Object.entries(grouped).map(([gName, gBendsValue]) => {
             const gBends = gBendsValue as any[];
-            const groupTitleHtml = Object.keys(grouped).length > 1 && gName !== 'Sem Grupo'
+            const groupTitleHtml = (isGroupedQuote && gName !== 'Sem Grupo')
                 ? `<h3 style="font-size:16px; margin: 24px 0 12px; padding-bottom: 4px; border-bottom: 2px solid #6366f1; color: #1e293b;">Grupo: ${gName}</h3>`
                 : '';
 
@@ -1370,8 +1377,8 @@ window.onload = function() {
                     </div>
                 </div>`;
             }).join('');
-            if (!groupByRoom) return `<div class="bends-grid">${bRows}</div>`;
-            const groupHeader = gName !== 'Sem Grupo'
+            if (!isGroupedQuote) return `<div class="bends-grid">${bRows}</div>`;
+            const groupHeader = (isGroupedQuote && gName !== 'Sem Grupo')
                 ? `<h3 style="font-size:14px;font-weight:bold;margin:16px 0 8px;padding:4px 0 4px 10px;border-left:5px solid #6366f1;background:#f1f5ff;">\ud83c\udfe0 ${gName}</h3>`
                 : '';
             return groupHeader + `<div class="bends-grid">${bRows}</div>`;

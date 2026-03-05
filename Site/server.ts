@@ -2591,12 +2591,23 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
   try {
     const { data: est, error: estErr } = await supabase
       .from('estimates')
-      .select('id, clientName, status, items:estimate_items(*)')
+      .select('id, status, client_id, estimate_items(*)')
       .eq('id', estimateId)
       .eq('company_id', req.user.companyId)
       .single();
 
-    if (estErr || !est) return res.status(404).json({ error: 'Orçamento não encontrado' });
+    if (estErr || !est) {
+      console.error('[FABRICACAO_ERROR] Orçamento não encontrado:', estErr);
+      return res.status(404).json({ error: 'Orçamento não encontrado' });
+    }
+
+    const itemsList = est.estimate_items || [];
+
+    let clientDispName = 'Cliente';
+    if (est.client_id) {
+      const { data: c } = await supabase.from('clients').select('name').eq('id', est.client_id).maybeSingle();
+      if (c) clientDispName = c.name;
+    }
 
     const { data: po, error: poErr } = await supabase
       .from('production_orders')
@@ -2620,15 +2631,14 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
           company_origin_id: req.user.companyId,
           company_target_id: req.user.companyId,
           estimate_id: estimateId,
-          client_name: est.clientName || 'Cliente',
-          status: 'in_production',
-          priority: 'normal',
-          deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()
+          client_name: clientDispName,
+          status: 'in_production'
         })
         .select()
         .single();
 
-      if (newPoErr) return res.status(500).json({ error: 'Erro ao auto-gerar ordem de produção', details: newPoErr });
+      if (newPoErr) return res.status(500).json({ error: 'Erro ao auto-gerar ordem de produção: ' + newPoErr.message, details: newPoErr });
+
       currentPo = newPo;
     }
 
@@ -2641,7 +2651,7 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
     if (!prodItems || prodItems.length === 0) {
       const newItems: any[] = [];
 
-      for (const item of (est.items || [])) {
+      for (const item of itemsList) {
         if ((item.description || '').startsWith('[BEND]')) {
           try {
             const bendStr = item.description.replace('[BEND]', '').trim();
@@ -2689,7 +2699,7 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
     const enrichedItems = prodItems || [];
 
     res.json({
-      clientName: est.clientName,
+      clientName: clientDispName,
       estimate: est,
       productionOrder: currentPo,
       items: enrichedItems
@@ -2727,8 +2737,8 @@ app.post('/api/fabricacao/order/:orderId/finish', authenticate, async (req: any,
     const { error } = await supabase
       .from('production_orders')
       .update({ status: 'ready', updated_at: new Date().toISOString() })
-      .eq('id', orderId)
-      .eq('company_id', req.user.companyId);
+      .eq('estimate_id', orderId) // O frontend envia o estimateId como parâmetro
+      .eq('company_origin_id', req.user.companyId);
 
     if (error) throw error;
     res.json({ success: true });
