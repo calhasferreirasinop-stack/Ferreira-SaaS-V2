@@ -444,6 +444,95 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+app.post('/api/auth/google/sync', async (req, res) => {
+  const { access_token } = req.body;
+  if (!access_token) return res.status(400).json({ error: 'Token ausente' });
+
+  try {
+    const tempClient = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY! || process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    // Obtém o usuário a partir do Token Google
+    const { data: { user }, error } = await tempClient.auth.getUser(access_token);
+    if (error || !user) return res.status(401).json({ error: 'Token inválido' });
+
+    // Verifica se já existe o profile vinculando ao banco real
+    let { data: profile } = await supabase
+      .from('profiles')
+      .select('id, role, name, company_id')
+      .eq('id', user.id)
+      .single();
+
+    let companyId = profile?.company_id;
+    let role = profile?.role || 'MASTER';
+
+    if (!profile) {
+      // Cria a nova Company primeiro
+      const { data: newCompany, error: companyErr } = await supabase
+        .from('companies')
+        .insert([{ name: `${user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário'} - Company` }])
+        .select()
+        .single();
+
+      if (companyErr) throw companyErr;
+      companyId = newCompany.id;
+
+      // Cria o novo Profile daquele usuário (Master da própria company)
+      const { data: newProfile, error: profileErr } = await supabase
+        .from('profiles')
+        .insert([{
+          id: user.id,
+          username: user.email,
+          name: user.user_metadata?.full_name || user.email?.split('@')[0],
+          role: 'MASTER',
+          company_id: companyId
+        }])
+        .select()
+        .single();
+
+      if (profileErr) throw profileErr;
+      profile = newProfile;
+    } else if (!companyId) {
+      // Usuário até existe (ex: testou o login normal sem company) mas sem `company_id`
+      const { data: newCompany, error: companyErr } = await supabase
+        .from('companies')
+        .insert([{ name: `${profile.name || user.email?.split('@')[0] || 'Usuário'} - Company` }])
+        .select()
+        .single();
+
+      if (companyErr) throw companyErr;
+      companyId = newCompany.id;
+
+      const { data: updateProfile, error: updateErr } = await supabase
+        .from('profiles')
+        .update({ company_id: companyId, role: 'MASTER' })
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (updateErr) throw updateErr;
+      profile = updateProfile;
+      role = 'MASTER';
+    }
+
+    // Retorna igual ao login normal com o cache interno / cookie de sessão multi-tenant
+    const sessionData = Buffer.from(JSON.stringify({ userId: profile.id })).toString('base64');
+    res.cookie('session', sessionData, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({ success: true, role: profile.role, name: profile.name, companyId: profile.company_id, id: profile.id });
+
+  } catch (err: any) {
+    console.error('[GOOGLE_SYNC_ERROR]', err);
+    res.status(500).json({ error: 'Erro interno no banco do sync do Google: ' + err.message });
+  }
+});
+
 app.post('/api/logout', (_req, res) => {
   res.clearCookie('session');
   res.clearCookie('admin_session');
