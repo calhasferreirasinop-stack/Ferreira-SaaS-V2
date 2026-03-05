@@ -104,9 +104,83 @@ async function captureSvg(el: SVGSVGElement): Promise<string> {
             };
             img.onerror = () => resolve('');
             img.src = url;
+            // Safety timeout to prevent freeze
+            setTimeout(() => resolve(''), 2000);
         } catch { resolve(''); }
     });
 }
+
+const calculateOptimization = (allBends: Bend[]) => {
+    const BIN_CAPACITY = 1.2; // 1.20m sheet
+    let optimizationPool: { bendId: string, originalIdx: number, length: number }[] = [];
+    let bins: { pieces: { bendId: string, originalIdx: number, length: number }[], scrap: number }[] = [];
+    let pieceToSeq: Record<string, number[]> = {};
+
+    // 1. Process pieces
+    allBends.forEach(b => {
+        if (!b.lengths || !Array.isArray(b.lengths)) return;
+        b.lengths.forEach((lenStr, idx) => {
+            let len = parseFloat(lenStr);
+            if (isNaN(len) || len <= 0) return;
+
+            const key = `${b.id}-${idx}`;
+            if (!pieceToSeq[key]) pieceToSeq[key] = [];
+
+            // If piece is longer than a standard sheet, consume full sheets first
+            while (len >= BIN_CAPACITY - 0.001) {
+                // Create a dedicated bin for this full section
+                const fullBinIdx = bins.length;
+                bins.push({
+                    pieces: [{ bendId: b.id, originalIdx: idx, length: BIN_CAPACITY }],
+                    scrap: 0
+                });
+                pieceToSeq[key].push(fullBinIdx + 1);
+                len -= BIN_CAPACITY;
+            }
+
+            // Any remainder goes to the pool to be optimized with others
+            if (len > 0.005) {
+                optimizationPool.push({ bendId: b.id, originalIdx: idx, length: len });
+            }
+        });
+    });
+
+    // 2. Sort pool descending (Standard FFD) for the remainders
+    const sortedPool = [...optimizationPool].sort((a, b) => b.length - a.length);
+
+    // 3. First Fit Decreasing for the remainders
+    sortedPool.forEach(p => {
+        let found = false;
+        // Only try to fit in bins that weren't "full sheet" reservations (bins with scrap > 0 or newly created)
+        // Actually, any bin with enough space works.
+        for (let i = 0; i < bins.length; i++) {
+            let bin = bins[i];
+            let currentUsed = bin.pieces.reduce((s, x) => s + x.length, 0);
+            if (currentUsed + p.length <= BIN_CAPACITY + 0.001) {
+                bin.pieces.push(p);
+                const key = `${p.bendId}-${p.originalIdx}`;
+                pieceToSeq[key].push(i + 1);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            const newBinIdx = bins.length;
+            bins.push({ pieces: [p], scrap: 0 });
+            const key = `${p.bendId}-${p.originalIdx}`;
+            pieceToSeq[key].push(newBinIdx + 1);
+        }
+    });
+
+    // Final scrap calculation
+    bins.forEach(bin => {
+        const used = bin.pieces.reduce((s, x) => s + x.length, 0);
+        bin.scrap = BIN_CAPACITY - used;
+    });
+
+    return { bins, pieceToSeq };
+};
 
 export default function Orcamento() {
     const navigate = useNavigate();
@@ -219,77 +293,6 @@ export default function Orcamento() {
     const [slopeH1, setSlopeH1] = useState('');
     const [slopeH2, setSlopeH2] = useState('');
 
-    const calculateOptimization = (allBends: Bend[]) => {
-        const BIN_CAPACITY = 1.2; // 1.20m sheet
-        let optimizationPool: { bendId: string, originalIdx: number, length: number }[] = [];
-        let bins: { pieces: { bendId: string, originalIdx: number, length: number }[], scrap: number }[] = [];
-        let pieceToSeq: Record<string, number[]> = {};
-
-        // 1. Process pieces
-        allBends.forEach(b => {
-            if (!b.lengths || !Array.isArray(b.lengths)) return;
-            b.lengths.forEach((lenStr, idx) => {
-                let len = parseFloat(lenStr);
-                if (isNaN(len) || len <= 0) return;
-
-                const key = `${b.id}-${idx}`;
-                if (!pieceToSeq[key]) pieceToSeq[key] = [];
-
-                // If piece is longer than a standard sheet, consume full sheets first
-                while (len >= BIN_CAPACITY - 0.001) {
-                    // Create a dedicated bin for this full section
-                    const fullBinIdx = bins.length;
-                    bins.push({
-                        pieces: [{ bendId: b.id, originalIdx: idx, length: BIN_CAPACITY }],
-                        scrap: 0
-                    });
-                    pieceToSeq[key].push(fullBinIdx + 1);
-                    len -= BIN_CAPACITY;
-                }
-
-                // Any remainder goes to the pool to be optimized with others
-                if (len > 0.005) {
-                    optimizationPool.push({ bendId: b.id, originalIdx: idx, length: len });
-                }
-            });
-        });
-
-        // 2. Sort pool descending (Standard FFD) for the remainders
-        const sortedPool = [...optimizationPool].sort((a, b) => b.length - a.length);
-
-        // 3. First Fit Decreasing for the remainders
-        sortedPool.forEach(p => {
-            let found = false;
-            // Only try to fit in bins that weren't "full sheet" reservations (bins with scrap > 0 or newly created)
-            // Actually, any bin with enough space works.
-            for (let i = 0; i < bins.length; i++) {
-                let bin = bins[i];
-                let currentUsed = bin.pieces.reduce((s, x) => s + x.length, 0);
-                if (currentUsed + p.length <= BIN_CAPACITY + 0.001) {
-                    bin.pieces.push(p);
-                    const key = `${p.bendId}-${p.originalIdx}`;
-                    pieceToSeq[key].push(i + 1);
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                const newBinIdx = bins.length;
-                bins.push({ pieces: [p], scrap: 0 });
-                const key = `${p.bendId}-${p.originalIdx}`;
-                pieceToSeq[key].push(newBinIdx + 1);
-            }
-        });
-
-        // Final scrap calculation
-        bins.forEach(bin => {
-            const used = bin.pieces.reduce((s, x) => s + x.length, 0);
-            bin.scrap = BIN_CAPACITY - used;
-        });
-
-        return { bins, pieceToSeq };
-    };
 
     // Otimização de Cortes
     const [optResult, setOptResult] = useState<{ bins: any[], pieceToSeq: Record<string, number[]> }>({ bins: [], pieceToSeq: {} });
@@ -373,6 +376,11 @@ export default function Orcamento() {
         setGroupByRoom(false);
         setCurrentGroupName('');
         setLastGroupName('');
+        // Focus client search after a short delay to allow re-render
+        setTimeout(() => {
+            const el = document.querySelector('input[placeholder*="Buscar ou digitar nome do cliente"]') as HTMLInputElement;
+            el?.focus();
+        }, 300);
     };
 
     useEffect(() => {
@@ -628,6 +636,14 @@ export default function Orcamento() {
         const savedLengths = editingBendLengths && editingBendLengths.some(l => parseFloat(l) > 0) ? editingBendLengths : [''];
 
         const bendCount = bends.filter(b => b.productType === 'product' || !b.productType).length;
+
+        // Requirement 3: Enforce room input if groupByRoom is active
+        const finalGroupName = (currentGroupName || '').trim() || (lastGroupName || '').trim();
+        if (groupByRoom && !finalGroupName) {
+            setToast({ msg: '⚠ Informe o CÔMODO para agrupar esta dobra.', type: 'error' });
+            return;
+        }
+
         const newBend: Bend = {
             id: uid(),
             risks: [...currentRisks],
@@ -639,9 +655,7 @@ export default function Orcamento() {
             svgDataUrl,
             product_id: selectedProductId || undefined,
             productType: 'product',
-            group_name: groupByRoom
-                ? (currentGroupName.trim() || lastGroupName || `CÔMODO ${bends.length + 1}`)
-                : ''
+            group_name: groupByRoom ? finalGroupName : ''
         };
         // Recalc m2 if lengths were preserved
         if (savedLengths !== null && savedLengths.some(l => parseFloat(l) > 0)) {
@@ -841,7 +855,7 @@ export default function Orcamento() {
             lengths: [],
             totalLengthM: 0,
             m2: 0,
-            group_name: `SERVIÇO #${serviceCount + 1}`
+            group_name: '' // Disregard grouping for services
         };
 
         setBends(prev => [...prev, newService]);
@@ -1987,7 +2001,7 @@ window.onload = function() {
                                                                 </button>
                                                             )}
 
-                                                            {(hasPaid || hasFinance || hasProd) && (
+                                                            {window.location.pathname.includes('/admin') && (hasPaid || hasFinance || hasProd) && (
                                                                 <button onClick={async () => {
                                                                     if (!confirm('Deseja criar uma nova versão deste orçamento?')) return;
                                                                     const res = await fetch(`/api/quotes/${q.id}/new-version`, { method: 'POST', credentials: 'include' });
@@ -2185,17 +2199,17 @@ window.onload = function() {
                                                             const local = quickClientForm.phone.replace(/^\+\d+\s?/, '');
                                                             setQuickClientForm(p => ({ ...p, phone: `${e.target.value} ${local}`.trim() }));
                                                         }}
-                                                        className="bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-blue-400 text-sm font-bold w-[90px] flex-shrink-0"
+                                                        className="bg-slate-700 border border-white/20 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-blue-400 text-sm font-bold w-[90px] flex-shrink-0"
                                                     >
-                                                        <option value="+55">+55 🇧🇷</option>
-                                                        <option value="+1">+1 🇺🇸</option>
-                                                        <option value="+44">+44 🇬🇧</option>
-                                                        <option value="+351">+351 🇵🇹</option>
-                                                        <option value="+54">+54 🇦🇷</option>
-                                                        <option value="+595">+595 🇵🇾</option>
-                                                        <option value="+598">+598 🇺🇾</option>
-                                                        <option value="+56">+56 🇨🇱</option>
-                                                        <option value="+57">+57 🇨🇴</option>
+                                                        <option value="+55" className="bg-slate-800 text-white">+55 🇧🇷</option>
+                                                        <option value="+1" className="bg-slate-800 text-white">+1 🇺🇸</option>
+                                                        <option value="+44" className="bg-slate-800 text-white">+44 🇬🇧</option>
+                                                        <option value="+351" className="bg-slate-800 text-white">+351 🇵🇹</option>
+                                                        <option value="+54" className="bg-slate-800 text-white">+54 🇦🇷</option>
+                                                        <option value="+595" className="bg-slate-800 text-white">+595 🇵🇾</option>
+                                                        <option value="+598" className="bg-slate-800 text-white">+598 🇺🇾</option>
+                                                        <option value="+56" className="bg-slate-800 text-white">+56 🇨🇱</option>
+                                                        <option value="+57" className="bg-slate-800 text-white">+57 🇨🇴</option>
                                                     </select>
                                                     <input
                                                         type="text"
@@ -2689,11 +2703,11 @@ window.onload = function() {
                                         {/* Width info */}
                                         <div className="flex gap-3 flex-wrap text-sm">
                                             <div className={`px-4 py-2 rounded-xl font-bold ${isOver ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-white/10 text-white'}`}>
-                                                Soma: <strong>{curWidth.toFixed(1)}</strong>
+                                                Soma: <strong>{curWidth.toFixed(2)}</strong>
                                             </div>
                                             {!isOver && curWidth > 0 && (
                                                 <div className="px-4 py-2 rounded-xl font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                                                    Arredondado: <strong>{curRounded}</strong>
+                                                    Arredondado: <strong>{curRounded.toFixed(2)}</strong>
                                                 </div>
                                             )}
                                             {isOver && <div className="flex items-center gap-2 text-red-400 font-bold"><AlertTriangle className="w-4 h-4" /> Excede 120 cm!</div>}
@@ -3347,7 +3361,7 @@ window.onload = function() {
                                             <div className="flex items-center justify-end gap-2">
                                                 <span className="text-white/60 font-bold">R$</span>
                                                 <span className="text-2xl font-black text-white">
-                                                    {totalCostValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                    {totalCostValue.toFixed(2)}
                                                 </span>
                                             </div>
                                             <p className="text-[10px] text-slate-500 mt-1 italic uppercase tracking-wider">Custo estimado total</p>
@@ -3359,7 +3373,7 @@ window.onload = function() {
                                     <div className="flex items-center gap-10">
                                         <div className="text-center group">
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-blue-400 transition-colors text-left">Subtotal</p>
-                                            <h4 className="text-2xl font-black text-white">R$ {totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h4>
+                                            <h4 className="text-2xl font-black text-white">R$ {totalValue.toFixed(2)}</h4>
                                         </div>
 
                                         <div className="text-center group">
@@ -3381,13 +3395,13 @@ window.onload = function() {
                                         <div className="text-right border-r border-white/10 pr-6">
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lucro Estimado</p>
                                             <h4 className={`text-xl font-black ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                                R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                R$ {profit.toFixed(2)}
                                             </h4>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Total Final</p>
                                             <h2 className="text-5xl font-black text-white tracking-tighter shadow-blue-500/20 drop-shadow-xl">
-                                                R$ {finalWithDiscount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                R$ {finalWithDiscount.toFixed(2)}
                                             </h2>
                                         </div>
                                     </div>

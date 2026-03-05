@@ -69,9 +69,11 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
     }, [quotes, searchTerm, statusFilter, finStatusFilter]);
 
     // Dashboard Stats
-    const totalOrcado = quotes.reduce((acc, q) => acc + (q.finalValue || q.totalValue || 0), 0);
-    const totalRecebido = quotes.reduce((acc, q) => acc + (q.fin_paid || 0), 0);
-    const totalAReceber = quotes.reduce((acc, q) => acc + (q.fin_remaining ?? (['approved', 'partial', 'in_production', 'paid'].includes(q.status) ? (q.finalValue || q.totalValue) : 0)), 0);
+    // Filto para evitar duplicidade de valores: só somamos orçamentos que NÃO estão cancelados.
+    // Quando uma nova versão é criada, a anterior é cancelada, então somamos apenas a "viva".
+    const totalOrcado = quotes
+        .filter(q => q.status !== 'cancelled' && q.status !== 'canceled')
+        .reduce((acc, q) => acc + (q.finalValue || q.totalValue || 0), 0);
 
     const handleApprove = async (id: string) => {
         const res = await fetch(`/api/quotes/${id}/status`, {
@@ -237,32 +239,14 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
             </div>
 
             {/* DASHBOARD */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center gap-4">
                     <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
                         <DollarSign className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Orçado</p>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Orçado (Ativos)</p>
                         <p className="text-2xl font-black text-slate-900">{fmt(totalOrcado)}</p>
-                    </div>
-                </div>
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center">
-                        <CheckCircle2 className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Recebido</p>
-                        <p className="text-2xl font-black text-green-600">{fmt(totalRecebido)}</p>
-                    </div>
-                </div>
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center">
-                        <Clock className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Saldo a Receber</p>
-                        <p className="text-2xl font-black text-amber-600">{fmt(totalAReceber)}</p>
                     </div>
                 </div>
             </div>
@@ -352,7 +336,8 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-wrap items-center justify-center gap-1.5 w-[280px] sm:w-[340px] mx-auto">
 
-                                                    {(!hasFinance && !hasProd && (q.status === 'draft' || q.status === 'sent')) ? (
+                                                    {/* Se o status for Rascunho (draft), SEMPRE permitimos Alterar, independente de histórico (visto que rascunhos de nova versão precisam ser editáveis) */}
+                                                    {(q.status === 'draft' || (!hasFinance && !hasProd && q.status === 'sent')) ? (
                                                         <button onClick={() => navigate(`/orcamento?edit=${q.id}`)}
                                                             className="flex items-center gap-1 bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="Alterar">
                                                             <PenLine className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Alterar</span>
@@ -406,7 +391,7 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
                                                         <FileDown className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Cliente</span>
                                                     </button>
 
-                                                    <button onClick={() => navigate(`/orcamento?printCompact=${q.id}`)}
+                                                    <button onClick={() => window.open(`/api/quotes/${q.id}/report`, '_blank')}
                                                         className="flex items-center gap-1 bg-slate-100 text-slate-600 hover:bg-slate-200 px-2 py-1 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer whitespace-nowrap" title="A4 Compacto (Obra)">
                                                         <Printer className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Obra</span>
                                                     </button>
