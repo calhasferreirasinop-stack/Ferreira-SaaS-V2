@@ -34,12 +34,11 @@ app.use((req, res, next) => {
 const sanitizeEnv = (val: string | undefined) => val ? val.replace(/['"]+/g, '').trim() : '';
 const supabaseUrl = sanitizeEnv(process.env.SUPABASE_URL);
 const supabaseServiceKey = sanitizeEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
+const supabaseAnonKey = sanitizeEnv(process.env.SUPABASE_ANON_KEY);
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env');
-  if (!process.env.VERCEL) {
-    process.exit(1);
-  }
+  // Em Vercel, o log acima ajudará a encontrar o erro, mas não matamos o processo para não quebrar o builder.
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
@@ -527,13 +526,16 @@ app.post('/api/auth/google/sync', async (req, res) => {
   if (!access_token) return res.status(400).json({ error: 'Token ausente' });
 
   try {
-    const tempClient = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY! || process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    const tempClient = createClient(supabaseUrl, supabaseAnonKey || supabaseServiceKey, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
 
     // Obtém o usuário a partir do Token Google
     const { data: { user }, error } = await tempClient.auth.getUser(access_token);
-    if (error || !user) return res.status(401).json({ error: 'Token inválido' });
+    if (error || !user) {
+      console.error('[SYNC_ERROR] Falha getUser:', error);
+      return res.status(401).json({ error: 'Token inválido ou expirado' });
+    }
 
     // Verifica se já existe o profile vinculando ao banco real
     let { data: profile } = await supabase
