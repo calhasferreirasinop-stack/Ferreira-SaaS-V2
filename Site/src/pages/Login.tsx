@@ -6,8 +6,9 @@ import { createClient } from '@supabase/supabase-js';
 const createSupabaseClient = () => {
   // Limpar possíveis aspas ou espaços colados por engano no Vercel
   const sanitize = (val: any) => typeof val === 'string' ? val.replace(/['"]+/g, '').trim() : val;
-  const url = sanitize(import.meta.env.VITE_SUPABASE_URL);
-  const key = sanitize(import.meta.env.VITE_SUPABASE_ANON_KEY);
+  const env = (import.meta as any).env;
+  const url = sanitize(env?.VITE_SUPABASE_URL);
+  const key = sanitize(env?.VITE_SUPABASE_ANON_KEY);
 
   if (!url || !key) {
     console.warn("[SUPABASE] Chaves de configuração ausentes no frontend.");
