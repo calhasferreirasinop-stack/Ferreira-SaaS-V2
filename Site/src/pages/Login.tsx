@@ -88,8 +88,8 @@ export default function Login() {
             setChecking(false);
             setLoading(false);
           }
-        } catch (err) {
-          setError('Erro na comunicação do Google login com servidor');
+        } catch (err: any) {
+          setError(`Erro de rede: ${err.message || 'Falha na comunicação'}`);
           setChecking(false);
           setLoading(false);
         }

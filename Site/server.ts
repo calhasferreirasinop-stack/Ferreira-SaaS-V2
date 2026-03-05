@@ -36,7 +36,9 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env');
-  process.exit(1);
+  if (!process.env.VERCEL) {
+    process.exit(1);
+  }
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey, {
