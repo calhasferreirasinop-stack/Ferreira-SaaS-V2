@@ -261,11 +261,11 @@ export default function Admin() {
     { id: 'clients', label: 'Clientes', icon: Users, show: true },
     { id: 'products', label: 'Produtos', icon: Package, show: true },
     { id: 'users', label: 'Usuários', icon: Users, show: isAdmin },
-    { id: 'quotes', label: 'Orçamentos', icon: ClipboardList, show: true, badge: pendingCount },
+    { id: 'quotes', label: 'Gestão de Orçamentos', icon: ClipboardList, show: true, badge: pendingCount },
     { id: 'inventory', label: 'Estoque', icon: Package, show: isAdmin },
     { id: 'financial', label: 'Dashboard Financeiro', icon: TrendingUp, show: isAdmin },
     { id: 'receivables', label: 'Contas a Receber', icon: DollarSign, show: isAdmin },
-    { id: 'reports', label: 'Relatório', icon: FileText, show: isAdmin },
+    { id: 'reports', label: 'Parâmetros', icon: FileText, show: isAdmin },
     { id: 'logs', label: 'Logs', icon: Crown, show: isMaster },
   ].filter(t => t.show);
 
