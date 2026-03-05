@@ -1,4 +1,5 @@
 import express from 'express';
+// Trigger Vercel Build - Novo Deploy Forçado
 import { createServer as createViteServer } from 'vite';
 import { createClient } from '@supabase/supabase-js';
 import multer from 'multer';
