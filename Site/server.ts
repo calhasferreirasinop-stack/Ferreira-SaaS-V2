@@ -37,12 +37,16 @@ const supabaseUrl = sanitizeEnv(process.env.SUPABASE_URL);
 const supabaseServiceKey = sanitizeEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
 const supabaseAnonKey = sanitizeEnv(process.env.SUPABASE_ANON_KEY);
 
-// Inicialização segura do Supabase (Evita crash no Vercel se as chaves demorarem a carregar)
+// Inicialização segura do Supabase (Evita crash no Vercel)
 const supabase = createClient(
-  supabaseUrl || 'https://placeholder-if-missing.supabase.co',
+  supabaseUrl || 'https://placeholder.supabase.co',
   supabaseServiceKey || 'placeholder-key',
   { auth: { persistSession: false } }
 );
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('⚠️ ATENÇÃO: SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurados corretamente no Vercel.');
+}
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
 if (!process.env.VERCEL) {
@@ -522,7 +526,15 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/auth/google/sync', async (req, res) => {
   const { access_token } = req.body;
-  if (!access_token) return res.status(400).json({ error: 'Token ausente' });
+  if (!access_token) return res.status(400).json({ error: 'Token do Google ausente' });
+
+  // Debug de Variáveis (Apenas presença, sem mostrar o valor por segurança)
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return res.status(500).json({
+      error: 'Erro de Configuração: As chaves do Supabase não foram encontradas no servidor do Vercel.',
+      debug: { hasUrl: !!supabaseUrl, hasService: !!supabaseServiceKey, hasAnon: !!supabaseAnonKey }
+    });
+  }
 
   try {
     const tempClient = createClient(supabaseUrl, supabaseAnonKey || supabaseServiceKey, {
@@ -530,14 +542,15 @@ app.post('/api/auth/google/sync', async (req, res) => {
     });
 
     // Obtém o usuário a partir do Token Google
-    const { data: { user }, error } = await tempClient.auth.getUser(access_token);
-    if (error || !user) {
-      console.error('[SYNC_ERROR] Falha getUser:', error);
-      return res.status(401).json({ error: 'Token inválido ou expirado' });
+    const { data: { user }, error: authError } = await tempClient.auth.getUser(access_token);
+
+    if (authError || !user) {
+      console.error('[SYNC_ERROR] Auth Failure:', authError);
+      return res.status(401).json({ error: 'Sua sessão do Google expirou ou é inválida. Tente logar novamente.' });
     }
 
     // Verifica se já existe o profile vinculando ao banco real
-    let { data: profile } = await supabase
+    let { data: profile, error: dbError } = await supabase
       .from('profiles')
       .select('id, role, name, company_id')
       .eq('id', user.id)
@@ -4151,6 +4164,15 @@ app.get('/api/admin/cron', async (_req, res) => {
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Middleware global de erro para evitar páginas HTML do Vercel
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('[FATAL_ERROR]', err);
+  res.status(500).json({
+    error: 'Ocorreu um erro fatal no servidor.',
+    details: err.message
+  });
 });
 
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
