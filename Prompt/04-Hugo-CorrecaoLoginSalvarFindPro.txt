@@ -1,0 +1,8 @@
+Corrigi os dois problemas que você relatou:
+
+Erro ao salvar Orçamento: Resolvi o erro de "RLS policy" no Supabase. Agora a tabela leads aceita envios de usuários não logados, então o botão "Get My Free Quotes" deve funcionar perfeitamente e redirecionar para a página de sucesso.
+Login do Homeowner (Admin):
+Atualizei o botão de login para usar a autenticação do Supabase corretamente.
+O Header (menu superior) agora reconhece quando você está logado. Ele mostrará seu nome e terá um menu com a opção de ir para o "Admin Portal" ou "Sign Out" (Sair).
+Isso elimina a confusão de pedir login do Google repetidamente se você já estiver autenticado.
+Todas as alterações estão na branch dev-Hugo. Pode testar agora!

@@ -1,0 +1,312 @@
+PROJECT: Upgrade Existing Project – home-pros-grid
+
+IMPORTANT:
+Do NOT create a new project.
+Upgrade and refactor the existing codebase into a production-ready SaaS contractor platform.
+
+The system must maintain current UI foundation but improve it to premium quality.
+
+STACK (MANDATORY)
+
+Frontend:
+
+* Next.js (latest stable, App Router)
+* TypeScript
+
+Backend:
+
+* Supabase (PostgreSQL via Supabase)
+* Supabase Auth
+* Supabase Storage
+* Row Level Security enabled
+
+Deployment:
+
+* GitHub ready
+* Optimized for Vercel
+* Environment variables documented
+
+---
+
+## PHASE 1 – CONVERT TO SAAS MULTI-TENANT
+
+Implement multi-tenant structure.
+
+Create:
+
+* organizations table
+* organization_users table
+
+Every business entity must include:
+
+organization_id
+
+Required entities:
+
+* leads
+* clients
+* jobs
+* estimates
+* estimate_items
+* change_orders
+* media
+* payments
+* expenses
+* sms_logs
+* signatures
+* subscriptions
+
+All queries must be scoped by organization_id.
+
+Use Supabase RLS to isolate tenant data.
+
+---
+
+## PHASE 2 – UPGRADE PUBLIC WEBSITE
+
+Improve design to premium US contractor standard.
+
+Sections:
+
+1. Hero Section
+
+   * Strong CTA: "Get Free Estimate"
+   * Secondary CTA: "Find a Pro"
+
+2. Services Section
+
+3. Testimonials
+
+4. Public Portfolio
+
+Portfolio must only display media where:
+
+show_on_portfolio = true
+
+5. Lead Funnel Page (Find a Pro)
+
+Lead form must include:
+
+* Name
+* Phone
+* Email
+* Address
+* Service Type
+* Description
+* Upload photos
+* Upload videos
+
+On submit:
+
+* Save in Supabase leads table
+* Auto-create client
+* Notify admin dashboard
+* Prepare for SMS trigger
+
+---
+
+## PHASE 3 – ADMIN DASHBOARD
+
+Secure Supabase Auth login.
+
+Role-based access:
+
+* owner
+* admin
+* staff
+
+Dashboard must show:
+
+* New leads
+* Active jobs
+* Pending estimates
+* Outstanding balances
+
+---
+
+## PHASE 4 – CRM & JOB SYSTEM
+
+CLIENT PROFILE:
+
+* Contact info
+* Notes
+* Job history
+* Communication history
+
+JOB STRUCTURE:
+
+Status pipeline:
+
+* Lead
+* Estimate Sent
+* Approved
+* In Progress
+* Completed
+* Invoiced
+* Paid
+
+Each Job must link to:
+
+* Estimates
+* Change Orders
+* Media
+* Payments
+* Expenses
+
+---
+
+## PHASE 5 – AI ESTIMATE BUILDER (CHAT STYLE)
+
+Create /estimate/new
+
+Chat-style UI similar to modern AI interface.
+
+Accept:
+
+* Text
+* Audio
+* Video
+* Image uploads
+
+Prepare structure for AI parsing.
+
+Generate structured editable estimate.
+
+Editable fields:
+
+* Description
+* Quantity
+* Unit price
+* Total
+
+Allow adding/removing items.
+
+---
+
+## PHASE 6 – PROFESSIONAL PDF GENERATION
+
+Generate branded PDF using company_settings.
+
+Include:
+
+* Logo
+* Company info
+* Client info
+* Line items
+* Totals
+* Terms
+* Signature area
+
+Support estimate versioning.
+
+---
+
+## PHASE 7 – DIGITAL SIGNATURE
+
+Mobile-friendly signature capture.
+
+Store signature in Supabase Storage.
+
+After signing:
+
+* Lock estimate
+* Generate signed PDF
+* Store timestamp
+
+---
+
+## PHASE 8 – CHANGE ORDERS (EXTRA WORK)
+
+Inside each Job:
+
+* Add extra service
+* Generate separate PDF
+* Optional signature
+* Update job total
+
+---
+
+## PHASE 9 – MEDIA CENTER
+
+Per Job:
+
+Upload:
+
+* Photos
+* Videos
+
+Fields:
+
+* Description
+* Uploaded by
+* Date
+* show_on_portfolio boolean
+
+If true → visible in public Portfolio
+If false → admin only
+
+---
+
+## PHASE 10 – FINANCIAL SYSTEM
+
+Accounts Receivable:
+
+* Estimate total
+* Change orders total
+* Payments received
+* Remaining balance
+* Auto status: unpaid / partial / paid / overdue
+
+Material Tracking:
+
+* Vendor
+* Amount
+* Receipt upload
+* Billable to client checkbox
+
+If billable:
+→ Add to client balance
+
+Accounts Payable dashboard summary required.
+
+---
+
+## PHASE 11 – COMMUNICATION SYSTEM
+
+Prepare SMS integration with Twilio.
+
+Features:
+
+* Send estimate via SMS
+* Send change order via SMS
+* Payment reminder
+* Log SMS history
+
+Email sending required.
+
+---
+
+## PHASE 12 – APP READY STRUCTURE
+
+System must be API-first.
+
+All business logic separated from UI.
+
+Prepare clean API routes for future React Native or Flutter mobile app.
+
+---
+
+## FINAL REQUIREMENT
+
+Deliver:
+
+* Clean, scalable code
+* Supabase connected
+* Multi-tenant SaaS ready
+* GitHub ready
+* Vercel ready
+* Production-quality UI
+
+This must feel like a premium US contractor SaaS platform, not a basic CRUD system.
+
+END OF SPECIFICATION.

@@ -1,0 +1,217 @@
+🚨 REFINAMENTO DE LAYOUT — MODO A4 COMPACTO PROFISSIONAL
+
+A última versão ficou boa, porém analisando orçamentos reais de calheiros percebemos que o layout atual está grande demais para uso prático em campo.
+
+Precisamos implementar um modo compacto profissional, mantendo TODAS as funcionalidades existentes.
+
+⚠️ IMPORTANTE
+Não quebrar nada que já funciona.
+Apenas otimizar visual, escala e impressão.
+
+📐 1. REDUÇÃO PROFISSIONAL DO GRÁFICO
+❌ Problema atual
+
+O desenho das dobras está muito grande e não condiz com o padrão real de calheiros.
+
+✅ Novo comportamento obrigatório
+
+O gráfico deve:
+
+Caber confortavelmente em folha A4
+
+Ser aproximadamente 60–70% menor que o atual
+
+Seguir proporção visual de caderno técnico
+
+Permitir múltiplas peças na mesma página
+
+🔧 Implementação técnica sugerida
+
+Aplicar:
+
+const SCALE_COMPACT = 0.55 // ou valor similar validado visualmente
+
+ou via CSS:
+
+.transform-compact {
+  transform: scale(0.6);
+  transform-origin: top left;
+}
+
+⚠️ Validar para não quebrar o canvas.
+
+🎨 2. REMOVER FUNDO ESCURO DO GRÁFICO
+❌ Problema atual
+
+O fundo escuro não condiz com:
+
+impressão
+
+padrão de obra
+
+leitura em papel
+
+✅ Novo padrão visual
+Fundo do gráfico:
+
+branco (#FFFFFF)
+
+ou cinza muito claro (#FAFAFA)
+
+Linhas do desenho:
+
+preto (#000000)
+
+ou cinza escuro (#222)
+
+Grid:
+
+opcional bem suave
+
+ou remover completamente no PDF
+
+🎯 Objetivo
+
+Visual semelhante a:
+
+folha de caderno
+
+desenho técnico manual
+
+orçamento de calheiro profissional
+
+✏️ 3. LINHAS MAIS FINAS (PADRÃO OBRA)
+
+Ajustar espessura:
+
+strokeWidth: 1.2px a 1.6px
+
+Hoje está visualmente grossa.
+
+⚠️ Deve ficar:
+
+limpa
+
+técnica
+
+imprimível
+
+📏 4. MEDIDAS NO ESTILO CADERNO
+
+Baseado nos exemplos reais:
+
+✅ Ajustar:
+
+fonte menor
+
+mais próxima das linhas
+
+menos espaçamento vertical
+
+alinhamento limpo
+
+Fonte sugerida:
+font-size: 10px ou 11px
+font-weight: 500
+color: #000
+📄 5. OTIMIZAÇÃO PARA CABER EM 1 A4
+🎯 Objetivo principal
+
+O relatório deve permitir:
+
+✅ várias dobras por página
+✅ lista de cortes compacta
+✅ sem grandes espaços vazios
+✅ aparência de orçamento de campo
+
+🔧 Ajustes obrigatórios
+Reduzir:
+
+paddings excessivos
+
+margens grandes
+
+altura de containers
+
+espaçamento entre peças
+
+Implementar:
+.page-break-inside: avoid;
+
+nas peças.
+
+📋 6. LISTA DE CORTES — ESTILO LINHA DE CADERNO
+
+Baseado nos exemplos reais:
+
+❌ Hoje
+
+Muito visual de sistema.
+
+✅ Novo padrão
+
+Lista simples tipo:
+
+Peça 1 — 3.50
+Peça 2 — 2.25
+Peça 3 — 1.80
+Requisitos:
+
+fonte menor
+
+alinhamento vertical limpo
+
+pouco espaçamento
+
+visual de anotação técnica
+
+🚀 7. CRIAR "MODO COMPACTO A4"
+✅ Melhor prática (IMPORTANTE)
+
+Criar flag:
+
+compactPrintMode: boolean
+
+Quando ativo:
+
+reduz escala
+
+remove fundo escuro
+
+aplica layout compacto
+
+otimiza para A4
+
+⚠️ Isso mantém flexibilidade futura.
+
+🧠 RESULTADO ESPERADO
+
+O relatório deve parecer:
+
+✅ profissional de calheiro
+✅ econômico em espaço
+✅ fácil de imprimir
+✅ semelhante aos exemplos enviados
+✅ cabendo múltiplas peças em 1 folha
+
+🔒 REGRA CRÍTICA
+
+🚨 NÃO alterar:
+
+cálculos
+
+lógica das dobras
+
+lógica de cortes
+
+funcionalidades já funcionando
+
+Apenas:
+
+escala
+
+layout
+
+estética
+
+impressão

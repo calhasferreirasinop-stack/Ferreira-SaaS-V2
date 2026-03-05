@@ -1,0 +1,52 @@
+Plano de Corte Otimizado que você mencionou estar "saindo muito errado".
+
+Analisei o código da função 
+
+calculateOptimization
+ e identifiquei 3 pontos que podem estar causando a sensação de erro:
+
+Capacidade Fixa (1.20m): O sistema assume que a chapa tem sempre 1,20m. Se você trabalha com réguas de 3m ou 6m, o cálculo gera dezenas de "chapinhas" desnecessárias.
+Unidades (Metros vs Centímetros): Se o usuário digita "150" pensando em cm, o código entende como 150 metros, o que estoura qualquer chapa.
+Divisão de Peças: Se um corte é maior que o tamanho da chapa (ex: calha de 3m em chapa de 1,2m), o código divide a peça, mas na montagem real isso significa uma emenda.
+🛠️ Proposta de Melhoria no Plano de Corte
+Vou ajustar a lógica para:
+
+Permitir que o sistema entenda peças maiores que a chapa como "Múltiplas Chapas inteiras + Sobra".
+Garantir que a ordenação (do maior para o menor) não ignore as sobras.
+Vou ler a função de otimização agora para aplicar uma melhoria:
+
+Analyzed
+
+
+O código de otimização atual segue o padrão FFD (First Fit Decreasing), que é o mais eficiente para "encaixar" peças, mas ele tem um detalhe: ele assume que a calha pode ser feita de vários pedaços pequenos (emendas).
+
+Se você quer que o sistema diga quantas chapas inteiras você vai gastar sem "picar" tanto o material, ou se o tamanho da sua chapa não for 1,20m, o resultado vai parecer errado.
+
+🔍 O que descobri no código:
+Na linha 215, se você digita uma peça de 3 metros, o sistema entende que são:
+
+2 pedaços de 1,20m (cheios)
+1 pedaço de 0,60m (sobra)
+Ele tenta encaixar esse 0,60m em qualquer "buraco" de outras chapas. Na prática da calha, isso pode não ser o que você quer se preferir evitar emendas.
+🚀 Plano de Ação para Agora:
+Refinar a Otimização: Vou alterar a lógica para que peças maiores que a chapa sejam tratadas como "Peças Únicas Longas" e só usem retalhos se for estritamente necessário.
+
+1. 📏 Otimização de Corte (Versão "Sem Emendas Desnecessárias")
+Vou mudar o cálculo:
+
+Peças maiores que a chapa (ex: 3m em chapa de 1,2m) agora reservam chapas inteiras automaticamente antes da otimização.
+Apenas a sobra/resto entra no sorteio de otimização com outras peças. Isso evita que o sistema sugira que você corte uma calha de 3m em 3 pedaços de bins diferentes.
+3. 🛠️ Correção no 
+
+calculateOptimization
+Vou aplicar o novo algoritmo:
+
+Edited
++49
+-37
+A otimização de corte agora está muito mais inteligente: ela prioriza chapas inteiras para peças longas e só tenta encaixar os "restinhos" no final, o que reflete muito melhor o uso real da chapa na calharia.
+
+Agora, vou renomear todos os textos de "Pagamento" para "Envio de Orçamento / Aprovação" no fluxo do 
+
+Orcamento.tsx
+ para finalizar essa parte:

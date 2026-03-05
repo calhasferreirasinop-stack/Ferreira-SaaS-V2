@@ -1,0 +1,34 @@
+diff --git a/Site/server.ts b/Site/server.ts
+index 2f76322..8abf125 100644
+--- a/Site/server.ts
++++ b/Site/server.ts
+@@ -1567,14 +1567,27 @@ app.put('/api/quotes/:id', authenticate, async (req: any, res) => {
+   // 🔴 REGRA RÍGIDA DE ALTERAÇÃO (BACKEND)
+   const { data: currentEstimate } = await supabase.from('estimates').select('status').eq('id', id).single();
+   const { data: existingAR } = await supabase.from('accounts_receivable').select('id').eq('estimate_id', id).not('status', 'in', '(\'cancelled\',\'canceled\')').maybeSingle();
+-  const { data: existingPO } = await supabase.from('production_orders').select('id').eq('estimate_id', id).maybeSingle();
++  const { data: existingPO } = await supabase.from('production_orders').select('id, status').eq('estimate_id', id).maybeSingle();
++
++  // Verificar se a produção REALMENTE começou (algum item concluído)
++  const { data: piDone } = await supabase.from('production_items').select('id').eq('estimate_id', id).eq('concluido', true).limit(1);
++  const hasItemsDone = (piDone && piDone.length > 0);
+ 
+   const isEditRestrictedStatus = ['approved', 'partial', 'paid', 'in_production', 'canceled', 'expired'].includes(currentEstimate?.status || '');
+ 
+-  if (isEditRestrictedStatus || existingAR || existingPO) {
++  // Bloqueamos se houver Financeiro Ativo OU Produção com itens concluídos OR Status Restrito
++  // Se houver apenas a Ordem de Produção (shell) mas nenhum item feito, permitimos editar e limpamos a PO anterior
++  if (isEditRestrictedStatus || existingAR || hasItemsDone) {
+     return res.status(403).json({ error: 'Este orçamento não pode mais ser alterado. Crie uma nova versão para fazer modificações.' });
+   }
+ 
++  // Se existir Ordem de Produção mas não tiver nada feito, limpamos para garantir sincronia com os novos itens do orçamento
++  if (existingPO) {
++    await supabase.from('production_items').delete().eq('estimate_id', id);
++    await supabase.from('production_orders').delete().eq('estimate_id', id);
++  }
++
++
+   const { data: qInfo } = await supabase.from('estimates').select('company_id').eq('id', id).single();
+   const cid = qInfo?.company_id || req.user.companyId;
+ 

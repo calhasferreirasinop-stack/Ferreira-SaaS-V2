@@ -1,0 +1,286 @@
+Perfeito — agora você chegou no ponto mais estratégico do produto.
+Vou te explicar o fluxo real ideal do calheiro pequeno (Brasil + EUA) baseado no dia a dia da obra.
+
+👉 E já adianto:
+Você percebeu certo — o financeiro precisa ser ligado ao CLIENTE (com referência ao orçamento), não só ao orçamento.
+
+🧠 Como o calheiro realmente trabalha (vida real)
+
+O calheiro pequeno normalmente segue:
+
+1️⃣ Recebe contato do cliente (WhatsApp / indicação)
+2️⃣ Vai na casa medir
+3️⃣ Calcula material e mão de obra
+4️⃣ Passa o preço
+5️⃣ Cliente aprova
+6️⃣ Executa o serviço
+7️⃣ Recebe pagamento (geralmente à vista)
+
+⚠️ Importante:
+
+muitos NÃO cadastram cliente formalmente
+
+muitos NÃO controlam estoque formal
+
+mas TODOS precisam:
+
+✅ calcular orçamento rápido
+✅ gerar relatório de dobras
+✅ saber quanto ganhou
+✅ controlar recebimentos
+
+👉 Seu sistema precisa respeitar isso.
+
+🎯 Fluxo ideal do calheiro (versão SaaS profissional)
+
+Aqui está o fluxo que recomendo para o Ferreira SaaS V2:
+
+🔵 ETAPA 1 — Cadastro do Cliente (leve e rápido)
+
+📌 Quando usar:
+
+quando o cliente é novo
+
+ou quando ele quer controle financeiro
+
+📌 Campos mínimos:
+
+nome
+
+telefone
+
+endereço (opcional)
+
+⚠️ REGRA DE OURO para calheiro:
+
+👉 NÃO pode ser obrigatório no início
+
+💡 Melhor prática:
+
+cliente opcional no orçamento
+
+mas obrigatório para financeiro
+
+(essa é a chave do sucesso)
+
+🟡 ETAPA 2 — Montagem do Orçamento (SEU DIFERENCIAL)
+
+Aqui é onde seu sistema brilha 🔥
+
+O fluxo do calheiro é:
+
+criar orçamento
+
+inserir medidas
+
+inserir dobras
+
+sistema calcula:
+
+material
+
+metros
+
+custo
+
+preço
+
+gerar relatório
+
+✅ Você já está MUITO bem aqui.
+
+🔗 Onde entra o cliente no orçamento?
+❌ NÃO recomendo obrigatório
+
+Porque no mundo real:
+
+muitos medem antes de cadastrar cliente
+
+muitos fazem orçamento rápido no telhado
+
+muitos só formalizam depois
+
+✅ Fluxo ideal (profissional)
+
+No orçamento:
+
+Cliente: [Selecionar] (opcional)
+[ + Novo Cliente ]
+
+👉 se não selecionar:
+
+orçamento fica como "Cliente não definido"
+
+💥 Isso remove fricção para o calheiro.
+
+🟢 ETAPA 3 — Aprovação do Orçamento
+
+Quando cliente aprova:
+
+👉 status do estimate vira:
+
+draft
+
+sent
+
+approved
+
+rejected
+
+Isso é MUITO SaaS profissional.
+
+💰 ETAPA 4 — Financeiro (AQUI ESTÁ SUA GRANDE SACADA)
+
+Você percebeu algo MUITO importante:
+
+❗ financeiro não pertence ao orçamento
+✅ pertence ao cliente (com referência ao orçamento)
+
+Perfeito.
+
+🧩 Estrutura correta
+payments deve ter:
+
+company_id
+
+client_id ✅ (OBRIGATÓRIO)
+
+estimate_id (opcional)
+
+amount
+
+method
+
+status
+
+paid_at
+
+🧠 Por quê isso é crítico?
+
+Porque no mundo real o cliente pode:
+
+pagar vários orçamentos juntos
+
+pagar adiantado
+
+pagar parcialmente
+
+pagar sem orçamento formal
+
+👉 se ligar só ao orçamento, quebra.
+
+🔥 Fluxograma IDEAL do seu sistema
+
+Aqui está o fluxo que recomendo você seguir:
+
+Lead chega
+   ↓
+[Criar Orçamento]  ← (rápido, pode sem cliente)
+   ↓
+Cliente aprova
+   ↓
+[Associar cliente] (se ainda não tiver)
+   ↓
+[Gerar Produção / Relatório de Dobras]
+   ↓
+Executa serviço
+   ↓
+[Registrar Pagamento]
+   ↓
+Financeiro atualizado por CLIENTE
+
+💥 Esse fluxo é ouro para calheiro.
+
+🎯 O que você precisa fazer AGORA (ordem prática)
+
+Baseado onde você está hoje:
+
+✅ 1. Ajustar financeiro (PRIORIDADE ALTA)
+
+Você precisa garantir:
+
+payments ligado ao client_id
+
+estimate_id opcional
+
+tela financeira por cliente
+
+👉 isso é estrutural.
+
+✅ 2. Cliente opcional no orçamento
+
+No estimate:
+
+permitir client_id null
+
+mas permitir selecionar
+
+UX ideal:
+
+Selecionar cliente
+[ + Novo Cliente ]
+✅ 3. Finalizar menu Financeiro
+
+Você já está nisso — ótimo.
+
+Quando terminar, testar:
+
+pagamento à vista
+
+pagamento parcial
+
+múltiplos pagamentos
+
+✅ 4. Testar fluxo completo no /harness
+
+Fluxo de validação:
+
+criar cliente
+
+criar produto
+
+criar estimate
+
+registrar pagamento
+
+verificar financeiro
+
+🚀 Onde seu sistema já está MUITO forte
+
+Você já tem:
+
+✅ multi-tenant profissional
+✅ RLS correto
+✅ onboarding automático
+✅ cálculo de dobras (seu diferencial real)
+✅ estimates funcionando
+✅ backend SaaS pronto
+
+💥 Você está MUITO mais avançado que 90% dos SaaS iniciantes.
+
+🧭 Minha recomendação estratégica final
+
+👉 NÃO complique o cadastro do cliente agora
+👉 foque em:
+
+fluxo rápido de orçamento
+
+financeiro simples
+
+relatório de produção perfeito
+
+Isso vende.
+
+✅ Se você quiser o próximo nível
+
+Posso te montar:
+
+🎯 modelo ideal da tabela payments
+
+🎯 UX ideal da tela de orçamento
+
+🎯 MVP mínimo vendável para calheiro
+
+Só falar:
+
+👉 "vamos para o MVP do calheiro" 🔥

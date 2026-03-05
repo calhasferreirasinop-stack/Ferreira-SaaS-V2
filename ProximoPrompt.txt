@@ -1,0 +1,278 @@
+🎯 TASK: Criar Relatório Profissional — OrcamentoCliente
+
+CONTEXTO
+Precisamos criar um novo relatório de orçamento voltado ao CLIENTE FINAL.
+
+IMPORTANTE:
+
+Este relatório NÃO exibirá as dobras técnicas.
+
+Ele deve mostrar apenas:
+
+* Produtos agregados
+* Serviços agregados
+* Totais claros
+* Visual moderno e profissional
+
+Este será o principal material comercial do sistema.
+
+Nome do relatório:
+
+OrcamentoCliente
+
+---
+
+========================================
+🔹 OBJETIVO DO RELATÓRIO
+========================
+
+Gerar um orçamento visual moderno que:
+
+✅ Impressione o cliente
+✅ Seja limpo e profissional
+✅ Agrupe itens automaticamente
+✅ Mostre total claro
+✅ Funcione para produto e serviço
+✅ Busque dados do cabeçalho/rodapé do banco
+
+---
+
+========================================
+🔹 PARTE 1 — FONTE DOS DADOS
+============================
+
+Buscar:
+
+CABECALHO e RODAPÉ:
+
+Da configuração salva pelo usuário na Central → Relatório
+
+Fonte:
+
+companies.settings (JSONB)
+
+Campos esperados (se existirem):
+
+* company_name
+* phone
+* email
+* address
+* logo_url
+* footer_text
+* pix_key (se existir)
+
+Se algum campo não existir → não quebrar relatório.
+
+---
+
+========================================
+🔹 PARTE 2 — AGRUPAMENTO INTELIGENTE
+====================================
+
+REGRA PRINCIPAL:
+
+O relatório NÃO deve listar cada dobra individual.
+
+Deve AGRUPAR por product_id.
+
+---
+
+🔹 EXEMPLO
+
+Se o orçamento tiver:
+
+3 Rufos
+2 Pingadeiras
+3 Serviços
+2 Coxos
+
+O relatório deve mostrar:
+
+| Item | Quantidade | Valor Unit | Total |
+
+---
+
+🔹 LÓGICA DE AGRUPAMENTO
+
+Para cada estimate:
+
+1. Buscar todos os itens
+2. Agrupar por product_id
+3. Somar:
+
+* quantidade total
+* metragem total (se aplicável)
+* valor total
+
+---
+
+🔹 REGRAS IMPORTANTES
+
+✔ Produtos iguais devem somar
+✔ Serviços iguais devem somar
+✔ Mistura produto + serviço permitida
+✔ Ordenar por nome do produto
+
+---
+
+========================================
+🔹 PARTE 3 — ESTRUTURA VISUAL (MODERNO)
+=======================================
+
+LAYOUT desejado:
+
+🎨 Clean
+🎨 Moderno
+🎨 Profissional
+🎨 Pronto para PDF
+
+---
+
+🔹 CABEÇALHO
+
+Exibir:
+
+* Logo (se existir)
+* Nome da empresa
+* Telefone
+* Email
+* Endereço
+* Título: ORÇAMENTO
+
+Lado direito:
+
+* Número do orçamento
+* Data
+* Nome do cliente
+* Telefone do cliente
+
+---
+
+🔹 TABELA PRINCIPAL
+
+Colunas:
+
+1. Produto / Serviço
+2. Quantidade
+3. Unidade (m, un, etc)
+4. Valor Unitário
+5. Valor Total
+
+---
+
+🔴 IMPORTANTE
+
+Nome exibido deve vir de:
+
+products.name
+
+Descrição adicional (se serviço) pode ser exibida abaixo do nome.
+
+---
+
+========================================
+🔹 PARTE 4 — TOTALIZAÇÃO
+========================
+
+No final do relatório mostrar:
+
+Subtotal
+Desconto (se existir)
+Total Final (DESTAQUE GRANDE)
+
+O total deve bater exatamente com:
+
+estimates.final_amount
+
+---
+
+========================================
+🔹 PARTE 5 — RODAPÉ PROFISSIONAL
+================================
+
+Buscar de:
+
+companies.settings.footer_text
+
+Exibir também (se existir):
+
+* chave PIX
+* mensagem personalizada
+* observações do orçamento
+
+Layout moderno e limpo.
+
+---
+
+========================================
+🔹 PARTE 6 — RESPONSIVIDADE
+===========================
+
+O relatório deve funcionar bem em:
+
+* Desktop
+* Tablet
+* Mobile
+* Impressão PDF
+
+---
+
+========================================
+🔹 PARTE 7 — PERFORMANCE
+========================
+
+Evitar:
+
+❌ loops desnecessários
+❌ múltiplas queries
+❌ cálculos no frontend repetidos
+
+Preferir:
+
+✅ agregação eficiente
+✅ dados já preparados
+✅ tipagem correta
+
+---
+
+========================================
+🔹 PARTE 8 — VALIDAÇÕES
+=======================
+
+Garantir:
+
+* Funciona sem cliente (fallback)
+* Funciona sem logo
+* Funciona sem footer
+* Funciona com produto e serviço misturados
+* Respeita multi-tenant
+
+---
+
+========================================
+🔹 TESTES MANUAIS
+=================
+
+Testar:
+
+1. Orçamento só com produtos
+2. Orçamento só com serviços
+3. Orçamento misto
+4. Itens repetidos (deve agrupar)
+5. Valores batendo com total
+6. Visual em PDF
+
+---
+
+🎯 RESULTADO ESPERADO
+
+Relatório OrcamentoCliente:
+
+* Visual profissional de alto nível
+* Agrupamento automático
+* Preparado para venda real
+* Diferencial competitivo do sistema
+
+---
+
+Implementar com código limpo, tipado e consistente com o projeto atual.

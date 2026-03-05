@@ -1,0 +1,5 @@
+C:\Desenvolvimento\SiteHugo\Site\src\App.tsx
+C:\Desenvolvimento\SiteHugo\Site\src\components\admin\FinancialTab.tsx
+C:\Desenvolvimento\SiteHugo\Site\src\components\admin\QuotesTab.tsx
+C:\Desenvolvimento\SiteHugo\Site\src\pages\Admin.tsx
+C:\Desenvolvimento\SiteHugo\Site\src\pages\Orcamento.tsx

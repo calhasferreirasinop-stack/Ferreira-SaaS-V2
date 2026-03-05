@@ -1,0 +1,14 @@
+{
+  "id": "063802a1-b75a-42ef-a136-b33066bc692e",
+  "company_id": "d9604efa-eecb-4e93-a118-d1d2715bc8ba",
+  "name": "Calha galvanizada",
+  "description": "Calha galvanizada",
+  "unit": "m2",
+  "base_cost": 0,
+  "default_margin_percentage": 0,
+  "calculated_price": 0,
+  "stock_quantity": 0,
+  "category": null,
+  "created_at": "2026-03-02T04:13:35.505237+00:00",
+  "type_product": "product"
+}

@@ -1,0 +1,21 @@
+Walkthrough - Melhorias no Módulo de Orçamentos e Login (Fase 7.6)
+Este documento resume as mudanças feitas para estabilizar o sistema de login e profissionalizar o módulo de Orçamentos.
+
+🔐 Estabilidade e Autenticação
+Timeout de Segurança: Adicionado um timeout de 5 segundos ao 
+UserContext.tsx
+ e 
+AdminLogin.tsx
+. Isso garante que a aplicação não fique travada em telas de "Checking..." ou carregamento infinito caso o Supabase falhe ou demore a responder.
+Robustez no Login: O botão de login agora é reabilitado automaticamente em caso de erro, permitindo novas tentativas sem precisar recarregar a página.
+🧾 Módulo de Orçamentos Enterprise
+Campos de Endereço: O formulário de orçamentos agora inclui campos completos para Rua, Cidade, Estado e CEP do cliente.
+PDF Profissional: O gerador de PDF foi atualizado para incluir os detalhes do endereço do cliente na seção "BILL TO".
+🌐 Fluxo de Compartilhamento e Tracking
+Botão Compartilhar: Adicionado um botão "Share" no editor que copia o link público do orçamento (/estimate/view/{token}) para a área de transferência com um clique.
+Rastreamento Automático: Ao abrir o link público, o sistema agora detecta se o status é "Enviado" e o altera automaticamente para "Visualizado", permitindo que o administrador saiba que o cliente recebeu e leu o documento.
+Exibição de Endereço: A página pública que o cliente visualiza agora exibe o endereço completo para confirmação dos dados.
+🇧🇷 Internacionalização
+Todas as novas funcionalidades foram traduzidas para o Português no 
+LanguageContext.tsx
+, garantindo uma experiência consistente para usuários brasileiros.

@@ -1,0 +1,301 @@
+📌 PROMPT PARA IMPLEMENTAÇÃO — MODELO PROFISSIONAL DE VERSÃO + EXPIRAÇÃO + AUTOMAÇÃO WHATSAPP
+🟢 1️⃣ IMPLEMENTAR MODELO 1 — Nova Versão com Cancelamento da Anterior
+
+Implementar fluxo profissional de versionamento de orçamento.
+
+🔹 Botão: “Criar Nova Versão”
+
+Ao clicar:
+
+Duplicar orçamento atual
+
+Gerar novo ID
+
+Criar campo:
+
+parent_estimate_id
+
+version_number
+
+Novo orçamento inicia como Rascunho
+
+Copiar:
+
+Dobras
+
+Valores
+
+Cliente
+
+Observações
+
+NÃO copiar financeiro
+
+🔹 Após criar nova versão:
+
+Sistema deve automaticamente:
+
+Cancelar orçamento anterior.
+
+🔹 Regras ao cancelar versão anterior:
+
+Se NÃO houver pagamento registrado:
+
+Cancelar contas a receber vinculadas
+
+Marcar contas como canceled
+
+Se houver pagamento registrado:
+
+NÃO apagar financeiro
+
+Gerar automaticamente registro de CRÉDITO
+
+Criar tabela (se ainda não existir):
+
+credits
+- id
+- company_id
+- client_id
+- estimate_id_origem
+- valor
+- status (disponivel / utilizado)
+- created_at
+
+O crédito poderá ser usado para:
+
+Abater novo orçamento manualmente
+
+Ou ficar disponível no cliente
+
+🔵 2️⃣ IMPLEMENTAR STATUS EXPIRADO
+
+Adicionar novo status:
+
+expired
+
+🔹 Campo obrigatório no orçamento:
+
+validade_dias
+
+Padrão: 7 dias (configurável em Configurações Gerais)
+
+🔹 Lógica automática:
+
+Quando:
+status = Enviado
+E data_envio + validade_dias < hoje
+
+→ alterar automaticamente para expired
+
+Criar rotina automática (cron job ou verificação diária no backend).
+
+🔹 Permitir:
+
+Botão: “Reativar Orçamento”
+
+Se status = expired:
+
+Voltar para Enviado
+
+Recalcular nova validade
+
+Permitir revisão antes de reativar
+
+🔴 3️⃣ MELHORAR CANCELAMENTO
+
+Ao clicar em Cancelar:
+
+Abrir modal obrigatório:
+
+"Qual o motivo do cancelamento?"
+
+Opções:
+
+Preço alto
+
+Cliente desistiu
+
+Perdeu para concorrência
+
+Serviço adiado
+
+Outro (campo texto obrigatório)
+
+Salvar campo:
+
+cancel_reason
+cancel_reason_text
+
+Após cancelar:
+
+Bloquear edição
+
+Bloquear aprovação
+
+Permitir apenas:
+
+Visualizar
+
+Criar Nova Versão
+
+🟣 4️⃣ AUTOMAÇÃO INTELIGENTE WHATSAPP
+
+Implementar sistema de lembrete automático de orçamento pendente.
+
+Criar configuração em:
+
+Admin → Configurações → Automação WhatsApp
+
+Campos:
+
+Ativar lembrete automático (on/off)
+
+Enviar lembrete 1 dia após envio (on/off)
+
+Enviar lembrete 1 dia antes de expirar (on/off)
+
+🔹 Lógica 1 — 1 dia após envio
+
+Se:
+status = Enviado
+E 1 dia após data_envio
+E ainda não aprovado/cancelado
+
+Enviar WhatsApp automático:
+
+Mensagem:
+
+"Olá {nome_cliente}, seu orçamento #{numero} ainda está pendente. Caso tenha dúvidas estou à disposição."
+
+🔹 Lógica 2 — 1 dia antes de expirar
+
+Se:
+status = Enviado
+E faltar 1 dia para expirar
+
+Enviar mensagem automática:
+
+"Olá {nome_cliente}, seu orçamento #{numero} vence amanhã. Aproveite para garantir os valores atuais."
+
+🔹 Lógica 3 — Orçamento expirado
+
+No dia que virar Expirado:
+
+Mensagem opcional:
+
+"Seu orçamento #{numero} expirou. Caso ainda tenha interesse podemos atualizar os valores."
+
+🔹 Integração WhatsApp
+
+Implementar via:
+
+WhatsApp Cloud API (Meta)
+ou
+
+Evolution API
+ou
+
+Z-API
+
+Sistema deve:
+
+Usar número configurado da empresa
+
+Salvar log de envio
+
+Não enviar duplicado
+
+Permitir desativar
+
+Criar tabela:
+
+whatsapp_logs
+
+id
+
+company_id
+
+estimate_id
+
+tipo_mensagem
+
+enviado_em
+
+status
+
+🧠 IMPORTANTE
+
+Nunca permitir alterar orçamento Aprovado diretamente.
+Sempre usar Nova Versão.
+
+🔥 Resultado Final Esperado
+
+Sistema passa a ter:
+
+✔ Versionamento profissional
+✔ Controle de crédito
+✔ Expiração automática
+✔ Motivo de perda comercial
+✔ Follow-up automático inteligente
+✔ Funil comercial estruturado
+
+
+Como testar agora:
+Acesse o Painel: Vá em Configurações -> Geral (se você for usuário Master).
+Configuração da API:
+No campo URL, coloque o endereço de envio da sua Evolution API (Ex: https://sua-api.com/message/sendText/NOME_DA_INSTANCIA).
+No campo API Key, coloque a sua chave (apikey).
+Ative a opção "Habilitar Robô de WhatsApp".
+Botão de Teste: Clique no botão ⚡ Enviar Mensagem de Teste que adicionei no topo do painel verde.
+O sistema pedirá um número (digite o seu com DDD, ex: 5566999990011).
+Se as configurações estiverem certas, você receberá uma mensagem de confirmação agora mesmo no seu celular.
+Respondendo sobre o número:
+Qual número aparece? O número que você parear na sua Evolution API via QR Code. Se você escanear o QR Code com o seu celular pessoal, as mensagens sairão pelo seu número. Se escanear com um chip novo da empresa, sairão por esse chip.
+Identificação: Para o cliente, é um chat normal com a sua empresa.
+Variáveis dinâmicas para as mensagens:
+Nas configurações de texto, você pode usar:
+
+{cliente} para o nome do cliente.
+{id} para o número do orçamento (ex: 8A2F1B).
+Dica: Deixei o sistema configurado para verificar orçamentos pendentes a cada 1 hora, mas o botão de teste é instantâneo para você validar se a conexão está OK!
+
+Algo mais que eu possa ajustar nessa integração?
+
+
+Professional Versioning, Expiration & WhatsApp Automation
+Completed Components
+ Basic "New Version" flow implemented in 
+server.ts
+ and 
+QuotesTab.tsx
+.
+ credits table exists and is used.
+ parent_estimate_id and version_number logic exists.
+ Cancellation of previous versions with credit generation.
+Pending Components
+1. Database Schema
+ Add validade_dias to estimates.
+ Add cancel_reason and cancel_reason_text to estimates.
+ Add data_envio to estimates.
+ Create whatsapp_logs table.
+
+
+
+
+
+
+
+2. Backend (server.ts) refinements
+ Update PUT /api/quotes/:id/status to handle cancellation reasons.
+ Implement data_envio recording when status moves to sent.
+ Implement expired status logic (reactive check in GET or background job).
+ Backend endpoint for "Reativar Orçamento" (expired -> pending).
+ WhatsApp reminder logic (logic for 1 day after, 1 day before expiry).
+3. Frontend (QuotesTab.tsx) refinements
+ Add "Cancel Reason" modal when clicking "Cancelar".
+ Add expired status to UI config.
+ Add "Reativar Orçamento" button for expired quotes.
+ Settings for WhatsApp Automation in Admin -> Configurações.
+4. Integration
+ WhatsApp API integration (Cloud API / Evolution / Z-API placeholder).

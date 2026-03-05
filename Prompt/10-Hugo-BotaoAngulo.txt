@@ -1,0 +1,181 @@
+🚀 PROMPT — Implementar Botão Opcional de Ângulo por Linha
+
+Precisamos implementar uma melhoria no módulo de construção de dobras.
+
+Essa melhoria será opcional e servirá apenas para representação visual no gráfico.
+
+🎯 OBJETIVO
+
+Permitir que o usuário informe o ângulo de uma linha específica, sem impactar cálculo de soma ou cobrança.
+
+O ângulo será apenas visual.
+
+📍 1. POSICIONAMENTO DO BOTÃO
+
+Na tela onde existem os botões de direção (Cima, Baixo, Direita, Esquerda etc):
+
+➡️ Ao lado direito desses botões
+➡️ Deve existir um novo botão chamado:
+
+Ângulo
+
+Esse botão deve:
+
+ficar desabilitado inicialmente
+
+habilitar somente após o usuário selecionar uma direção
+
+ser opcional (não obrigatório)
+
+🔘 2. COMPORTAMENTO DO BOTÃO ÂNGULO
+
+Quando o usuário:
+
+Selecionar uma direção
+
+O botão Ângulo fica habilitado
+
+Se clicar no botão Ângulo:
+
+Deve abrir:
+
+Um pequeno modal
+ou
+
+Um campo expandido abaixo
+
+Com:
+
+Input numérico para informar grau
+
+Exemplo placeholder: 45°
+
+Permitir valores positivos
+
+Permitir valores negativos
+
+Limitar entre -180° e 180°
+
+Não é obrigatório informar ângulo.
+
+Se não informar → comportamento continua normal.
+
+📐 3. REPRESENTAÇÃO NO GRÁFICO
+
+Quando houver ângulo informado:
+
+Deve aparecer:
+
+✅ Uma linha indicadora do ângulo
+✅ O valor do grau ao lado dessa linha
+
+⚠️ REGRAS IMPORTANTES
+
+A linha do ângulo NÃO pode cruzar por cima do desenho da calha
+
+Ela deve sair levemente deslocada para fora do desenho
+
+Deve ficar paralela ou inclinada representando visualmente o ângulo
+
+Deve ser discreta
+
+Não pode poluir o layout
+
+O valor do grau deve aparecer ao lado dessa linha
+
+📍 POSICIONAMENTO VISUAL
+
+A linha indicadora deve:
+
+sair da metade do segmento selecionado
+
+deslocar alguns pixels para fora
+
+nunca invadir o interior do desenho
+
+manter legibilidade
+
+🧠 LÓGICA DE FUNCIONAMENTO
+
+Cada segmento pode ter:
+
+{
+  direction: "right",
+  size: 15,
+  angle: null | number
+}
+
+Se angle existir:
+
+desenhar linha indicadora
+
+desenhar texto do grau
+
+Se angle for null:
+
+não desenhar nada
+
+✏️ 4. EDIÇÃO
+
+Se o usuário clicar novamente no botão Ângulo:
+
+permitir editar valor
+
+permitir remover valor
+
+se remover → apagar indicador gráfico
+
+🎨 5. ESTILO VISUAL
+
+A linha do ângulo deve:
+
+ser mais fina que a linha principal
+
+cor discreta (ex: amarelo claro ou branco suave)
+
+não competir com risco da caída lateral
+
+📌 6. IMPORTANTE
+
+O ângulo:
+
+❌ NÃO altera cálculo de soma
+❌ NÃO altera cobrança
+❌ NÃO altera otimização
+❌ NÃO altera metros corridos
+
+É apenas visual para facilitar leitura técnica.
+
+🎯 RESULTADO ESPERADO
+
+Após implementação:
+
+Seleciono uma direção
+
+Botão Ângulo habilita
+
+Clico no botão
+
+Informo grau
+
+Surge uma linha indicadora deslocada
+
+Surge valor em graus ao lado
+
+Sem cruzar o desenho principal
+
+Sem poluição visual
+
+🚨 OBSERVAÇÃO FINAL
+
+Implementar de forma modular.
+
+Não quebrar:
+
+lógica de queda lateral
+
+lógica de soma
+
+lógica de desenho existente
+
+Se necessário, criar camada separada de renderização para ângulos.

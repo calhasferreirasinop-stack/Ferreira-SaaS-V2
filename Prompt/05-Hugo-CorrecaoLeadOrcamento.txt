@@ -1,0 +1,9 @@
+Olá! Concluí todas as tarefas da Fase 9 (Round 5).
+
+Aqui está um resumo do que foi feito
+
+Multi-idioma (i18n) O site agora suporta Inglês e Português. Adicionei um seletor de idiomas no Header (Desktop e Mobile) e traduzi o formulário de orçamento, o cabeçalho e as áreas administrativas.
+Refinamento de Zip Code Agora, ao digitar o Zip Code, a Cidade e o Estado são buscados automaticamente e exibidos em campos separados.
+Melhorias no Orçamento No EstimateEditor.tsx, adicionei um botão de Salvar no topo e no rodapé para facilitar o uso. Também melhorei a conversão de Lead para Orçamento, que agora inclui automaticamente detalhes da área de serviço (ex Carpintaria - Framing).
+Correções de Admin Corrigi o erro que impedia o carregamento da página de Configurações e garanti que o organization_id seja salvo corretamente em novos orçamentos.
+Você pode conferir os detalhes no arquivo walkthrough.md. Tudo pronto para você testar!

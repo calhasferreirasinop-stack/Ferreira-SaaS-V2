@@ -1,0 +1,9 @@
+Pronto! Implementei as correções conforme o planejado:
+
+Orçamentos (Find a Pro): Agora o formulário tem tratamento de erros. Se algo der errado na submissão, você verá um alerta vermelho no canto da tela informando o erro (antes ele apenas não fazia nada). Também adicionei um estado de "Enviando..." no botão para evitar cliques duplos.
+Tratamento de Dados: Adicionei logs no sistema de envio para facilitar a identificação de problemas futuros caso o banco de dados recuse alguma informação.
+Lembrete importante para o Google Login: Como o sistema agora usa o Supabase Auth, você precisa ativar o provedor Google no seu painel. Se você tentar logar e o erro persistir, siga os passos que deixei no 
+plano de implementação
+.
+
+O código já está atualizado na sua branch dev-Hugo. Pode testar novamente!

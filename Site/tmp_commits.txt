@@ -1,0 +1,27 @@
+commit 4164a99f09dd0576daa78069d66d226fa079e3e7
+Author: Alecio <calhas.ferreira.sinop@gmail.com>
+Date:   Sun Mar 1 17:29:23 2026 -0500
+
+    CorrecaoRelatorioETelaOrcamento
+
+A	Prompt/02-Hugo-ImplementacaoMenus.txt
+A	Prompt/03-Hugo- - Copy (2).txt
+A	Prompt/03-Hugo- - Copy (3).txt
+A	Prompt/03-Hugo- - Copy (4).txt
+A	Prompt/03-Hugo- - Copy (5).txt
+A	Prompt/03-Hugo- - Copy (6).txt
+A	Prompt/03-Hugo- - Copy (7).txt
+A	Prompt/03-Hugo-ReformulacaoSite.txt
+A	Prompt/04-Hugo-CorrecaoLoginSalvarFindPro.txt
+A	Prompt/05-Hugo-CorrecaoLeadOrcamento.txt
+A	Prompt/06-Hugo-BarraIdiomas.txt
+A	Prompt/07-Hugo-IdiomaLead.txt
+A	Prompt/08-Hugo-Passo7RealizadoImplementacaoGeracaoPDF.txt
+A	Prompt/09-Hugo-Passo.txt
+A	Prompt/09-Hugo-Passo7.6ImplatRels.txt
+A	Prompt/10-Hugo-BotaoAngulo.txt
+A	Prompt/11-Hugo-RemodelacaoRelatorio.txt
+A	Prompt/CriadoUsuarioParaAutenticacaoEmailGoogle.png
+A	Prompt/Regra.txt
+A	Prompt/VinculacaoComGoogle.png
+A	Prompt/VinculacaoComGoogleCredenciais.png
