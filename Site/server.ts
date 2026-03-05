@@ -56,39 +56,49 @@ async function seedDatabase() {
  * Popula automaticamente uma nova company com produtos e serviços padrão (Item 3)
  */
 async function seedDefaultProducts(companyId: string) {
-  try {
-    // 1. Verificar se já existem produtos (Evita duplicidade - Item 4)
-    const { count, error: countErr } = await supabase
-      .from('products')
-      .select('*', { count: 'exact', head: true })
-      .eq('company_id', companyId);
+  if (!companyId) {
+    console.error('[SEED_ERROR] Nenhuma company_id fornecida.');
+    return;
+  }
 
-    if (countErr) throw countErr;
-    if (count && count > 0) return; // Já possui produtos
+  console.log(`[SEED] Verificando produtos para a empresa: ${companyId}`);
+
+  try {
+    // 1. Verificar se existem produtos usando consulta de dados em vez de cabeçalho
+    const { data: existing, error: checkErr } = await supabase
+      .from('products')
+      .select('id')
+      .eq('company_id', companyId)
+      .limit(1);
+
+    if (checkErr) throw checkErr;
+
+    if (existing && existing.length > 0) {
+      console.log(`[SEED] Empresa ${companyId} já possui produtos. Pulando...`);
+      return;
+    }
 
     console.log(`[SEED] Populando produtos padrão para a nova company: ${companyId}`);
 
     const defaultItems = [
-      // PRODUTOS
       { company_id: companyId, name: 'Calha Moldura', type_product: 'product' },
       { company_id: companyId, name: 'Condutor', type_product: 'product' },
       { company_id: companyId, name: 'Calha Agua Furtada', type_product: 'product' },
       { company_id: companyId, name: 'Calha Chalé', type_product: 'product' },
       { company_id: companyId, name: 'Calha Cocho', type_product: 'product' },
       { company_id: companyId, name: 'Rufos', type_product: 'product' },
-      // SERVIÇOS
       { company_id: companyId, name: 'Reparo', type_product: 'service' },
       { company_id: companyId, name: 'Servico', type_product: 'service' },
       { company_id: companyId, name: 'Pintura', type_product: 'service' },
       { company_id: companyId, name: 'Troca de Telhado', type_product: 'service' }
     ];
 
-    const { error } = await supabase.from('products').insert(defaultItems);
-    if (error) throw error;
+    const { error: insertErr } = await supabase.from('products').insert(defaultItems);
+    if (insertErr) throw insertErr;
 
-    console.log(`[SEED] Sucesso: ${defaultItems.length} itens criados para ${companyId}`);
-  } catch (err) {
-    console.error('[SEED_ERROR] Falha ao popular produtos padrão:', err);
+    console.log(`[SEED_SUCCESS] ${defaultItems.length} itens criados para ${companyId}`);
+  } catch (err: any) {
+    console.error(`[SEED_CRITICAL_ERROR] Falha total no seed: ${err.message}`);
   }
 }
 
@@ -122,7 +132,7 @@ const sanitize = (data: any) => {
     if (sensitiveKeys.some(sk => key.toLowerCase().includes(sk))) {
       sanitized[key] = '[REDACTED]';
     } else if (typeof sanitized[key] === 'object') {
-      sanitized[sanitized] = sanitize(sanitized[key]);
+      sanitized[key] = sanitize(sanitized[key]);
     }
   }
   return sanitized;
@@ -503,6 +513,9 @@ app.post('/api/auth/google/sync', async (req, res) => {
       .select('id, role, name, company_id')
       .eq('id', user.id)
       .single();
+
+    console.log(`[SYNC_DEBUG] Perfil encontrado: ${!!profile} | UserID: ${user.id}`);
+    if (profile) console.log(`[SYNC_DEBUG] Perfil Data: Role=${profile.role}, Company=${profile.company_id}`);
 
     let companyId = profile?.company_id;
     let role = profile?.role || 'master';
