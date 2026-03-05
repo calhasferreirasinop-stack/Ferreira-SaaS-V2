@@ -44,8 +44,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-app.use('/uploads', express.static(uploadsDir));
+if (!process.env.VERCEL) {
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+  app.use('/uploads', express.static(uploadsDir));
+}
 
 // --- Seed (Disabled in V2 - Handled by Migration 005) ---
 async function seedDatabase() {
@@ -103,12 +105,35 @@ async function seedDefaultProducts(companyId: string) {
 }
 
 
-// Multer
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
-  filename: (_req, file, cb) => cb(null, Date.now() + '-' + Math.round(Math.random() * 1e9) + path.extname(file.originalname)),
+// Multer - Em produção (ou Vercel), usamos MemoryStorage para enviar ao Supabase Storage.
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
-const upload = multer({ storage });
+
+/**
+ * Helper para upload no Supabase Storage (Substitui o disco local no Vercel/Prod)
+ */
+async function uploadToSupabase(file: Express.Multer.File, bucket = 'uploads'): Promise<string> {
+  const ext = path.extname(file.originalname);
+  const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(fileName, file.buffer, {
+      contentType: file.mimetype,
+      upsert: false
+    });
+
+  if (error) {
+    console.error('[STORAGE_ERROR]', error);
+    throw new Error('Falha ao subir arquivo para o storage: ' + error.message);
+  }
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
+  return data.publicUrl;
+}
 // --- Security Helpers ---
 const rateLimitMap = new Map<string, { count: number, reset: number }>();
 const checkRateLimit = (ip: string, limit = 50, windowMs = 60000) => {
@@ -1065,13 +1090,20 @@ app.get('/api/services', async (req: any, res) => {
 
 
 app.post('/api/services', requireAdmin, upload.single('image'), async (req: any, res) => {
-  const { title, description } = req.body;
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-  const { data, error } = await supabase.from('services').insert({
-    title, description, imageUrl, company_id: req.user.companyId
-  }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  try {
+    const { title, description } = req.body;
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = await uploadToSupabase(req.file);
+    }
+    const { data, error } = await supabase.from('services').insert({
+      title, description, imageUrl, company_id: req.user.companyId
+    }).select().single();
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post('/api/services/delete/:id', requireAdmin, async (req: any, res) => {
@@ -1114,13 +1146,20 @@ app.get('/api/posts', async (req: any, res) => {
 
 
 app.post('/api/posts', requireAdmin, upload.single('image'), async (req: any, res) => {
-  const { title, content } = req.body;
-  const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
-  const { data, error } = await supabase.from('posts').insert({
-    title, content, imageUrl, company_id: req.user.companyId
-  }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  try {
+    const { title, content } = req.body;
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = await uploadToSupabase(req.file);
+    }
+    const { data, error } = await supabase.from('posts').insert({
+      title, content, imageUrl, company_id: req.user.companyId
+    }).select().single();
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post('/api/posts/delete/:id', requireAdmin, async (req: any, res) => {
@@ -1161,21 +1200,31 @@ app.get('/api/gallery', async (req: any, res) => {
 
 
 app.post('/api/gallery', requireAdmin, upload.array('images'), async (req: any, res) => {
-  const { description, serviceId } = req.body;
-  const files = req.files as Express.Multer.File[];
-  if (!files || files.length === 0) return res.status(400).json({ error: 'Pelo menos uma imagem é necessária' });
+  try {
+    const { description, serviceId } = req.body;
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) return res.status(400).json({ error: 'Pelo menos uma imagem é necessária' });
 
-  const parsedServiceId = serviceId ? parseInt(String(serviceId), 10) : null;
-  const items = files.map(file => ({
-    imageUrl: `/uploads/${file.filename}`,
-    description: description || '',
-    serviceId: parsedServiceId,
-    company_id: req.user.companyId
-  }));
+    const parsedServiceId = serviceId ? parseInt(String(serviceId), 10) : null;
 
-  const { data, error } = await supabase.from('gallery').insert(items).select();
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+    // Upload de múltiplos arquivos para o Supabase
+    const imageLinks = await Promise.all(
+      files.map(file => uploadToSupabase(file))
+    );
+
+    const items = imageLinks.map(url => ({
+      imageUrl: url,
+      description: description || '',
+      serviceId: parsedServiceId,
+      company_id: req.user.companyId
+    }));
+
+    const { data, error } = await supabase.from('gallery').insert(items).select();
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post('/api/gallery/delete/:id', requireAdmin, async (req: any, res) => {
@@ -2967,18 +3016,13 @@ app.post('/api/quotes/:id/discount', requireMaster, async (req: any, res) => {
 });
 
 app.post('/api/quotes/:id/proof', authenticate, upload.single('proof'), async (req: any, res) => {
-  const id = req.params.id; // UUID
-  const { data: estimate } = await supabase.from('estimates').select('client_id').eq('id', id).eq('company_id', req.user.companyId).single();
-  if (!estimate) return res.status(404).json({ error: 'Orçamento não encontrado' });
-  if (req.user.role === 'user' && estimate.client_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
-  if (!req.file) return res.status(400).json({ error: 'Arquivo obrigatório' });
-
-  const pixProofUrl = `/uploads/${req.file.filename}`;
-  // Warning: Schema might not have metadata, skipping pixProofUrl update for now to prevent crash
-  // await supabase.from('estimates').update({
-  //   metadata: { pixProofUrl }
-  // }).eq('id', id).eq('company_id', req.user.companyId);
-  res.json({ success: true, pixProofUrl });
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Nenhum comprovante enviado' });
+    const pixProofUrl = await uploadToSupabase(req.file);
+    res.json({ success: true, pixProofUrl });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 
@@ -3465,7 +3509,7 @@ app.post('/api/report-settings', requireAdmin, upload.single('reportLogoFile'), 
     const { data: company } = await supabase.from('companies').select('settings').eq('id', req.user.companyId).single();
     const settings = company?.settings || {};
 
-    const updatedSettings = {
+    const updatedSettings: any = {
       ...settings,
       reportCompanyName, reportHeaderText, reportFooterText, reportPhone, reportEmail, reportAddress,
       reportPaymentTerms, reportExecDays, reportValidityDays,
@@ -3475,7 +3519,7 @@ app.post('/api/report-settings', requireAdmin, upload.single('reportLogoFile'), 
     };
 
     if (req.file) {
-      updatedSettings.reportLogo = `/uploads/${req.file.filename}`;
+      updatedSettings.reportLogo = await uploadToSupabase(req.file);
     }
 
     const { error } = await supabase.from('companies').update({ settings: updatedSettings }).eq('id', req.user.companyId);
@@ -3840,12 +3884,17 @@ async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
-  } else {
+  } else if (!process.env.VERCEL) {
+    // Solo servir estático se NÃO estiver no Vercel (ex: rodando node server.ts em VPS)
+    // No Vercel, o próprio Vercel serve a pasta 'dist' nativamente.
     app.use(express.static('dist'));
     app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
   }
 
-  app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server on http://localhost:${PORT}`));
+  // Só rodar o listen manual se NÃO estiver no Vercel
+  if (!process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server on http://localhost:${PORT}`));
+  }
 }
 
 /**
@@ -4082,6 +4131,22 @@ app.post('/api/production-orders/:estimateId/finish', authenticate, async (req: 
 
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
+});
+
+/**
+ * Endpoint de Cron para Vercel Automations (WhatsApp + Expiração)
+ */
+app.get('/api/admin/cron', async (_req, res) => {
+  // O ideal é proteger isso com um header secreto no Vercel
+  // if (_req.headers['x-vercel-cron-secret'] !== process.env.CRON_SECRET) return res.status(401).end();
+
+  console.log('[CRON] Executando rotinas de automação via endpoint...');
+  try {
+    await runAutomationRoutines();
+    res.json({ success: true, timestamp: new Date().toISOString() });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
