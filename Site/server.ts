@@ -505,7 +505,7 @@ app.post('/api/auth/google/sync', async (req, res) => {
       .single();
 
     let companyId = profile?.company_id;
-    let role = profile?.role || 'MASTER';
+    let role = profile?.role || 'master';
 
     if (!profile) {
       // Cria a nova Company primeiro
@@ -552,7 +552,7 @@ app.post('/api/auth/google/sync', async (req, res) => {
 
       const { data: updateProfile, error: updateErr } = await supabase
         .from('profiles')
-        .update({ company_id: companyId, role: 'MASTER' })
+        .update({ company_id: companyId, role: 'master' })
         .eq('id', user.id)
         .select()
         .single();
