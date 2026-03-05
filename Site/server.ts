@@ -541,8 +541,9 @@ app.post('/api/auth/google/sync', async (req, res) => {
       auth: { persistSession: false, autoRefreshToken: false }
     });
 
-    // Obtém o usuário a partir do Token Google
-    const { data: { user }, error: authError } = await tempClient.auth.getUser(access_token);
+    // Obtém o usuário a partir do Token Google de forma segura
+    const { data, error: authError } = await tempClient.auth.getUser(access_token);
+    const user = data?.user;
 
     if (authError || !user) {
       console.error('[SYNC_ERROR] Auth Failure:', authError);
