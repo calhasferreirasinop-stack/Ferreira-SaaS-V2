@@ -3,20 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, User, Hammer } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
-const getSupabase = () => {
+const createSupabaseClient = () => {
+  // @ts-ignore
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  // @ts-ignore
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    console.warn("[SUPABASE] Chaves de configuração ausentes no frontend.");
+    return null;
+  }
+
   try {
-    // @ts-ignore
-    const url = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-    // @ts-ignore
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY || 'dummy_anon_key';
     return createClient(url, key);
   } catch (e) {
-    console.error('Supabase init error', e);
+    console.error('[SUPABASE] Falha na inicialização do client:', e);
     return null;
   }
 };
 
-const supabase = getSupabase();
+const supabase = createSupabaseClient();
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -139,6 +145,27 @@ export default function Login() {
         <div className="text-center">
           <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
           <p className="text-white/60 text-sm">Verificando sessão...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!supabase) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 pt-24">
+        <div className="max-w-md w-full bg-slate-800 border border-red-500/20 rounded-[2.5rem] p-8 md:p-12 text-center shadow-2xl">
+          <div className="w-16 h-16 bg-red-500/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Lock className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Erro de Configuração</h1>
+          <p className="text-slate-400 text-sm leading-relaxed mb-8">
+            As credenciais do <b>Supabase</b> (ANON KEY) não foram detectadas.
+            O login via Google e as funções de banco estão desabilitadas.
+          </p>
+          <button onClick={() => navigate('/')}
+            className="w-full bg-slate-700 text-white py-4 rounded-2xl font-bold hover:bg-slate-600 transition-all cursor-pointer">
+            Voltar para o site
+          </button>
         </div>
       </div>
     );
