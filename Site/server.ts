@@ -70,17 +70,17 @@ async function seedDefaultProducts(companyId: string) {
 
     const defaultItems = [
       // PRODUTOS
-      { company_id: companyId, name: 'Calha Moldura', type: 'produto' },
-      { company_id: companyId, name: 'Condutor', type: 'produto' },
-      { company_id: companyId, name: 'Calha Agua Furtada', type: 'produto' },
-      { company_id: companyId, name: 'Calha Chalé', type: 'produto' },
-      { company_id: companyId, name: 'Calha Cocho', type: 'produto' },
-      { company_id: companyId, name: 'Rufos', type: 'produto' },
+      { company_id: companyId, name: 'Calha Moldura', type_product: 'product' },
+      { company_id: companyId, name: 'Condutor', type_product: 'product' },
+      { company_id: companyId, name: 'Calha Agua Furtada', type_product: 'product' },
+      { company_id: companyId, name: 'Calha Chalé', type_product: 'product' },
+      { company_id: companyId, name: 'Calha Cocho', type_product: 'product' },
+      { company_id: companyId, name: 'Rufos', type_product: 'product' },
       // SERVIÇOS
-      { company_id: companyId, name: 'Reparo', type: 'servico' },
-      { company_id: companyId, name: 'Servico', type: 'servico' },
-      { company_id: companyId, name: 'Pintura', type: 'servico' },
-      { company_id: companyId, name: 'Troca de Telhado', type: 'servico' }
+      { company_id: companyId, name: 'Reparo', type_product: 'service' },
+      { company_id: companyId, name: 'Servico', type_product: 'service' },
+      { company_id: companyId, name: 'Pintura', type_product: 'service' },
+      { company_id: companyId, name: 'Troca de Telhado', type_product: 'service' }
     ];
 
     const { error } = await supabase.from('products').insert(defaultItems);
