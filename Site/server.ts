@@ -1565,7 +1565,7 @@ app.put('/api/quotes/:id', authenticate, async (req: any, res) => {
   const { clientName, bends, notes, totalValue: passedTotalValue, adminCreated, clientId, pricePerM2Override, costPerM2Override } = req.body;
 
   // 🔴 REGRA RÍGIDA DE ALTERAÇÃO (BACKEND)
-  const { data: currentEstimate } = await supabase.from('estimates').select('status').eq('id', id).single();
+  const { data: currentEstimate } = await supabase.from('estimates').select('status, is_grouped').eq('id', id).single();
   const { data: existingAR } = await supabase.from('accounts_receivable').select('id').eq('estimate_id', id).not('status', 'in', '(\'cancelled\',\'canceled\')').maybeSingle();
   const { data: existingPO } = await supabase.from('production_orders').select('id, status').eq('estimate_id', id).maybeSingle();
 
@@ -1632,7 +1632,7 @@ app.put('/api/quotes/:id', authenticate, async (req: any, res) => {
     cost_per_m2: costPerM2Override || null,
     notes: quoteNotes,
     status: finalStatus,
-    is_grouped: req.body.isGrouped || false
+    is_grouped: req.body.isGrouped !== undefined ? !!req.body.isGrouped : (currentEstimate?.is_grouped || false)
   }).eq('id', id).eq('company_id', cid).select().single();
 
   if (eError) return res.status(500).json({ error: eError.message });
@@ -1831,39 +1831,72 @@ app.get('/api/quotes/:id/client-report', async (req: any, res) => {
   const s: any = (company?.settings) || {};
 
   // 4. Agregar itens para o cliente
-  const groupedMap: Record<string, any> = {};
-  (estimate.items || []).forEach((item: any) => {
-    let name = 'Fabricação de Calha/Rufo';
-    let unit = 'm²';
-    let type = 'product';
-    let quantity = 0;
-    let total_price = parseFloat(item.total_price) || 0;
-    let unit_price = parseFloat(item.unit_price) || 0;
+  let items: any[] = [];
+  if (estimate.is_grouped) {
+    // Se for agrupado, não consolidamos tudo — mostramos por cômodo
+    const groups: Record<string, any[]> = {};
+    (estimate.items || []).forEach((item: any) => {
+      let name = 'Fabricação';
+      let gName = 'Geral';
+      if (item.description?.startsWith('[BEND] ')) {
+        try {
+          const b = JSON.parse(item.description.substring(7));
+          name = b.productName || 'Calha/Rufo';
+          gName = b.group_name || 'Geral';
+        } catch { }
+      } else if (item.description?.startsWith('[SERVICE] ')) {
+        name = item.description.replace('[SERVICE] ', '');
+      }
+      if (!groups[gName]) groups[gName] = [];
+      groups[gName].push({
+        name,
+        type: item.description?.startsWith('[SERVICE] ') ? 'service' : 'product',
+        quantity: parseFloat(item.quantity) || 0,
+        unit_price: parseFloat(item.unit_price) || 0,
+        total_price: parseFloat(item.total_price) || 0,
+        unit: item.description?.startsWith('[BEND] ') ? 'm²' : 'un'
+      });
+    });
+    // Flatten with group headers
+    Object.entries(groups).forEach(([gName, gItems]) => {
+      items.push({ isHeader: true, name: `🏠 ${gName}` });
+      items.push(...gItems);
+    });
+  } else {
+    // Se NÃO for agrupado, consolidamos itens iguais
+    const groupedMap: Record<string, any> = {};
+    (estimate.items || []).forEach((item: any) => {
+      let name = 'Fabricação de Calha/Rufo';
+      let unit = 'm²';
+      let type = 'product';
+      let quantity = 0;
+      let total_price = parseFloat(item.total_price) || 0;
+      let unit_price = parseFloat(item.unit_price) || 0;
 
-    if (item.description?.startsWith('[BEND] ')) {
-      try {
-        const b = JSON.parse(item.description.substring(7));
-        quantity = b.m2 || 0;
-        name = b.productName || 'Calha/Rufo';
-        unit = 'm²';
-        type = 'product';
-      } catch { quantity = parseFloat(item.quantity) || 0; }
-    } else if (item.description?.startsWith('[SERVICE] ')) {
-      name = item.description.replace('[SERVICE] ', '');
-      unit = 'un';
-      type = 'service';
-      quantity = parseFloat(item.quantity) || 1;
-    } else {
-      quantity = parseFloat(item.quantity) || 0;
-    }
+      if (item.description?.startsWith('[BEND] ')) {
+        try {
+          const b = JSON.parse(item.description.substring(7));
+          quantity = b.m2 || 0;
+          name = b.productName || 'Calha/Rufo';
+          unit = 'm²';
+          type = 'product';
+        } catch { quantity = parseFloat(item.quantity) || 0; }
+      } else if (item.description?.startsWith('[SERVICE] ')) {
+        name = item.description.replace('[SERVICE] ', '');
+        unit = 'un';
+        type = 'service';
+        quantity = parseFloat(item.quantity) || 1;
+      } else {
+        quantity = parseFloat(item.quantity) || 0;
+      }
 
-    const key = `${name}-${unit_price}`;
-    if (!groupedMap[key]) groupedMap[key] = { name, unit, type, quantity: 0, total_price: 0 };
-    groupedMap[key].quantity += quantity;
-    groupedMap[key].total_price += total_price;
-  });
-
-  const items = Object.values(groupedMap).sort((a: any, b: any) => a.name.localeCompare(b.name));
+      const key = `${name}-${unit_price}`;
+      if (!groupedMap[key]) groupedMap[key] = { name, unit, type, quantity: 0, total_price: 0 };
+      groupedMap[key].quantity += quantity;
+      groupedMap[key].total_price += total_price;
+    });
+    items = Object.values(groupedMap).sort((a: any, b: any) => a.name.localeCompare(b.name));
+  }
   const totalAmount = parseFloat(estimate.total_amount) || 0;
   const discountAmount = parseFloat(estimate.discount_amount) || 0;
   const finalAmount = parseFloat(estimate.final_amount) || (totalAmount - discountAmount);
@@ -1951,26 +1984,28 @@ app.get('/api/quotes/:id/client-report', async (req: any, res) => {
     </div>
     <table>
       <thead><tr>
-        <th width="55%">Descrição do Item</th>
-        <th style="text-align:center">Quantidade</th>
-        <th style="text-align:right">Valor Total</th>
+        <th width="40%">Descrição do Item</th>
+        <th width="20%" style="text-align:center">Quantidade</th>
+        <th width="20%" style="text-align:right">Valor Unitário</th>
+        <th width="20%" style="text-align:right">Valor Total</th>
       </tr></thead>
-      <tbody>
-        ${items.map((item: any) => `
-          <tr>
-            <td>
-              <span class="item-name">${item.name}</span>
-              <span class="item-tag ${item.type === 'service' ? 'tag-service' : 'tag-product'}">${item.type === 'service' ? 'Mão de Obra' : 'Material'}</span>
-            </td>
-            <td style="text-align:center;font-weight:700">
-              ${item.type === 'service' ? `${item.quantity || 1} <span class="price-unit">${item.unit}</span>` : `${(item.quantity || 0).toFixed(2)} <span class="price-unit">${item.unit}</span>`}
-            </td>
-            <td style="text-align:right">
-              <span class="price-total">R$ ${(Number(item.total_price) || 0).toFixed(2)}</span>
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
+        <tbody>
+          ${items.map((item: any) => item.isHeader ? `
+            <tr>
+              <td colspan="4" style="background:#f8fafc; font-weight:800; color:var(--brand); border-left:4px solid var(--brand); padding:8px 12px; font-size:12px;">${item.name}</td>
+            </tr>
+          ` : `
+            <tr>
+              <td>
+                <span class="item-name">${item.name}</span>
+                <span class="item-tag tag-${item.type}">${item.type === 'product' ? 'Produto' : 'Serviço'}</span>
+              </td>
+              <td style="text-align:center;font-weight:700">${item.quantity.toFixed(2)} <span class="price-unit">${item.unit || ''}</span></td>
+              <td style="text-align:right"><span class="price-unit">R$ ${item.unit_price.toFixed(2)}</span></td>
+              <td style="text-align:right"><span class="price-total">R$ ${item.total_price.toFixed(2)}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
     </table>
     <div class="financial-grid">
       <div class="notes-area">
@@ -2009,19 +2044,27 @@ app.get('/api/quotes/:id/client-report', async (req: any, res) => {
 });
 
 // ── Relatório A4 Compacto para Obra ──────────────────────────────────────────
-app.get('/api/quotes/:id/report', authenticate, async (req: any, res) => {
+// Tornado PÚBLICO para evitar problemas de sessão em novas janelas (Item 3)
+app.get('/api/quotes/:id/report', async (req: any, res) => {
   const id = req.params.id;
-  const companyId = req.user.companyId;
+  console.log(`[REPORT] Requesting report for estimate: ${id}`);
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-  // 1. Buscar orçamento + itens
+  if (!uuidRegex.test(id)) {
+    console.warn(`[REPORT] Invalid UUID format: ${id}`);
+    return res.status(400).send('ID inválido. Certifique-se de que o orçamento foi salvo corretamente no formato V2 (UUID).');
+  }
+
+  // 1. Buscar orçamento + itens (sem filtro de company para ser público)
   const { data: quote, error } = await supabase
     .from('estimates')
     .select('*, items:estimate_items(*)')
     .eq('id', id)
-    .eq('company_id', companyId)
     .single();
 
   if (error || !quote) return res.status(404).send('Orçamento não encontrado');
+
+  const companyId = quote.company_id;
 
   // 2. Buscar settings para o logo/nome
   const { data: company } = await supabase.from('companies').select('settings').eq('id', companyId).single();
@@ -2040,6 +2083,17 @@ app.get('/api/quotes/:id/report', authenticate, async (req: any, res) => {
   }));
 
   const quoteNum = String(id).substring(0, 8).toUpperCase();
+  console.log(`[REPORT] Estimate: ${quoteNum} | Grouped: ${quote.is_grouped} | Items: ${quote.items?.length}`);
+
+  // Agrupamento por cômodo (Item 4)
+  const groupedBends: Record<string, any[]> = {};
+  if (quote.is_grouped) {
+    bends.forEach((b: any) => {
+      const g = b.group_name || 'Sem Grupo';
+      if (!groupedBends[g]) groupedBends[g] = [];
+      groupedBends[g].push(b);
+    });
+  }
 
   // 4. Gerar HTML Compacto
   const html = `<!DOCTYPE html>
@@ -2054,6 +2108,7 @@ app.get('/api/quotes/:id/report', authenticate, async (req: any, res) => {
     .title { font-size: 18px; font-weight: bold; color: #2563eb; }
     .quote-info { text-align: right; }
     .section-title { background: #f8fafc; padding: 5px 10px; font-weight: bold; border-left: 4px solid #2563eb; margin: 20px 0 10px; text-transform: uppercase; font-size: 11px; }
+    .group-title { background: #e2e8f0; padding: 4px 10px; font-weight: 800; margin: 15px 0 10px; border-radius: 4px; font-size: 12px; color: #1e293b; }
     .bend-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
     .bend-card { border: 1px solid #eee; border-radius: 8px; padding: 10px; page-break-inside: avoid; }
     .bend-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; margin-bottom: 5px; }
@@ -2085,25 +2140,51 @@ app.get('/api/quotes/:id/report', authenticate, async (req: any, res) => {
   </div>
 
   <div class="section-title">Itens de Produção (Dobras)</div>
-  <div class="bend-grid">
-    ${bends.map((b: any, idx: number) => `
-      <div class="bend-card">
-        <div class="bend-header">
-          <span>ITEM #${idx + 1} - ${b.productName || 'Personalizado'}</span>
-          <span>${b.m2?.toFixed(2)} m²</span>
-        </div>
-        <div class="bend-details">
-          Largura: ${b.roundedWidthCm}mm | Riscos: ${(b.risks || []).length}
-        </div>
-        <div style="font-size: 9px; color: #888;">
-          ${(b.risks || []).map((r: any) => `${r.direction === 'up' ? '↑' : r.direction === 'down' ? '↓' : '→'} ${r.sizeCm}`).join(' · ')}
-        </div>
-        <div class="lengths">
-          ${(b.lengths || []).map((l: any) => `<span class="len-tag">${Number(l).toFixed(2)}m</span>`).join('')}
-        </div>
+  
+  ${quote.is_grouped ?
+      Object.entries(groupedBends).map(([groupName, groupBends]) => `
+      <div class="group-title">🏠 ${groupName}</div>
+      <div class="bend-grid">
+        ${groupBends.map((b: any, idx: number) => `
+          <div class="bend-card">
+            <div class="bend-header">
+              <span>ITEM #${idx + 1} - ${b.productName || 'Personalizado'}</span>
+              <span>${b.m2?.toFixed(2)} m²</span>
+            </div>
+            <div class="bend-details">
+              Largura: ${b.roundedWidthCm}mm | Riscos: ${(b.risks || []).length}
+            </div>
+            <div style="font-size: 9px; color: #888;">
+              ${(b.risks || []).map((r: any) => `${r.direction === 'up' ? '↑' : r.direction === 'down' ? '↓' : '→'} ${r.sizeCm}`).join(' · ')}
+            </div>
+            <div class="lengths">
+              ${(b.lengths || []).map((l: any) => `<span class="len-tag">${Number(l).toFixed(2)}m</span>`).join('')}
+            </div>
+          </div>
+        `).join('')}
       </div>
-    `).join('')}
-  </div>
+    `).join('')
+      : `
+    <div class="bend-grid">
+      ${bends.map((b: any, idx: number) => `
+        <div class="bend-card">
+          <div class="bend-header">
+            <span>ITEM #${idx + 1} - ${b.productName || 'Personalizado'}</span>
+            <span>${b.m2?.toFixed(2)} m²</span>
+          </div>
+          <div class="bend-details">
+            Largura: ${b.roundedWidthCm}mm | Riscos: ${(b.risks || []).length}
+          </div>
+          <div style="font-size: 9px; color: #888;">
+            ${(b.risks || []).map((r: any) => `${r.direction === 'up' ? '↑' : r.direction === 'down' ? '↓' : '→'} ${r.sizeCm}`).join(' · ')}
+          </div>
+          <div class="lengths">
+            ${(b.lengths || []).map((l: any) => `<span class="len-tag">${Number(l).toFixed(2)}m</span>`).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `}
 
   ${services.length > 0 ? `
     <div class="section-title">Serviços / Mão de Obra</div>
@@ -2432,14 +2513,17 @@ app.post('/api/quotes/:id/new-version', authenticate, async (req: any, res) => {
         parent_estimate_id: originId,
         origin_estimate_id: rootOriginId,
         is_latest_version: true,
-        is_grouped: origin.is_grouped || false
+        is_grouped: !!origin.is_grouped // Garante persistência do agrupamento (Item 4)
       })
       .select()
       .single();
 
     if (newEstErr || !newEstimate) {
+      console.error('[NEW_VERSION_ERROR] Failed to duplicate estimate:', newEstErr);
       return res.status(500).json({ error: 'Falha ao criar nova versão: ' + newEstErr?.message });
     }
+
+    console.log(`[NEW_VERSION_SUCCESS] Created version ${newVersion} for ${originId} -> ${newEstimate.id} (Grouped: ${newEstimate.is_grouped})`);
 
     // 6. Copiar itens para nova versão
     const items = origin.items || [];

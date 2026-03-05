@@ -304,10 +304,16 @@ export default function Orcamento() {
     // Auto-scroll para a seção de totais ao entrar no resumo e atualizar settings
     useEffect(() => {
         if (step === 'summary') {
-            // Re-busca settings ao entrar no resumo para garantir que o preço M2 esteja atualizado (Item 1)
+            // Re-busca settings ao entrar no resumo para garantir que os valores padrão estejam disponíveis (Item 1)
             fetch('/api/settings').then(r => r.json()).then(d => {
                 setSettings(d);
-                // Se NÃO houver override manual, o sistema usará o novo valor dos settings automaticamente via variável pricePerM2
+                // Preenche os overrides se estiverem vazios para que não fiquem em branco na tela (Item 1)
+                if ((!overridePricePerM2 || overridePricePerM2 === '') && d.pricePerM2) {
+                    setOverridePricePerM2(String(d.pricePerM2));
+                }
+                if ((!overrideCostPerM2 || overrideCostPerM2 === '') && d.costPerM2) {
+                    setOverrideCostPerM2(String(d.costPerM2));
+                }
             }).catch(() => { });
 
             // Pequeno delay para o DOM renderizar antes do scroll
@@ -376,8 +382,8 @@ export default function Orcamento() {
         setSelectedClientId(null);
         setSelectedProductId(null);
         setSelectedProductName('');
-        setOverridePricePerM2('');
-        setOverrideCostPerM2('');
+        setOverridePricePerM2(settings.pricePerM2 || '');
+        setOverrideCostPerM2(settings.costPerM2 || '');
         setDiscountAmount('');
         setGroupByRoom(false);
         setCurrentGroupName('');
@@ -3344,7 +3350,8 @@ window.onload = function() {
                                                 type="number"
                                                 value={overridePricePerM2}
                                                 onChange={e => setOverridePricePerM2(e.target.value)}
-                                                className="bg-transparent text-xl font-black text-white outline-none w-full"
+                                                className="bg-white/20 border border-white/20 rounded-xl px-4 py-2 text-xl font-black text-white outline-none w-full focus:ring-2 focus:ring-blue-500 transition-all"
+                                                placeholder="0,00"
                                             />
                                         </div>
                                         <p className="text-[10px] text-slate-500 mt-2 italic">Valor usado para calcular as dobras deste orçamento</p>
@@ -3359,7 +3366,8 @@ window.onload = function() {
                                                     type="number"
                                                     value={overrideCostPerM2}
                                                     onChange={e => setOverrideCostPerM2(e.target.value)}
-                                                    className="bg-white/10 rounded-xl px-4 py-2 text-xl font-black text-white outline-none w-24 focus:ring-2 focus:ring-blue-500"
+                                                    className="bg-white/20 border border-white/20 rounded-xl px-4 py-2 text-xl font-black text-white outline-none w-24 focus:ring-2 focus:ring-blue-500 transition-all"
+                                                    placeholder="0,00"
                                                 />
                                             </div>
                                         </div>
