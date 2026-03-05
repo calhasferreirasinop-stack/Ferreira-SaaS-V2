@@ -74,7 +74,17 @@ export default function Login() {
             body: JSON.stringify({ access_token: session.access_token }),
             credentials: 'include'
           });
-          const data = await res.json();
+
+          let data;
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.indexOf("application/json") !== -1) {
+            data = await res.json();
+          } else {
+            const text = await res.text();
+            console.error('[SYNC_DEBUG] Server returned non-JSON:', text);
+            throw new Error(res.status === 500 ? 'Erro interno no servidor do Vercel' : `Erro ${res.status}: O servidor não respondeu corretamente.`);
+          }
+
           if (res.ok) {
             localStorage.setItem('user', JSON.stringify({
               authenticated: true,
@@ -89,7 +99,7 @@ export default function Login() {
             setLoading(false);
           }
         } catch (err: any) {
-          setError(`Erro de rede: ${err.message || 'Falha na comunicação'}`);
+          setError(`Erro de login: ${err.message || 'Falha na comunicação'}`);
           setChecking(false);
           setLoading(false);
         }
