@@ -194,7 +194,7 @@ export default function InventoryTab({ inventory, onSave, showToast }: Props) {
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="flex-1">
                                                 <p className="font-bold text-slate-900">{inv.description || `Bobina #${inv.id}`}</p>
-                                                <p className="text-xs text-slate-400 mt-0.5">{inv.widthM}m × {inv.lengthM}m · {new Date(inv.purchasedAt).toLocaleDateString('pt-BR')}</p>
+                                                <p className="text-xs text-slate-400 mt-0.5">{inv.widthM}m × {inv.lengthM}m · {new Date(inv.created_at).toLocaleDateString('pt-BR')}</p>
                                                 {inv.costPerUnit && <p className="text-xs text-slate-500 mt-0.5">Custo unit.: R$ {parseFloat(inv.costPerUnit).toFixed(2)}</p>}
                                             </div>
                                             <div className="text-right flex-shrink-0">
@@ -243,7 +243,7 @@ export default function InventoryTab({ inventory, onSave, showToast }: Props) {
                                                     {inv.costPerUnit ? `R$ ${parseFloat(inv.costPerUnit).toFixed(2)}` : '—'}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-slate-500">
-                                                    {new Date(inv.purchasedAt).toLocaleDateString('pt-BR')}
+                                                    {new Date(inv.created_at).toLocaleDateString('pt-BR')}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="font-black text-slate-800">{parseFloat(inv.availableM2).toFixed(2)} m²</div>
