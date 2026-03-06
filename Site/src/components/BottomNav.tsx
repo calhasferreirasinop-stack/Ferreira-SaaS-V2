@@ -12,11 +12,6 @@ export default function BottomNav() {
             path: '/orcamento',
         },
         {
-            label: 'Produção',
-            icon: Factory,
-            path: '/producao',
-        },
-        {
             label: 'Central',
             icon: LayoutGrid,
             path: '/admin',
