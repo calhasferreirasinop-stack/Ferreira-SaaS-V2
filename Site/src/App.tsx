@@ -18,23 +18,30 @@ import Fabricacao from './pages/Fabricacao';
 
 function AppContent() {
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const isAdmin = location.pathname.startsWith('/admin') || location.pathname.startsWith('/central') || location.pathname.startsWith('/producao');
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
       <OfflineIndicator />
-      <Navbar />
-      <main className="flex-grow pt-[env(safe-area-inset-top)] pb-20 md:pb-0">
+      {/* Show top Navbar on desktop, hide on mobile if it's redundant with bottom nav */}
+      {!isMobile && <Navbar />}
+
+      <main className={`flex-grow ${isMobile ? 'pt-[env(safe-area-inset-top)] pb-24' : 'pt-20 md:pb-0'}`}>
         <Routes>
           {/* === MODO BETA PRIVADO === */}
           {/* Página inicial redireciona para login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           {/* Páginas públicas desativadas temporariamente */}
           <Route path="/servicos" element={<Navigate to="/login" replace />} />
-          <Route path="/blog" element={<Navigate to="/login" replace />} />
-          <Route path="/galeria" element={<Navigate to="/login" replace />} />
-          <Route path="/inicio" element={<Navigate to="/login" replace />} />
-          {/* === ROTAS DO SISTEMA (mantidas) === */}
+          {/* ... existing routes ... */}
           <Route path="/login" element={<Login />} />
           <Route path="/orcamento" element={
             <ErrorBoundary>
@@ -71,10 +78,13 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>
-      {/* Footer and WhatsApp always visible EXCEPT on admin/producao */}
-      {!isAdmin && <Footer />}
-      {!isAdmin && <WhatsAppButton />}
-      <BottomNav />
+
+      {/* Footer and WhatsApp only on desktop non-admin pages */}
+      {!isMobile && !isAdmin && <Footer />}
+      {!isMobile && !isAdmin && <WhatsAppButton />}
+
+      {/* Bottom Nav ONLY on mobile */}
+      {isMobile && <BottomNav />}
     </div>
   );
 }

@@ -84,6 +84,14 @@ export default function ClientsTab({ showToast }: Props) {
         }
     };
 
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     useEffect(() => { fetchClients(); }, []);
 
     const handleOpenModal = (client?: any) => {
@@ -169,7 +177,7 @@ export default function ClientsTab({ showToast }: Props) {
                     <Users className="w-16 h-16 text-slate-200 mx-auto mb-4" />
                     <p className="text-slate-500 font-medium">Nenhum cliente cadastrado ainda.</p>
                 </div>
-            ) : (
+            ) : isMobile ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {clients.map(client => (
                         <motion.div
@@ -229,6 +237,67 @@ export default function ClientsTab({ showToast }: Props) {
                             </div>
                         </motion.div>
                     ))}
+                </div>
+            ) : (
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Nome</th>
+                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Contato</th>
+                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Documento</th>
+                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Endereço</th>
+                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {clients.map(client => (
+                                <tr key={client.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <td className="px-6 py-4">
+                                        <div className="font-bold text-slate-800">{client.name}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2 text-sm text-slate-600">
+                                                <Phone className="w-3.5 h-3.5 text-slate-400" />
+                                                <span className="font-mono text-xs">{client.phone}</span>
+                                            </div>
+                                            {client.email && (
+                                                <div className="flex items-center gap-2 text-sm text-slate-500">
+                                                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                                                    {client.email}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="text-sm text-slate-600">{client.document || '—'}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="text-sm text-slate-600 max-w-[200px] truncate" title={client.address}>{client.address || '—'}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button
+                                                onClick={() => handleOpenModal(client)}
+                                                className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-brand-primary hover:text-white transition-colors cursor-pointer"
+                                                title="Editar"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(client.id)}
+                                                className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
+                                                title="Excluir"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 

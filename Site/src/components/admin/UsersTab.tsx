@@ -20,6 +20,13 @@ export default function UsersTab({ users, currentUser, onSave, showToast }: Prop
     const [editing, setEditing] = useState<any>(null);
     const [form, setForm] = useState(emptyForm);
     const [loading, setLoading] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    React.useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const startNew = () => { setEditing('new'); setForm(emptyForm); };
     const startEdit = (u: any) => {
@@ -138,45 +145,123 @@ export default function UsersTab({ users, currentUser, onSave, showToast }: Prop
             )}
 
             {/* Users list */}
-            <div className="space-y-3">
-                {users.map(u => {
-                    const cfg = ROLE_CONFIG[u.role as keyof typeof ROLE_CONFIG] || ROLE_CONFIG.user;
-                    const Icon = cfg.icon;
-                    return (
-                        <div key={u.id} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${u.active ? 'bg-white border-slate-100 hover:shadow-sm' : 'bg-slate-50 border-slate-200 opacity-60'}`}>
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${cfg.color}`}>
-                                <Icon className="w-5 h-5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="font-bold text-slate-900">{u.name || (u.username || u.name)}</span>
-                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cfg.color}`}>{cfg.label}</span>
-                                    {!u.active && <span className="text-xs text-slate-400 font-bold bg-slate-100 px-2 py-0.5 rounded-full">Inativo</span>}
+            {isMobile ? (
+                <div className="space-y-3">
+                    {users.map(u => {
+                        const cfg = ROLE_CONFIG[u.role as keyof typeof ROLE_CONFIG] || ROLE_CONFIG.user;
+                        const Icon = cfg.icon;
+                        return (
+                            <div key={u.id} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${u.active ? 'bg-white border-slate-100 hover:shadow-sm' : 'bg-slate-50 border-slate-200 opacity-60'}`}>
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${cfg.color}`}>
+                                    <Icon className="w-5 h-5" />
                                 </div>
-                                <p className="text-xs text-slate-400 mt-0.5">{u.phone || ''}</p>
-                            </div>
-                            {u.id !== currentUser?.id && (
-                                <div className="flex gap-2">
-                                    <button onClick={() => toggleActive(u)} title={u.active ? 'Desativar' : 'Ativar'}
-                                        className={`p-2 rounded-xl transition-all cursor-pointer ${u.active ? 'text-green-500 hover:bg-green-50' : 'text-slate-400 hover:bg-slate-100'}`}>
-                                        <Check className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => startEdit(u)}
-                                        className="p-2 text-blue-500 hover:bg-blue-50 rounded-xl transition-all cursor-pointer">
-                                        <Edit2 className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => handleDelete(u.id)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all cursor-pointer">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="font-bold text-slate-900">{u.name || (u.username || u.name)}</span>
+                                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cfg.color}`}>{cfg.label}</span>
+                                        {!u.active && <span className="text-xs text-slate-400 font-bold bg-slate-100 px-2 py-0.5 rounded-full">Inativo</span>}
+                                    </div>
+                                    <p className="text-xs text-slate-400 mt-0.5">{u.phone || ''}</p>
                                 </div>
+                                {u.id !== currentUser?.id && (
+                                    <div className="flex gap-2">
+                                        <button onClick={() => toggleActive(u)} title={u.active ? 'Desativar' : 'Ativar'}
+                                            className={`p-2 rounded-xl transition-all cursor-pointer ${u.active ? 'text-green-500 hover:bg-green-50' : 'text-slate-400 hover:bg-slate-100'}`}>
+                                            <Check className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => startEdit(u)}
+                                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-xl transition-all cursor-pointer">
+                                            <Edit2 className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => handleDelete(u.id)}
+                                            className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all cursor-pointer">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
+                                {u.id === currentUser?.id && <span className="text-xs text-slate-400 italic">Você</span>}
+                            </div>
+                        );
+                    })}
+                    {users.length === 0 && <p className="text-slate-400 text-center py-8">Nenhum usuário encontrado.</p>}
+                </div>
+            ) : (
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50 border-b border-slate-100 font-bold text-xs text-slate-500 uppercase">
+                            <tr>
+                                <th className="px-6 py-4">Nome / Usuário</th>
+                                <th className="px-6 py-4">Papel</th>
+                                <th className="px-6 py-4">Telefone</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {users.map(u => {
+                                const cfg = ROLE_CONFIG[u.role as keyof typeof ROLE_CONFIG] || ROLE_CONFIG.user;
+                                return (
+                                    <tr key={u.id} className={`hover:bg-slate-50/50 transition-colors ${!u.active ? 'opacity-60 bg-slate-50/30' : ''}`}>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${cfg.color}`}>
+                                                    <cfg.icon className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-slate-800">{u.name || u.username}</div>
+                                                    <div className="text-xs text-slate-400">@{u.username}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg ${cfg.color}`}>
+                                                {cfg.label}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-slate-500 font-mono">
+                                            {u.phone || '—'}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {u.active ? (
+                                                <span className="text-[10px] font-black uppercase tracking-wider text-green-600 bg-green-50 px-2 py-1 rounded-lg">Ativo</span>
+                                            ) : (
+                                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-1 rounded-lg">Inativo</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-center gap-2">
+                                                {u.id !== currentUser?.id ? (
+                                                    <>
+                                                        <button onClick={() => toggleActive(u)} title={u.active ? 'Desativar' : 'Ativar'}
+                                                            className={`p-2 rounded-xl transition-all cursor-pointer ${u.active ? 'text-green-500 hover:bg-green-50' : 'text-slate-400 hover:bg-slate-100'}`}>
+                                                            <Check className="w-4 h-4" />
+                                                        </button>
+                                                        <button onClick={() => startEdit(u)} title="Editar"
+                                                            className="p-2 text-blue-500 hover:bg-blue-50 rounded-xl transition-all cursor-pointer">
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                        <button onClick={() => handleDelete(u.id)} title="Excluir"
+                                                            className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all cursor-pointer">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <span className="text-xs text-slate-400 italic">Você</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            {users.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-bold">Nenhum usuário encontrado.</td>
+                                </tr>
                             )}
-                            {u.id === currentUser?.id && <span className="text-xs text-slate-400 italic">Você</span>}
-                        </div>
-                    );
-                })}
-                {users.length === 0 && <p className="text-slate-400 text-center py-8">Nenhum usuário encontrado.</p>}
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }

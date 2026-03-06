@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare, Menu, X } from 'lucide-react';
+import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare, Menu, X, Factory } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import UsersTab from '../components/admin/UsersTab';
 import QuotesTab from '../components/admin/QuotesTab';
 import InventoryTab from '../components/admin/InventoryTab';
 import FinancialTab from '../components/admin/FinancialTab';
 import ReceivablesTab from '../components/admin/ReceivablesTab';
-import ReportTab from '../components/admin/ReportTab';
 import LogTab from '../components/admin/LogTab';
 import ClientsTab from '../components/admin/ClientsTab';
 import ProductsTab from '../components/admin/ProductsTab';
-type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products';
+import ProductionTab from '../components/admin/ProductionTab';
+type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -263,6 +263,7 @@ export default function Admin() {
     { id: 'products', label: 'Produtos', icon: Package, show: true },
     { id: 'users', label: 'Usuários', icon: Users, show: isAdmin },
     { id: 'quotes', label: 'Gestão de Orçamentos', icon: ClipboardList, show: true, badge: pendingCount },
+    { id: 'production_admin', label: 'Produção', icon: Factory, show: true },
     { id: 'inventory', label: 'Estoque', icon: Package, show: isAdmin },
     { id: 'financial', label: 'Dashboard Financeiro', icon: TrendingUp, show: isAdmin },
     { id: 'receivables', label: 'Contas a Receber', icon: DollarSign, show: isAdmin },
@@ -653,6 +654,11 @@ export default function Admin() {
               {/* ─── LOGS ─── */}
               {activeTab === 'logs' && isMaster && (
                 <LogTab showToast={showToast} />
+              )}
+
+              {/* ─── PRODUCTION ─── */}
+              {activeTab === 'production_admin' && (
+                <ProductionTab showToast={showToast} />
               )}
 
             </div>
