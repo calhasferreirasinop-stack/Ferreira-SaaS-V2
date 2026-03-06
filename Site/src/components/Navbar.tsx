@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Hammer, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
+import { Menu, X, Hammer, LogOut, User as UserIcon, ChevronDown, Download } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -14,6 +14,9 @@ export default function Navbar() {
   const [settings, setSettings] = useState<any>({});
   const [user, setUser] = useState<any>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === '/';
@@ -37,7 +40,6 @@ export default function Navbar() {
       }
     } catch { /* ignore */ }
 
-    // Close user menu on outside click
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setShowUserMenu(false);
@@ -45,9 +47,31 @@ export default function Navbar() {
     };
     document.addEventListener('mousedown', handleClickOutside);
 
+    // PWA Install Logic
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    const handleAppInstalled = () => {
+      setIsInstallable(false);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Check if already in standalone mode
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsStandalone(true);
+    }
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
@@ -72,6 +96,16 @@ export default function Navbar() {
     setShowUserMenu(false);
     setIsOpen(false);
     navigate('/login', { replace: true });
+  };
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setIsInstallable(false);
+    }
+    setDeferredPrompt(null);
   };
 
   const navLinks = [
@@ -157,6 +191,12 @@ export default function Navbar() {
                       className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors">
                       <UserIcon className="w-4 h-4" /> Central do Usuário
                     </Link>
+                    {isInstallable && !isStandalone && (
+                      <button onClick={handleInstallClick}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-brand-primary hover:bg-brand-primary/5 transition-colors w-full text-left cursor-pointer">
+                        <Download className="w-4 h-4" /> Instalar Aplicativo
+                      </button>
+                    )}
                     <hr className="border-slate-100 my-1" />
                     <button onClick={handleLogout}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors w-full text-left cursor-pointer">
@@ -218,6 +258,14 @@ export default function Navbar() {
                     >
                       Central do Usuário
                     </Link>
+                    {isInstallable && !isStandalone && (
+                      <button
+                        onClick={() => { handleInstallClick(); setIsOpen(false); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-base font-bold text-brand-primary hover:bg-brand-primary/5 cursor-pointer"
+                      >
+                        <Download className="w-4 h-4" /> Instalar Aplicativo
+                      </button>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-3 py-2 rounded-md text-base font-bold text-red-500 hover:bg-red-50 cursor-pointer"
