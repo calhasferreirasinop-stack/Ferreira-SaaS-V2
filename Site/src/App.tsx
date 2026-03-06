@@ -23,10 +23,15 @@ function AppContent() {
       <Navbar />
       <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/servicos" element={<Services />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/galeria" element={<Gallery />} />
+          {/* === MODO BETA PRIVADO === */}
+          {/* Página inicial redireciona para login */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* Páginas públicas desativadas temporariamente */}
+          <Route path="/servicos" element={<Navigate to="/login" replace />} />
+          <Route path="/blog" element={<Navigate to="/login" replace />} />
+          <Route path="/galeria" element={<Navigate to="/login" replace />} />
+          <Route path="/inicio" element={<Navigate to="/login" replace />} />
+          {/* === ROTAS DO SISTEMA (mantidas) === */}
           <Route path="/login" element={<Login />} />
           <Route path="/orcamento" element={
             <ErrorBoundary>
@@ -59,7 +64,8 @@ function AppContent() {
               <Fabricacao />
             </ErrorBoundary>
           } />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Qualquer rota desconhecida → login */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>
       {/* Footer and WhatsApp always visible EXCEPT on admin */}

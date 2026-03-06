@@ -71,15 +71,16 @@ export default function Navbar() {
     setUser(null);
     setShowUserMenu(false);
     setIsOpen(false);
-    navigate('/', { replace: true });
+    navigate('/login', { replace: true });
   };
 
   const navLinks = [
-    { name: 'Início', path: '/' },
-    { name: 'Serviços', path: '/servicos' },
-    { name: 'Galeria', path: '/galeria' },
-    { name: 'Blog', path: '/blog' },
-    { name: '📐 Orçamento', path: '/orcamento' },
+    // === MODO BETA: links públicos ocultos ===
+    // { name: 'Início', path: '/' },
+    // { name: 'Serviços', path: '/servicos' },
+    // { name: 'Galeria', path: '/galeria' },
+    // { name: 'Blog', path: '/blog' },
+    // Para reativar o site público, descomente as linhas acima
   ];
 
   const isScrolledOrNotHome = scrolled || !isHome;
