@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare } from 'lucide-react';
+import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import UsersTab from '../components/admin/UsersTab';
 import QuotesTab from '../components/admin/QuotesTab';
@@ -16,6 +16,7 @@ type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'u
 export default function Admin() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>('quotes'); // default; adjusted by useEffect once user loads
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [settings, setSettings] = useState<any>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [heroFile, setHeroFile] = useState<File | null>(null);
@@ -273,21 +274,79 @@ export default function Admin() {
   const btnPrimary = 'bg-brand-primary text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-brand-primary/20 cursor-pointer';
 
   return (
-    <div className="pt-32 pb-24 bg-slate-50 min-h-screen">
+    <div className="pt-20 md:pt-32 pb-24 bg-slate-50 min-h-screen">
       {/* Toast */}
       <AnimatePresence>
         {toast?.show && (
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className={`fixed top-6 right-6 z-50 px-6 py-3 rounded-2xl text-white font-bold shadow-xl ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+            className={`fixed top-6 right-6 z-[200] px-6 py-3 rounded-2xl text-white font-bold shadow-xl ${toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
             {toast.message}
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Mobile Top Bar (visible only on mobile) */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-[150] bg-white border-b border-slate-100 shadow-sm px-4 pt-[env(safe-area-inset-top)] flex items-center justify-between h-16">
+        <div>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Central do Usuário</p>
+          <p className="text-sm font-black text-slate-800 truncate max-w-[200px]">{currentUser?.name || currentUser?.username}</p>
+        </div>
+        <button onClick={() => setMobileNavOpen(true)}
+          className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-xl cursor-pointer">
+          <Menu className="w-5 h-5 text-slate-700" />
+        </button>
+      </div>
+
+      {/* Mobile Nav Drawer Overlay */}
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-900/50 z-[160] md:hidden"
+              onClick={() => setMobileNavOpen(false)} />
+            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+              transition={{ type: 'tween', duration: 0.25 }}
+              className="fixed top-0 left-0 bottom-0 w-72 max-w-[85vw] bg-white z-[170] md:hidden flex flex-col shadow-2xl">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Menu</p>
+                  <p className="text-sm font-black text-slate-800">{currentUser?.name || currentUser?.username}</p>
+                </div>
+                <button onClick={() => setMobileNavOpen(false)}
+                  className="w-9 h-9 flex items-center justify-center bg-slate-100 rounded-xl cursor-pointer">
+                  <X className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+              <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+                {allTabs.map((tab: any) => (
+                  <button key={tab.id} onClick={() => { setActiveTab(tab.id as TabId); setMobileNavOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all cursor-pointer
+                      ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-slate-600 hover:bg-slate-50'}`}>
+                    <tab.icon className="w-4 h-4" />
+                    <span className="flex-1 text-left">{tab.label}</span>
+                    {tab.badge > 0 && (
+                      <span className={`text-xs font-black px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-white text-brand-primary' : 'bg-orange-500 text-white'}`}>
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </nav>
+              <div className="border-t border-slate-100 p-3">
+                <button onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-all cursor-pointer">
+                  <LogOut className="w-4 h-4" /> Sair da conta
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar */}
-          <aside className="md:w-64 shrink-0">
+          {/* Sidebar — desktop only */}
+          <aside className="hidden md:block md:w-64 shrink-0">
             <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 sticky top-32">
               <div className="px-4 mb-4">
                 <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">
@@ -322,8 +381,8 @@ export default function Admin() {
           </aside>
 
           {/* Content */}
-          <main className="flex-grow">
-            <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-sm border border-slate-100">
+          <main className="flex-grow min-w-0">
+            <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-12 shadow-sm border border-slate-100">
 
               {/* ─── SETTINGS ─── */}
               {activeTab === 'settings' && (

@@ -10,6 +10,36 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
+    /* Smooth momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile: prevent tiny inputs / buttons */
+  @media (max-width: 767px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea,
+    button {
+      min-height: 44px;
+    }
+
+    /* Ensure full-width inputs on mobile */
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="date"],
+    input[type="password"],
+    select,
+    textarea {
+      width: 100%;
+      font-size: 16px; /* Prevents iOS zoom on focus */
+    }
   }
 }
 

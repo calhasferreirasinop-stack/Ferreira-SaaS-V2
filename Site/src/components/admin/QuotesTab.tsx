@@ -252,20 +252,20 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
             </div>
 
             {/* BARRA DE FILTROS */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-4 shadow-sm">
                 <div className="flex flex-wrap gap-2">
                     {['all', 'draft', 'sent', 'approved', 'in_production', 'paid', 'expired', 'cancelled'].map(f => {
                         const count = f === 'all' ? quotes.length : quotes.filter(q => q.status === f).length;
                         return (
                             <button key={f} onClick={() => setStatusFilter(f)}
-                                className={`px-4 py-2 rounded-xl text-[11px] font-bold uppercase transition-all flex items-center gap-2 ${statusFilter === f ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase transition-all flex items-center gap-1.5 ${statusFilter === f ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
                                 {f === 'all' ? 'Todos' : STATUS_CONFIG[f]?.label || f}
                                 <span className={`px-1.5 py-0.5 rounded-md text-[10px] ${statusFilter === f ? 'bg-white/20' : 'bg-slate-200 text-slate-400'}`}>{count}</span>
                             </button>
                         )
                     })}
                 </div>
-                <div className="relative w-full md:w-80">
+                <div className="relative">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input type="text" placeholder="Buscar por cliente ou Nº orçamento..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" />
@@ -273,7 +273,122 @@ export default function QuotesTab({ quotes, fetchData, showToast }: QuotesTabPro
             </div>
 
             {/* LISTAGEM */}
-            <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+            {/* === MOBILE: Cards View (hidden on md+) === */}
+            <div className="md:hidden space-y-3">
+                {filtered.length === 0 ? (
+                    <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-400 font-bold">
+                        Nenhum orçamento encontrado.
+                    </div>
+                ) : (
+                    filtered.map((q) => {
+                        const fallbackRestante = (q.finalValue || q.totalValue || 0) - (q.fin_paid || 0) - (q.fin_credit || 0);
+                        const valRestante = q.fin_remaining !== null && q.fin_remaining !== undefined ? q.fin_remaining : Math.max(0, fallbackRestante);
+                        const isTotalPaid = valRestante < 0.01 && ((q.fin_paid || 0) > 0 || (q.fin_credit || 0) > 0);
+                        const hasPaid = (q.fin_paid || 0) > 0 || (q.fin_credit || 0) > 0;
+                        const hasFinance = !!q.fin_id || hasPaid;
+                        const hasProd = !!q.production_order;
+                        const finKey = isTotalPaid ? 'pago' : (hasPaid ? 'parcial' : 'pendente');
+                        const isDraft = q.status === 'draft';
+                        const stConf = STATUS_CONFIG[q.status] || STATUS_CONFIG['draft'];
+                        const fnConf = FIN_STATUS_CONFIG[finKey] || FIN_STATUS_CONFIG['pendente'];
+
+                        return (
+                            <div key={q.id} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+                                {/* Card Header */}
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-black text-slate-900 text-base truncate">{q.clientName || 'Cliente'}</p>
+                                        <p className="font-mono text-slate-400 text-xs">#{String(q.id).substring(0, 8).toUpperCase()} • {new Date(q.createdAt).toLocaleDateString('pt-BR')}</p>
+                                    </div>
+                                    <p className="font-black text-slate-900 text-lg ml-3 shrink-0">{fmt(q.finalValue || q.totalValue)}</p>
+                                </div>
+
+                                {/* Status badges */}
+                                <div className="flex flex-wrap gap-1.5 mb-4">
+                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${stConf.bg} ${stConf.color}`}>
+                                        {stConf.label}
+                                    </span>
+                                    {!isDraft && (
+                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${fnConf.bg} ${fnConf.color}`}>
+                                            {fnConf.label}
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Action buttons — full width on mobile */}
+                                <div className="grid grid-cols-2 gap-2">
+                                    {/* Ver / Alterar */}
+                                    {(q.status === 'draft' || q.status === 'rascunho' || (!hasPaid && !hasProd && q.status === 'sent')) ? (
+                                        <button onClick={() => navigate(`/orcamento?edit=${q.id}`)}
+                                            className="flex items-center justify-center gap-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer col-span-2">
+                                            <PenLine className="w-4 h-4" /> Alterar Orçamento
+                                        </button>
+                                    ) : (
+                                        <button onClick={() => navigate(`/orcamento?view=${q.id}`)}
+                                            className="flex items-center justify-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-2.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer col-span-2">
+                                            <Eye className="w-4 h-4" /> Visualizar Orçamento
+                                        </button>
+                                    )}
+
+                                    {q.status !== 'cancelled' && q.status !== 'canceled' && (
+                                        <>
+                                            {(hasPaid || hasProd) && (
+                                                <button onClick={() => handleNewVersionClick(q)}
+                                                    className="flex items-center justify-center gap-1.5 bg-purple-100 text-purple-700 px-3 py-2.5 rounded-xl text-xs font-black uppercase cursor-pointer">
+                                                    <RefreshCcw className="w-4 h-4" /> Nova Versão
+                                                </button>
+                                            )}
+                                            {(q.status === 'draft' || q.status === 'sent') && (
+                                                <button onClick={() => handleApprove(q.id)}
+                                                    className="flex items-center justify-center gap-1.5 bg-brand-primary text-white px-3 py-2.5 rounded-xl text-xs font-black uppercase cursor-pointer">
+                                                    <CheckCircle2 className="w-4 h-4" /> Aprovar
+                                                </button>
+                                            )}
+                                            {(q.status !== 'draft' && q.status !== 'rascunho' && q.status !== 'sent' && !hasPaid) && (
+                                                <button onClick={() => handleReopen(q.id, false)}
+                                                    className="flex items-center justify-center gap-1.5 bg-slate-700 text-white px-3 py-2.5 rounded-xl text-xs font-black uppercase cursor-pointer">
+                                                    <RefreshCcw className="w-4 h-4" /> Reabrir
+                                                </button>
+                                            )}
+                                            <button onClick={() => navigate(`/fabricacao/${q.id}`)}
+                                                className="flex items-center justify-center gap-1.5 bg-indigo-600 text-white px-3 py-2.5 rounded-xl text-xs font-black uppercase cursor-pointer">
+                                                <Hammer className="w-4 h-4" /> Fabricação
+                                            </button>
+                                        </>
+                                    )}
+
+                                    <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
+                                        className="flex items-center justify-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-2.5 rounded-xl text-xs font-black uppercase cursor-pointer">
+                                        <FileDown className="w-4 h-4" /> PDF Cliente
+                                    </button>
+
+                                    <button onClick={() => window.open(`/api/quotes/${q.id}/report`, '_blank')}
+                                        className="flex items-center justify-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-2.5 rounded-xl text-xs font-black uppercase cursor-pointer">
+                                        <Printer className="w-4 h-4" /> PDF Obra
+                                    </button>
+
+                                    {q.status !== 'cancelled' && q.status !== 'canceled' && !isTotalPaid && (
+                                        <button onClick={() => openPayModal(q)}
+                                            className="flex items-center justify-center gap-1.5 bg-green-100 text-green-700 px-3 py-2.5 rounded-xl text-xs font-black uppercase cursor-pointer col-span-2">
+                                            <DollarSign className="w-4 h-4" /> Registrar Pagamento
+                                        </button>
+                                    )}
+
+                                    {q.status !== 'cancelled' && q.status !== 'canceled' && !hasPaid && !hasFinance && !hasProd && (
+                                        <button onClick={() => handleCancelClick(q)}
+                                            className="flex items-center justify-center gap-1.5 bg-red-50 text-red-600 px-3 py-2.5 rounded-xl text-xs font-black uppercase cursor-pointer col-span-2">
+                                            <XCircle className="w-4 h-4" /> Cancelar Orçamento
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+
+            {/* === DESKTOP: Table View (hidden on mobile) === */}
+            <div className="hidden md:block bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-slate-50 border-b border-slate-200 uppercase text-[10px] font-black text-slate-500 tracking-widest">
