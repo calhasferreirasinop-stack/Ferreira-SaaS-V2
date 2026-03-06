@@ -6,9 +6,10 @@ import { createClient } from '@supabase/supabase-js';
 const createSupabaseClient = () => {
   // Limpar possíveis aspas ou espaços colados por engano no Vercel
   const sanitize = (val: any) => typeof val === 'string' ? val.replace(/['"]+/g, '').trim() : val;
-  const env = (import.meta as any).env;
-  const url = sanitize(env?.VITE_SUPABASE_URL);
-  const key = sanitize(env?.VITE_SUPABASE_ANON_KEY);
+  // @ts-ignore
+  const url = sanitize(import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL);
+  // @ts-ignore
+  const key = sanitize(import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY);
 
   if (!url || !key) {
     console.warn("[SUPABASE] Chaves de configuração ausentes no frontend.");
@@ -173,10 +174,6 @@ export default function Login() {
             As credenciais do <b>Supabase</b> (ANON KEY) não foram detectadas.
             O login via Google e as funções de banco estão desabilitadas.
           </p>
-          <button onClick={() => navigate('/')}
-            className="w-full bg-slate-700 text-white py-4 rounded-2xl font-bold hover:bg-slate-600 transition-all cursor-pointer">
-            Voltar para o site
-          </button>
         </div>
       </div>
     );
@@ -265,13 +262,6 @@ export default function Login() {
             Continuar com Google
           </button>
         </form>
-
-        <div className="mt-8 text-center">
-          <button onClick={() => navigate('/')}
-            className="text-slate-500 hover:text-slate-300 text-sm font-medium transition-colors cursor-pointer">
-            ← Voltar para o site
-          </button>
-        </div>
       </div>
     </div>
   );
