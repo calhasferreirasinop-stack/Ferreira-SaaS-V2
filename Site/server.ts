@@ -3132,9 +3132,9 @@ app.get('/api/fabricacao/:estimateId', authenticate, async (req: any, res) => {
 
     let { data: prodItems, error: piErr } = await supabase
       .from('production_items')
-      .select('*')
+      .select('*, sequence_number, material_source, source_detail')
       .eq('production_order_id', currentPo.id)
-      .order('created_at', { ascending: true });
+      .order('sequence_number', { ascending: true, nullsFirst: false });
 
     if (!prodItems || prodItems.length === 0) {
       const newItems: any[] = [];
@@ -3227,6 +3227,34 @@ app.post('/api/fabricacao/item/:itemId/toggle', authenticate, async (req: any, r
 
     if (error) throw error;
     res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// SALVAR PLANO DE CORTE (SEQUENCIAMENTO)
+app.post('/api/fabricacao/plan/save', authenticate, async (req: any, res) => {
+  const { items } = req.body;
+  if (!items || !Array.isArray(items)) return res.status(400).json({ error: 'Lista de itens inválida' });
+
+  try {
+    const updates = items.map(item => ({
+      id: item.id,
+      sequence_number: item.sequence_number,
+      material_source: item.material_source,
+      source_detail: item.source_detail,
+      company_id: req.user.companyId,
+      estimate_id: item.estimate_id,
+      production_order_id: item.production_order_id
+    }));
+
+    // Usamos upsert passando o ID para atualizar apenas os campos especificados
+    const { error } = await supabase
+      .from('production_items')
+      .upsert(updates, { onConflict: 'id' });
+
+    if (error) throw error;
+    res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -3742,6 +3770,9 @@ CREATE TABLE IF NOT EXISTS production_items (
     comodo           TEXT DEFAULT 'Geral',
     concluido        BOOLEAN DEFAULT false,
     concluido_em     TIMESTAMPTZ,
+    sequence_number  INTEGER,
+    material_source  TEXT,
+    source_detail    TEXT,
     created_at       TIMESTAMPTZ DEFAULT NOW(),
     updated_at       TIMESTAMPTZ DEFAULT NOW()
 );

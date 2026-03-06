@@ -99,8 +99,11 @@ export default function Fabricacao() {
         }
     };
 
-    const runOptimization = () => {
+    const runOptimization = async () => {
         setIsOptimizing(true);
+        // Recarregar sobras antes para garantir que as novas disparadas pelo usuário estejam lá
+        await fetchRemnants();
+
         try {
             const estimateItems = estimate?.estimate_items || [];
             const planPiecesIds = new Set<string>();
@@ -159,7 +162,7 @@ export default function Fabricacao() {
 
             allPieces.forEach(piece => {
                 const fits = availableRemnants
-                    .filter(r => r.width_cm >= piece.width && r.remainingLength >= piece.length)
+                    .filter(r => r.width_cm >= (piece.width - 0.1) && r.remainingLength >= piece.length)
                     .sort((a, b) => a.width_cm - b.width_cm);
 
                 let seqData: any = {
@@ -182,10 +185,38 @@ export default function Fabricacao() {
                 pieceToSeq[`${piece.bendId}-${piece.pieceIdx}`] = seqData;
             });
 
-            setOptimizedPlan(processedBends.map(b => ({
+            const newPlan = processedBends.map(b => ({
                 ...b,
                 sequences: b.lengths.map((_: any, idx: number) => pieceToSeq[`${b.id}-${idx}`])
-            })));
+            }));
+
+            setOptimizedPlan(newPlan);
+
+            // SALVAR NO BANCO DE DADOS
+            const itemsToUpdate = [];
+            for (const bend of newPlan) {
+                for (const seq of bend.sequences) {
+                    if (seq.productionItemId) {
+                        itemsToUpdate.push({
+                            id: seq.productionItemId,
+                            sequence_number: seq.seq,
+                            material_source: seq.source,
+                            source_detail: seq.sourceDetail,
+                            estimate_id: estimateId,
+                            production_order_id: seq.productionItem?.production_order_id
+                        });
+                    }
+                }
+            }
+
+            if (itemsToUpdate.length > 0) {
+                await fetch('/api/fabricacao/plan/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: itemsToUpdate }),
+                    credentials: 'include'
+                });
+            }
 
         } catch (e) {
             console.error('Erro na otimização:', e);
@@ -204,6 +235,51 @@ export default function Fabricacao() {
                 setItems(data.items || []);
                 setClientName(data.clientName || 'Cliente');
                 setEstimate(data.estimate || null);
+
+                // RECONSTRUIR PLANO OTIMIZADO SE JÁ EXISTIR SEQUENCIAMENTO
+                const savedItems = data.items || [];
+                const hasPlan = savedItems.some((i: any) => i.sequence_number);
+
+                if (hasPlan && data.estimate) {
+                    const estItems = data.estimate.estimate_items || [];
+                    const processed = estItems
+                        .filter((ei: any) => ei.description.includes('[BEND]'))
+                        .map((ei: any, bendIndex: number) => {
+                            let bendData: any = {};
+                            try { bendData = JSON.parse(ei.description.replace('[BEND]', '')); } catch (e) { return null; }
+                            const lengths = Array.isArray(bendData.lengths) ? bendData.lengths.filter((l: any) => parseFloat(l) > 0) : [];
+
+                            const bendId = bendData.id || `bend-${bendIndex}`;
+
+                            // Mapear sequencias salvas para este bend
+                            // Nota: A correspondência original era por bendId e pieceIdx
+                            // Aqui vamos tentar encontrar os itens que pertencem a este bend
+                            const bendPieces = savedItems
+                                .filter((si: any) => si.description.includes(bendId) || si.description.includes(bendData.productName))
+                                .sort((a: any, b: any) => a.sequence_number - b.sequence_number);
+
+                            if (bendPieces.length === 0) return null;
+
+                            return {
+                                id: bendId,
+                                room: ei.room || 'Geral',
+                                description: bendData.productName || 'Dobra',
+                                width: bendData.roundedWidthCm || 0,
+                                risks: bendData.risks || [],
+                                lengths: bendPieces.map((p: any) => p.metragem),
+                                sequences: bendPieces.map((p: any) => ({
+                                    seq: p.sequence_number,
+                                    productionItemId: p.id,
+                                    productionItem: p,
+                                    concluido: p.concluido,
+                                    source: p.material_source,
+                                    sourceDetail: p.source_detail
+                                }))
+                            };
+                        }).filter(Boolean);
+
+                    if (processed.length > 0) setOptimizedPlan(processed);
+                }
             } else {
                 const err = await res.json();
                 alert(err.error || 'Erro ao carregar fabricação');
@@ -341,8 +417,18 @@ export default function Fabricacao() {
                                 {isOptimizing ? 'CALCULANDO...' : 'RECALCULAR PLANO'}
                             </button>
 
-                            <button onClick={() => navigate(-1)}
-                                className="btn-field bg-slate-100 text-slate-700 border border-slate-200 shadow-sm w-full sm:w-auto">
+                            <button
+                                onClick={() => {
+                                    // Feedback visual rápido antes de sair
+                                    const btn = document.getElementById('btn-save-exit');
+                                    if (btn) {
+                                        btn.innerHTML = 'SALVO! SAINDO...';
+                                        btn.classList.add('bg-green-600', 'text-white');
+                                    }
+                                    setTimeout(() => navigate(-1), 800);
+                                }}
+                                id="btn-save-exit"
+                                className="btn-field bg-slate-100 text-slate-700 border border-slate-200 shadow-sm w-full sm:w-auto transition-all duration-300">
                                 <Save className="w-5 h-5" /> SALVAR E SAIR
                             </button>
                         </div>
