@@ -265,9 +265,9 @@ function OrderCard({ order, mode, onUpdateStatus, updating }: OrderCardProps) {
                     <button
                         onClick={() => onUpdateStatus(order.id, cfg.next!)}
                         disabled={updating}
-                        className="px-5 py-3 bg-blue-500 hover:bg-blue-400 disabled:opacity-50 text-white font-bold rounded-2xl transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-blue-500/20 active:scale-[0.97] whitespace-nowrap"
+                        className="btn-field bg-blue-500 hover:bg-blue-400 disabled:opacity-50 text-white shadow-blue-500/20 active:scale-[0.97] whitespace-nowrap min-w-[200px]"
                     >
-                        {updating ? <RefreshCw className="w-4 h-4 animate-spin" /> : null}
+                        {updating ? <RefreshCw className="w-5 h-5 animate-spin" /> : cfg.icon}
                         {cfg.nextLabel}
                     </button>
                 )}

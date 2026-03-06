@@ -117,20 +117,20 @@ export default function Fabricacao() {
 
                     {allDone ? (
                         <button onClick={handleFinish} disabled={finishing}
-                            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 transition-all shadow-lg shadow-green-600/20 active:scale-[0.98] cursor-pointer">
-                            <CheckCircle2 className="w-5 h-5" /> {finishing ? 'Processando...' : 'Finalizar Produção'}
+                            className="btn-field bg-green-600 text-white shadow-green-600/20 w-full sm:w-auto self-stretch sm:self-center">
+                            <CheckCircle2 className="w-6 h-6" /> {finishing ? 'FINALIZANDO...' : 'FINALIZAR PRODUÇÃO'}
                         </button>
                     ) : (
-                        <div className="flex items-center gap-6">
-                            <div className="text-right">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Progresso</p>
-                                <div className="w-32 h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
-                                    <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${(completedCount / totalCount) * 100 || 0}%` }} />
+                        <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                            <div className="flex-1 w-full sm:text-right">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progresso</p>
+                                <div className="w-full sm:w-32 h-3 bg-slate-100 rounded-full mt-2 overflow-hidden border border-slate-200">
+                                    <div className="h-full bg-blue-500 rounded-full transition-all duration-500 shadow-sm" style={{ width: `${(completedCount / totalCount) * 100 || 0}%` }} />
                                 </div>
                             </div>
                             <button onClick={() => navigate(-1)}
-                                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all cursor-pointer border border-slate-200 shadow-sm">
-                                <Save className="w-4 h-4" /> Salvar Sair
+                                className="btn-field bg-slate-100 text-slate-700 border border-slate-200 shadow-sm w-full sm:w-auto">
+                                <Save className="w-5 h-5" /> SALVAR E SAIR
                             </button>
                         </div>
                     )}
