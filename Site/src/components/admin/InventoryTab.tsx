@@ -288,87 +288,81 @@ export default function InventoryTab({ inventory, onSave, showToast }: Props) {
                         <div className="flex justify-center py-8"><div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" /></div>
                     ) : movements.length === 0 ? (
                         <p className="text-slate-400 text-center py-8">Nenhuma movimentação registrada.</p>
-                    ) : (
-                        {
-                            isMobile?(
-                            <div className = "space-y-2" >
-                                {
-                                    movements.map((m, i) => (
-                                        <div key={m.id || i} className={`bg-white border rounded-2xl p-4 flex items-center gap-4 ${m.type === 'consumption' ? 'border-red-100' : m.type === 'restoration' ? 'border-blue-100' : 'border-green-100'}`}>
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${m.type === 'consumption' ? 'bg-red-100 text-red-600' :
-                                                m.type === 'restoration' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'
-                                                }`}>
-                                                {m.type === 'consumption' ? <ArrowDownCircle className="w-5 h-5" /> : <ArrowUpCircle className="w-5 h-5" />}
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${m.type === 'consumption' ? 'bg-red-100 text-red-700' :
-                                                        m.type === 'restoration' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-                                                        }`}>
-                                                        {m.type === 'consumption' ? 'SAÍDA' : m.type === 'restoration' ? 'DEVOLUÇÃO' : 'ENTRADA'}
-                                                    </span>
-                                                    {m.quoteId && <span className="text-xs text-slate-500">Orçamento #{m.quoteId}</span>}
-                                                </div>
-                                                <p className="text-xs text-slate-400 mt-0.5">
-                                                    {m.inventoryDescription || `Bobina #${m.inventoryId}`}
-                                                    {' · '}{new Date(m.createdAt).toLocaleDateString('pt-BR')} {new Date(m.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className={`font-black text-lg ${m.type === 'consumption' ? 'text-red-600' : 'text-green-600'}`}>
-                                                    {m.type === 'consumption' ? '-' : '+'}{parseFloat(m.m2Amount).toFixed(2)} m²
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))
-                                }
-                            </div>
-            ) : (
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-slate-50 border-b border-slate-100 font-bold text-xs text-slate-500 uppercase">
-                        <tr>
-                            <th className="px-6 py-4">Tipo</th>
-                            <th className="px-6 py-4">Descrição / Bobina</th>
-                            <th className="px-6 py-4">Data / Hora</th>
-                            <th className="px-6 py-4">Referência</th>
-                            <th className="px-6 py-4 text-right">Quantidade</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                        {movements.map((m, i) => (
-                            <tr key={m.id || i} className="hover:bg-slate-50/50 transition-colors text-sm">
-                                <td className="px-6 py-4">
-                                    <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg ${m.type === 'consumption' ? 'bg-red-100 text-red-700' :
-                                        m.type === 'restoration' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                    ) : isMobile ? (
+                        <div className="space-y-2">
+                            {movements.map((m, i) => (
+                                <div key={m.id || i} className={`bg-white border rounded-2xl p-4 flex items-center gap-4 ${m.type === 'consumption' ? 'border-red-100' : m.type === 'restoration' ? 'border-blue-100' : 'border-green-100'}`}>
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${m.type === 'consumption' ? 'bg-red-100 text-red-600' :
+                                        m.type === 'restoration' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'
                                         }`}>
-                                        {m.type === 'consumption' ? 'Saída' : m.type === 'restoration' ? 'Devolução' : 'Entrada'}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-slate-800 font-medium">
-                                    {m.inventoryDescription || `Bobina #${m.inventoryId}`}
-                                </td>
-                                <td className="px-6 py-4 text-slate-500">
-                                    {new Date(m.createdAt).toLocaleDateString('pt-BR')} {new Date(m.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {m.quoteId ? (
-                                        <span className="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">Orçamento #{m.quoteId}</span>
-                                    ) : '—'}
-                                </td>
-                                <td className={`px-6 py-4 text-right font-black ${m.type === 'consumption' ? 'text-red-600' : 'text-green-600'}`}>
-                                    {m.type === 'consumption' ? '-' : '+'}{parseFloat(m.m2Amount).toFixed(2)} m²
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-                        )}
+                                        {m.type === 'consumption' ? <ArrowDownCircle className="w-5 h-5" /> : <ArrowUpCircle className="w-5 h-5" />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${m.type === 'consumption' ? 'bg-red-100 text-red-700' :
+                                                m.type === 'restoration' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                                                }`}>
+                                                {m.type === 'consumption' ? 'SAÍDA' : m.type === 'restoration' ? 'DEVOLUÇÃO' : 'ENTRADA'}
+                                            </span>
+                                            {m.quoteId && <span className="text-xs text-slate-500">Orçamento #{m.quoteId}</span>}
+                                        </div>
+                                        <p className="text-xs text-slate-400 mt-0.5">
+                                            {m.inventoryDescription || `Bobina #${m.inventoryId}`}
+                                            {' · '}{new Date(m.createdAt).toLocaleDateString('pt-BR')} {new Date(m.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className={`font-black text-lg ${m.type === 'consumption' ? 'text-red-600' : 'text-green-600'}`}>
+                                            {m.type === 'consumption' ? '-' : '+'}{parseFloat(m.m2Amount).toFixed(2)} m²
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                            <table className="w-full text-left border-collapse">
+                                <thead className="bg-slate-50 border-b border-slate-100 font-bold text-xs text-slate-500 uppercase">
+                                    <tr>
+                                        <th className="px-6 py-4">Tipo</th>
+                                        <th className="px-6 py-4">Descrição / Bobina</th>
+                                        <th className="px-6 py-4">Data / Hora</th>
+                                        <th className="px-6 py-4">Referência</th>
+                                        <th className="px-6 py-4 text-right">Quantidade</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {movements.map((m, i) => (
+                                        <tr key={m.id || i} className="hover:bg-slate-50/50 transition-colors text-sm">
+                                            <td className="px-6 py-4">
+                                                <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg ${m.type === 'consumption' ? 'bg-red-100 text-red-700' :
+                                                    m.type === 'restoration' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                                                    }`}>
+                                                    {m.type === 'consumption' ? 'Saída' : m.type === 'restoration' ? 'Devolução' : 'Entrada'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-800 font-medium">
+                                                {m.inventoryDescription || `Bobina #${m.inventoryId}`}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-500">
+                                                {new Date(m.createdAt).toLocaleDateString('pt-BR')} {new Date(m.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {m.quoteId ? (
+                                                    <span className="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg">Orçamento #{m.quoteId}</span>
+                                                ) : '—'}
+                                            </td>
+                                            <td className={`px-6 py-4 text-right font-black ${m.type === 'consumption' ? 'text-red-600' : 'text-green-600'}`}>
+                                                {m.type === 'consumption' ? '-' : '+'}{parseFloat(m.m2Amount).toFixed(2)} m²
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     )}
+                </div>
+            )}
         </div>
-    )
-}
-        </div >
     );
 }
