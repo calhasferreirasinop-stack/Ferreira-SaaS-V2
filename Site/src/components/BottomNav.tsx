@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Calculator, LayoutGrid, Factory, ClipboardList, User } from 'lucide-react';
+import { Calculator, LayoutGrid, Factory, ClipboardList, User, Users, Package, UserCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export default function BottomNav() {
@@ -17,9 +17,19 @@ export default function BottomNav() {
             path: '/admin',
         },
         {
-            label: 'Histórico',
-            icon: ClipboardList,
-            path: '/admin?tab=quotes',
+            label: 'Clientes',
+            icon: Users,
+            path: '/admin?tab=clients',
+        },
+        {
+            label: 'Produtos',
+            icon: Package,
+            path: '/admin?tab=products',
+        },
+        {
+            label: 'Usuários',
+            icon: UserCircle,
+            path: '/admin?tab=users',
         },
         {
             label: 'Sair',
