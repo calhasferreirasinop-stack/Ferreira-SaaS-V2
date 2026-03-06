@@ -71,15 +71,16 @@ export default function Navbar() {
     setUser(null);
     setShowUserMenu(false);
     setIsOpen(false);
-    navigate('/', { replace: true });
+    navigate('/login', { replace: true });
   };
 
   const navLinks = [
-    { name: 'Início', path: '/' },
-    { name: 'Serviços', path: '/servicos' },
-    { name: 'Galeria', path: '/galeria' },
-    { name: 'Blog', path: '/blog' },
     { name: '📐 Orçamento', path: '/orcamento' },
+    // === MODO BETA: links públicos ocultos ===
+    // { name: 'Início', path: '/' },
+    // { name: 'Serviços', path: '/servicos' },
+    // { name: 'Galeria', path: '/galeria' },
+    // { name: 'Blog', path: '/blog' },
   ];
 
   const isScrolledOrNotHome = scrolled || !isHome;
@@ -164,19 +165,7 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-            ) : (
-              <Link
-                to="/login"
-                className={cn(
-                  "text-[10px] uppercase tracking-widest font-black transition-colors border rounded-md px-2 py-1",
-                  isScrolledOrNotHome
-                    ? "text-slate-400 border-slate-200 hover:text-brand-primary hover:border-brand-primary"
-                    : "text-white/60 border-white/20 hover:text-white hover:border-white"
-                )}
-              >
-                Central do Usuário
-              </Link>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Menu Button */}
@@ -195,59 +184,52 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-white border-b border-slate-100 animate-in slide-in-from-top duration-300">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className={cn(
-                  'block px-3 py-2 rounded-md text-base font-bold uppercase tracking-wider',
-                  location.pathname === link.path
-                    ? 'bg-brand-primary/10 text-brand-primary'
-                    : 'text-slate-600 hover:bg-slate-50'
-                )}
-              >
-                {link.name}
-              </Link>
-            ))}
+      {
+        isOpen && (
+          <div className="md:hidden bg-white border-b border-slate-100 animate-in slide-in-from-top duration-300">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    'block px-3 py-2 rounded-md text-base font-bold uppercase tracking-wider',
+                    location.pathname === link.path
+                      ? 'bg-brand-primary/10 text-brand-primary'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  )}
+                >
+                  {link.name}
+                </Link>
+              ))}
 
-            {/* Mobile user section */}
-            {user ? (
-              <>
-                <div className="border-t border-slate-100 pt-2 mt-2">
-                  <p className="px-3 py-1 text-xs font-bold text-slate-400 uppercase">
-                    Logado como: {user.name || 'Usuário'}
-                  </p>
-                  <Link
-                    to="/admin"
-                    onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:bg-slate-50"
-                  >
-                    Central do Usuário
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-3 py-2 rounded-md text-base font-bold text-red-500 hover:bg-red-50 cursor-pointer"
-                  >
-                    🚪 Sair
-                  </button>
-                </div>
-              </>
-            ) : (
-              <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 rounded-md text-base font-medium text-slate-400"
-              >
-                Central do Usuário
-              </Link>
-            )}
+              {/* Mobile user section */}
+              {user ? (
+                <>
+                  <div className="border-t border-slate-100 pt-2 mt-2">
+                    <p className="px-3 py-1 text-xs font-bold text-slate-400 uppercase">
+                      Logado como: {user.name || 'Usuário'}
+                    </p>
+                    <Link
+                      to="/admin"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:bg-slate-50"
+                    >
+                      Central do Usuário
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-3 py-2 rounded-md text-base font-bold text-red-500 hover:bg-red-50 cursor-pointer"
+                    >
+                      🚪 Sair
+                    </button>
+                  </div>
+                </>
+              ) : null}
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </nav>
   );
 }
