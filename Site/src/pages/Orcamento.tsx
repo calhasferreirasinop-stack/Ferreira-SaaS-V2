@@ -184,11 +184,13 @@ const calculateOptimization = (allBends: Bend[]) => {
 };
 
 export default function Orcamento() {
+    const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
     const navigate = useNavigate();
     const { isOnline, saveOffline } = useOfflineSync();
     const [user, setUser] = useState<any>(null);
     const [settings, setSettings] = useState<any>({});
-    const [step, setStep] = useState<'bends' | 'summary' | 'payment'>('bends');
+    const [step, setStep] = useState<'bends' | 'summary' | 'payment' | 'success'>('bends');
     const [bends, setBends] = useState<Bend[]>([]);
 
     // Quotes listing
@@ -1753,11 +1755,14 @@ window.onload = function() {
     };
 
     // ── Render helpers ────────────────────────────────────────────────────────
+    // ── Render helpers (Redesigned for Mobile) ──
     const DirBtn = ({ d, active, onClick }: { d: typeof DIR_GRID[0]; active: boolean; onClick: () => void }) => (
-        <button onClick={onClick} className={`flex flex-col items-center gap-1 p-3 rounded-2xl border-2 font-bold text-xs transition-all cursor-pointer
-            ${active ? `bg-gradient-to-br ${d.grad} border-transparent text-white shadow-lg scale-105` : 'border-white/10 text-white/60 hover:border-white/30 hover:text-white'}`}>
-            <span className="text-3xl leading-none">{d.icon}</span>
-            <span className="text-center leading-tight mt-1">{d.label}</span>
+        <button onClick={onClick} className={`relative aspect-square flex flex-col items-center justify-center p-2 rounded-3xl border-2 font-black transition-all active:scale-90
+            ${active
+                ? `bg-brand-primary border-brand-primary text-white shadow-xl shadow-blue-500/30`
+                : 'bg-white border-slate-100 text-slate-400'}`}>
+            <span className="text-2xl leading-none mb-1">{active ? <Check className="w-5 h-5" /> : d.icon}</span>
+            <span className="text-[8px] uppercase tracking-tighter text-center">{d.label}</span>
         </button>
     );
 
@@ -1825,7 +1830,7 @@ window.onload = function() {
                             className="bg-slate-800 border border-white/20 rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4"
                             onClick={e => e.stopPropagation()}>
                             <div className="flex items-center justify-between">
-                                <h3 className="text-white font-black text-lg">📊 Relatório — Orçamento #{reportQuote.id}</h3>
+                                <h3 className="text-white font-black text-lg">📊 Relatório — Orçamento #${reportQuote.id}</h3>
                                 <button onClick={() => setReportQuote(null)} className="text-white/60 hover:text-white cursor-pointer"><X className="w-5 h-5" /></button>
                             </div>
                             <div className="flex items-center gap-3 text-sm">
@@ -1896,7 +1901,8 @@ window.onload = function() {
                                                                                 return (
                                                                                     <div key={ci} className="flex justify-between items-center text-xs">
                                                                                         <span className="text-white/50">
-                                                                                            <b className="text-indigo-400">(Chapas {seq?.join(',') || '?'})</b> Corte {ci + 1}
+                                                                                            <b className="text-indigo-400">(Corte {p.originalIdx + 1})</b>
+                                                                                            Dobra #{bIdx + 1}
                                                                                         </span>
                                                                                         <span className="text-white font-black">{len.toFixed(2)}m</span>
                                                                                     </div>
@@ -1911,7 +1917,6 @@ window.onload = function() {
                                                 );
                                             })}
                                         </div>
-
                                         <div className="bg-slate-900 border border-white/10 rounded-3xl p-6 mt-6 space-y-4 shadow-2xl relative overflow-hidden">
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
                                             <h3 className="text-lg font-black text-white flex items-center gap-2 relative z-10">
@@ -1979,7 +1984,7 @@ window.onload = function() {
                                     <p className="text-slate-500 text-sm font-bold">Nenhuma dobra encontrada neste orçamento.</p>
                                 </div>
                             )}
-                        </motion.div>
+                        </motion.div >
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -2025,136 +2030,82 @@ window.onload = function() {
                     ))}
                 </div>
 
-                {/* ══ MY QUOTES LISTING ══ */}
+                {/* ══ MY QUOTES LISTING (Redesigned for Mobile) ══ */}
                 {showMyQuotes && step === 'bends' && myQuotes.length > 0 && bends.length === 0 && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                        className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-white flex items-center gap-2"><List className="w-5 h-5" /> Meus Orçamentos</h2>
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-20 px-1">
+                        <div className="flex items-center justify-between px-2">
+                            <div>
+                                <h2 className="text-2xl font-black text-white leading-tight">Meus Orçamentos</h2>
+                                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-0.5">{myQuotes.length} registros encontrados</p>
+                            </div>
                             <button onClick={() => { handleResetQuote(); setShowMyQuotes(false); }}
-                                className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl flex items-center gap-2 text-sm cursor-pointer">
-                                <Plus className="w-4 h-4" /> Novo Orçamento
+                                className="w-14 h-14 bg-brand-primary text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 active:scale-90 transition-all">
+                                <Plus className="w-6 h-6" />
                             </button>
                         </div>
-                        <div className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-xl mt-4">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-left text-slate-300">
-                                    <thead className="bg-slate-800/50 border-b border-white/10 uppercase text-[10px] font-black text-slate-400 tracking-widest">
-                                        <tr>
-                                            <th className="px-6 py-4">Cliente</th>
-                                            <th className="px-6 py-4">Nº Orçamento</th>
-                                            <th className="px-6 py-4">Data</th>
-                                            <th className="px-6 py-4 text-right">Valor Total</th>
-                                            <th className="px-6 py-4">Status</th>
-                                            <th className="px-6 py-4 text-center">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-white/5">
-                                        {myQuotes.map(q => {
-                                            const st = STATUS_LABELS[q.status] || STATUS_LABELS.pending;
-                                            const hasPaid = (q.fin_paid || 0) > 0 || (q.fin_credit || 0) > 0;
-                                            const hasFinance = !!q.fin_id || hasPaid;
-                                            const hasProd = !!q.production_order;
-                                            const isDraft = q.status === 'draft' || q.status === 'rascunho';
 
-                                            return (
-                                                <tr key={q.id} className="hover:bg-white/5 transition-all group">
-                                                    <td className="px-6 py-4 font-bold text-white group-hover:text-blue-400 transition-colors whitespace-nowrap">
-                                                        {q.clientName || 'Cliente sem nome'}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <span className="font-mono text-slate-500 text-xs">#{String(q.id).substring(0, 8).toUpperCase()}</span>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-slate-400 font-medium whitespace-nowrap">
-                                                        {new Date(q.createdAt).toLocaleDateString('pt-BR')}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right font-black text-white whitespace-nowrap">
-                                                        R$ {parseFloat(q.finalValue || q.totalValue || 0).toFixed(2)}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${st.color}`}>
-                                                            {st.label}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex flex-wrap items-center justify-start 2xl:justify-center gap-1.5 min-w-[200px] w-full max-w-[340px]">
-                                                            {(q.status === 'draft' || q.status === 'rascunho' || (!hasFinance && !hasProd && q.status === 'sent')) ? (
-                                                                <button onClick={() => handleEditQuote(q)}
-                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Alterar Orçamento">
-                                                                    <PenLine className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Alterar</span>
-                                                                </button>
-                                                            ) : (
-                                                                <button onClick={() => handleViewReport(q)}
-                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Visualizar Orçamento">
-                                                                    <Eye className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Visualizar</span>
-                                                                </button>
-                                                            )}
+                        <div className="grid grid-cols-1 gap-4">
+                            {myQuotes.map(q => {
+                                const st = STATUS_LABELS[q.status] || STATUS_LABELS.pending;
+                                const isDraft = q.status === 'draft' || q.status === 'rascunho';
+                                const quoteNum = String(q.id).substring(0, 8).toUpperCase();
 
-                                                            {window.location.pathname.includes('/admin') && (hasPaid || hasFinance || hasProd) && (
-                                                                <button onClick={async () => {
-                                                                    if (!confirm('Deseja criar uma nova versão deste orçamento?')) return;
-                                                                    const res = await fetch(`/api/quotes/${q.id}/new-version`, { method: 'POST', credentials: 'include' });
-                                                                    if (res.ok) {
-                                                                        setToast({ msg: 'Nova versão criada!', type: 'success' });
-                                                                        fetch('/api/quotes', { credentials: 'include' }).then(r => r.json()).then(setMyQuotes).catch(() => { });
-                                                                    } else {
-                                                                        const err = await res.json();
-                                                                        setToast({ msg: err.error || 'Erro', type: 'error' });
-                                                                    }
-                                                                }}
-                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Criar Nova Versão">
-                                                                    <RefreshCcw className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Nova Versão</span>
-                                                                </button>
-                                                            )}
+                                return (
+                                    <div key={q.id} className="bg-white rounded-[2.5rem] p-6 shadow-xl border border-slate-100 flex flex-col gap-5">
+                                        {/* Top Info */}
+                                        <div className="flex justify-between items-start">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`w-2 h-2 rounded-full ${st.color.replace('bg-', 'bg-')}`}></span>
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{st.label}</span>
+                                                </div>
+                                                <h3 className="text-lg font-black text-slate-900 leading-tight truncate max-w-[180px]">
+                                                    {q.clientName || 'Cliente sem nome'}
+                                                </h3>
+                                                <p className="text-[10px] font-mono text-slate-400">ID: #{quoteNum} • {new Date(q.createdAt).toLocaleDateString('pt-BR')}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total</p>
+                                                <p className="text-xl font-black text-brand-primary">R$ {parseFloat(q.finalValue || q.totalValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                        </div>
 
-                                                            {q.status !== 'cancelled' && q.status !== 'canceled' && (
-                                                                <button onClick={() => navigate(`/fabricacao/${q.id}`)}
-                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Módulo Fabricação">
-                                                                    <Hammer className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Fabricação</span>
-                                                                </button>
-                                                            )}
+                                        {/* Action Bar */}
+                                        <div className="flex gap-2 pt-1 border-t border-slate-50 overflow-x-auto no-scrollbar pb-1">
+                                            {isDraft ? (
+                                                <button onClick={() => handleEditQuote(q)}
+                                                    className="flex-1 min-w-[100px] h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:bg-blue-100 transition-all">
+                                                    <PenLine className="w-3.5 h-3.5" /> Editar
+                                                </button>
+                                            ) : (
+                                                <button onClick={() => handleViewReport(q)}
+                                                    className="flex-1 min-w-[100px] h-12 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:bg-slate-100 transition-all">
+                                                    <Eye className="w-3.5 h-3.5" /> Ver
+                                                </button>
+                                            )}
 
-                                                            <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
-                                                                className="flex items-center gap-1 px-2 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Orçamento Cliente">
-                                                                <FileDown className="w-3.5 h-3.5" /> <span className="hidden sm:inline">PDF</span>
-                                                            </button>
+                                            <button onClick={() => navigate(`/fabricacao/${q.id}`)}
+                                                className="h-12 w-12 bg-brand-secondary/10 text-brand-secondary rounded-2xl flex items-center justify-center active:scale-95 transition-all" title="Fabricação">
+                                                <Hammer className="w-5 h-5" />
+                                            </button>
 
-                                                            <button onClick={async () => {
-                                                                const w2 = window.open('', '_blank');
-                                                                w2?.document.write('Buscando dobras...');
-                                                                try {
-                                                                    const r = await fetch(`/api/quotes/${q.id}/bends`, { credentials: 'include' });
-                                                                    if (!r.ok) throw new Error();
-                                                                    const b = await r.json();
-                                                                    w2?.document.write('<br/>Gerando A4 Compacto...');
-                                                                    handleDownloadQuoteCompactPDF(q, b, w2);
-                                                                } catch {
-                                                                    w2?.close();
-                                                                    setToast({ msg: 'Erro ao gerar A4 Compacto', type: 'error' });
-                                                                }
-                                                            }}
-                                                                className="flex items-center gap-1 px-2 py-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="A4 Compacto (Obra)">
-                                                                <Printer className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Obra</span>
-                                                            </button>
+                                            <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
+                                                className="h-12 w-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center active:scale-95 transition-all" title="PDF Cliente">
+                                                <FileDown className="w-5 h-5" />
+                                            </button>
 
-                                                            {q.status !== 'cancelled' && q.status !== 'canceled' && !hasPaid && !hasFinance && !hasProd && (
-                                                                <button onClick={() => {
-                                                                    setCancelModalQuote(q);
-                                                                    setCancelReason('');
-                                                                    setCancelReasonText('');
-                                                                }}
-                                                                    className="flex items-center gap-1 px-2 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-lg text-[10px] font-black uppercase transition-all whitespace-nowrap shadow-sm cursor-pointer" title="Cancelar Orçamento">
-                                                                    <XCircle className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Cancelar</span>
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
+                                            <button onClick={() => {
+                                                setCancelModalQuote(q);
+                                                setCancelReason('');
+                                                setCancelReasonText('');
+                                            }}
+                                                className="h-12 w-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center active:scale-95 transition-all" title="Cancelar">
+                                                <XCircle className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </motion.div>
                 )}
@@ -2263,43 +2214,27 @@ window.onload = function() {
                 {
                     step === 'bends' && (!showMyQuotes || myQuotes.length === 0 || bends.length > 0) && (
                         <div className="space-y-6">
-                            {/* Quick Client Create Modal */}
+                            {/* Quick Client Create Modal (Redesigned) */}
                             {showQuickClient && (
-                                <div className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
-                                    <div className="bg-slate-800 border border-white/20 rounded-3xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+                                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[9999] flex items-end justify-center">
+                                    <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+                                        className="bg-white rounded-t-[3rem] p-8 w-full max-w-lg space-y-6 shadow-2xl relative">
+                                        <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mb-2" />
                                         <div className="flex justify-between items-center">
-                                            <h3 className="text-white font-bold text-lg">➕ Cadastro Rápido de Cliente</h3>
-                                            <button onClick={() => setShowQuickClient(false)} className="text-white/50 hover:text-white cursor-pointer"><X className="w-5 h-5" /></button>
+                                            <h3 className="text-2xl font-black text-slate-900">Novo Cliente</h3>
+                                            <button onClick={() => setShowQuickClient(false)} className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400"><X className="w-5 h-5" /></button>
                                         </div>
-                                        <div className="space-y-3">
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Nome *</label>
+                                        <div className="space-y-5">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nome Completo</label>
                                                 <input type="text" value={quickClientForm.name}
                                                     onChange={e => setQuickClientForm(p => ({ ...p, name: e.target.value }))}
-                                                    placeholder="Nome completo"
-                                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-blue-400" />
+                                                    placeholder="Nome do cliente"
+                                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 transition-all text-sm font-bold" />
                                             </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Telefone / WhatsApp *</label>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp</label>
                                                 <div className="flex gap-2">
-                                                    <select
-                                                        value={quickClientForm.phone.startsWith('+') ? quickClientForm.phone.split(' ')[0] : '+55'}
-                                                        onChange={e => {
-                                                            const local = quickClientForm.phone.replace(/^\+\d+\s?/, '');
-                                                            setQuickClientForm(p => ({ ...p, phone: `${e.target.value} ${local}`.trim() }));
-                                                        }}
-                                                        className="bg-slate-700 border border-white/20 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-blue-400 text-sm font-bold w-[90px] flex-shrink-0"
-                                                    >
-                                                        <option value="+55" className="bg-slate-800 text-white">+55 🇧🇷</option>
-                                                        <option value="+1" className="bg-slate-800 text-white">+1 🇺🇸</option>
-                                                        <option value="+44" className="bg-slate-800 text-white">+44 🇬🇧</option>
-                                                        <option value="+351" className="bg-slate-800 text-white">+351 🇵🇹</option>
-                                                        <option value="+54" className="bg-slate-800 text-white">+54 🇦🇷</option>
-                                                        <option value="+595" className="bg-slate-800 text-white">+595 🇵🇾</option>
-                                                        <option value="+598" className="bg-slate-800 text-white">+598 🇺🇾</option>
-                                                        <option value="+56" className="bg-slate-800 text-white">+56 🇨🇱</option>
-                                                        <option value="+57" className="bg-slate-800 text-white">+57 🇨🇴</option>
-                                                    </select>
                                                     <input
                                                         type="text"
                                                         value={quickClientForm.phone.startsWith('+') ? quickClientForm.phone.replace(/^\+\d+\s?/, '') : quickClientForm.phone}
@@ -2310,215 +2245,231 @@ window.onload = function() {
                                                             if (val.length > 2) masked = `(${val.substring(0, 2)}) ${val.substring(2)}`;
                                                             if (val.length > 6) masked = `(${val.substring(0, 2)}) ${val.substring(2, 6)}-${val.substring(6)}`;
                                                             if (val.length > 10) masked = `(${val.substring(0, 2)}) ${val.substring(2, 7)}-${val.substring(7)}`;
-                                                            const countryCode = quickClientForm.phone.startsWith('+') ? quickClientForm.phone.split(' ')[0] : '+55';
-                                                            setQuickClientForm(p => ({ ...p, phone: `${countryCode} ${masked}`.trim() }));
+                                                            setQuickClientForm(p => ({ ...p, phone: `+55 ${masked}`.trim() }));
                                                         }}
-                                                        placeholder="(66) 99000-0000"
-                                                        className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-blue-400" />
+                                                        placeholder="(00) 00000-0000"
+                                                        className="flex-1 bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 transition-all text-sm font-bold" />
                                                 </div>
                                             </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-400 uppercase block mb-1">E-mail (opcional)</label>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">E-mail (opcional)</label>
                                                 <input type="email" value={quickClientForm.email}
                                                     onChange={e => setQuickClientForm(p => ({ ...p, email: e.target.value }))}
                                                     placeholder="cliente@email.com"
-                                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-blue-400" />
+                                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 transition-all text-sm font-bold" />
                                             </div>
                                         </div>
-                                        <div className="flex gap-3 pt-2">
-                                            <button onClick={() => setShowQuickClient(false)}
-                                                className="flex-1 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl cursor-pointer">Cancelar</button>
-                                            <button disabled={quickClientSaving}
-                                                onClick={async () => {
-                                                    if (!quickClientForm.name.trim() || !quickClientForm.phone.trim()) {
-                                                        setToast({ msg: 'Nome e Telefone são obrigatórios', type: 'error' }); return;
-                                                    }
-                                                    setQuickClientSaving(true);
-                                                    try {
-                                                        const res = await fetch('/api/clients', {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            credentials: 'include',
-                                                            body: JSON.stringify(quickClientForm),
-                                                        });
-                                                        if (!res.ok) throw new Error((await res.json()).error);
-                                                        const newClient = await res.json();
-                                                        setAllClients(p => [...p, newClient]);
-                                                        setSelectedClientId(newClient.id);
-                                                        setClientName(newClient.name);
-                                                        setClientSearch(newClient.name);
-                                                        setShowQuickClient(false);
-                                                        setQuickClientForm({ name: '', phone: '', email: '' });
-                                                        setToast({ msg: 'Cliente cadastrado e selecionado!', type: 'success' });
-                                                    } catch (err: any) {
-                                                        setToast({ msg: err.message || 'Erro ao criar cliente', type: 'error' });
-                                                    } finally { setQuickClientSaving(false); }
-                                                }}
-                                                className="flex-1 py-2.5 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl cursor-pointer disabled:opacity-50">
-                                                {quickClientSaving ? 'Salvando...' : 'Salvar e Selecionar'}
-                                            </button>
-                                        </div>
-                                    </div>
+                                        <button disabled={quickClientSaving}
+                                            onClick={async () => {
+                                                if (!quickClientForm.name.trim() || !quickClientForm.phone.trim()) {
+                                                    setToast({ msg: 'Nome e Telefone são obrigatórios', type: 'error' }); return;
+                                                }
+                                                setQuickClientSaving(true);
+                                                try {
+                                                    const res = await fetch('/api/clients', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        credentials: 'include',
+                                                        body: JSON.stringify(quickClientForm),
+                                                    });
+                                                    if (!res.ok) throw new Error((await res.json()).error);
+                                                    const newClient = await res.json();
+                                                    setAllClients(p => [...p, newClient]);
+                                                    setSelectedClientId(newClient.id);
+                                                    setClientName(newClient.name);
+                                                    setClientSearch(newClient.name);
+                                                    setShowQuickClient(false);
+                                                    setQuickClientForm({ name: '', phone: '', email: '' });
+                                                    setToast({ msg: 'Cliente cadastrado!', type: 'success' });
+                                                } catch (err: any) {
+                                                    setToast({ msg: err.message || 'Erro ao criar cliente', type: 'error' });
+                                                } finally { setQuickClientSaving(false); }
+                                            }}
+                                            className="w-full py-5 bg-brand-primary text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 active:scale-95 transition-all uppercase tracking-widest text-xs">
+                                            {quickClientSaving ? 'Salvando...' : 'Salvar e Selecionar'}
+                                        </button>
+                                        <div className="pb-4" />
+                                    </motion.div>
                                 </div>
                             )}
 
-                            {/* Client name input + Product selector */}
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
-                                <div className="flex flex-col sm:flex-row gap-3">
-                                    {/* Client autocomplete */}
-                                    <div className="flex-1 relative">
-                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Cliente (opcional)</label>
-                                        <input
-                                            type="text"
-                                            value={clientSearch}
-                                            onChange={e => {
-                                                const val = e.target.value;
-                                                setClientSearch(val);
-                                                setClientName(val);
-                                                setSelectedClientId(null);
-                                                setShowClientDropdown(true);
-                                            }}
-                                            onFocus={() => setShowClientDropdown(true)}
-                                            placeholder="Buscar ou digitar nome do cliente..."
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white placeholder-white/30 font-medium focus:outline-none focus:border-blue-400 transition-all"
-                                        />
-                                        {/* Dropdown */}
-                                        {showClientDropdown && clientSearch.length > 0 && (
-                                            <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-white/20 rounded-xl z-50 shadow-2xl max-h-48 overflow-y-auto">
-                                                {allClients.filter(c =>
-                                                    c.name?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-                                                    c.phone?.includes(clientSearch)
-                                                ).map(c => (
-                                                    <button key={c.id}
-                                                        onMouseDown={e => e.preventDefault()}
-                                                        onClick={() => {
-                                                            setSelectedClientId(c.id);
-                                                            setClientName(c.name);
-                                                            setClientSearch(c.name);
-                                                            setShowClientDropdown(false);
-                                                        }}
-                                                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 flex items-center justify-between transition-colors">
-                                                        <span className="text-white font-medium">{c.name}</span>
-                                                        <span className="text-slate-400 text-xs">{c.phone}</span>
-                                                    </button>
-                                                ))}
-                                                {allClients.filter(c =>
-                                                    c.name?.toLowerCase().includes(clientSearch.toLowerCase()) ||
-                                                    c.phone?.includes(clientSearch)
-                                                ).length === 0 && (
-                                                        <div className="px-4 py-3 space-y-2">
-                                                            <p className="text-slate-400 text-sm">Nenhum cliente encontrado.</p>
-                                                            <button onClick={() => { setShowClientDropdown(false); setShowQuickClient(true); setQuickClientForm({ name: clientSearch, phone: '', email: '' }); }}
-                                                                className="w-full text-left text-blue-400 hover:text-blue-300 font-bold text-sm flex items-center gap-2 py-1">
-                                                                ➕ Cadastrar "{clientSearch}" rapidamente
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                            </div>
-                                        )}
-                                        {selectedClientId && (
-                                            <span className="absolute right-3 top-8 text-green-400 text-xs font-bold">✔ vinculado</span>
-                                        )}
+                            {/* Client name input + Product selector (Redesigned) */}
+                            <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl space-y-8 border border-slate-100">
+                                <div className="flex flex-col gap-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="space-y-1">
+                                            <h2 className="text-2xl font-black text-slate-900 leading-tight">Setup do Orçamento</h2>
+                                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Identificação e Materiais</p>
+                                        </div>
+                                        <button onClick={() => {
+                                            if (currentRisks.length > 0 || bends.length > 0) {
+                                                if (!window.confirm('Deseja descartar e voltar à listagem?')) return;
+                                            }
+                                            setShowMyQuotes(true); setBends([]); setCurrentRisks([]);
+                                        }}
+                                            className="w-12 h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center active:scale-95 transition-all">
+                                            <ChevronLeft className="w-6 h-6" />
+                                        </button>
                                     </div>
 
-                                    <button onClick={() => {
-                                        if (currentRisks.length > 0 || bends.length > 0) {
-                                            if (!window.confirm('Você tem informações na tela de edição. Se não tiver salvo, perderá as alterações. Deseja CONTINUAR MESMO ASSIM e voltar para a listagem?')) return;
-                                        }
-                                        setShowMyQuotes(true); setBends([]); setCurrentRisks([]);
-                                    }}
-                                        className="self-end px-4 py-2.5 bg-slate-700 hover:bg-slate-600 border border-white/10 text-white rounded-xl flex items-center gap-2 text-sm font-bold cursor-pointer transition-colors shadow shadow-black/20">
-                                        <ChevronLeft className="w-4 h-4" /> Voltar à Listagem
-                                    </button>
-                                </div>
+                                    {/* Client autocomplete */}
+                                    <div className="relative group">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block">Cliente</label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={clientSearch}
+                                                onChange={e => {
+                                                    const val = e.target.value;
+                                                    setClientSearch(val);
+                                                    setClientName(val);
+                                                    setSelectedClientId(null);
+                                                    setShowClientDropdown(true);
+                                                }}
+                                                onFocus={() => setShowClientDropdown(true)}
+                                                placeholder="Nome do cliente ou buscar..."
+                                                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 font-bold focus:ring-4 focus:ring-brand-primary/5 transition-all outline-none"
+                                            />
+                                            {selectedClientId && (
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-green-500 rounded-full p-1 shadow-lg">
+                                                    <Check className="w-3 h-3 text-white" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        {/* Dropdown */}
+                                        <AnimatePresence>
+                                            {showClientDropdown && clientSearch.length > 0 && (
+                                                <motion.div initial={{ opacity: 0, scale: 0.95, y: -10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                                    className="absolute top-full left-0 right-0 mt-3 bg-white border border-slate-100 rounded-3xl z-50 shadow-2xl overflow-hidden">
+                                                    <div className="max-h-60 overflow-y-auto">
+                                                        {allClients.filter(c =>
+                                                            c.name?.toLowerCase().includes(clientSearch.toLowerCase()) ||
+                                                            c.phone?.includes(clientSearch)
+                                                        ).map(c => (
+                                                            <button key={c.id}
+                                                                onMouseDown={e => e.preventDefault()}
+                                                                onClick={() => {
+                                                                    setSelectedClientId(c.id);
+                                                                    setClientName(c.name);
+                                                                    setClientSearch(c.name);
+                                                                    setShowClientDropdown(false);
+                                                                }}
+                                                                className="w-full text-left px-6 py-4 hover:bg-slate-50 flex items-center justify-between transition-colors border-b border-slate-50 last:border-none">
+                                                                <div className="space-y-0.5">
+                                                                    <p className="text-slate-900 font-bold text-sm">{c.name}</p>
+                                                                    <p className="text-slate-400 text-[10px] font-mono">{c.phone}</p>
+                                                                </div>
+                                                                <ChevronRight className="w-4 h-4 text-slate-200" />
+                                                            </button>
+                                                        ))}
+                                                        {allClients.filter(c =>
+                                                            c.name?.toLowerCase().includes(clientSearch.toLowerCase()) ||
+                                                            c.phone?.includes(clientSearch)
+                                                        ).length === 0 && (
+                                                                <div className="px-6 py-5 space-y-3">
+                                                                    <p className="text-slate-400 text-xs font-medium">Nenhum cliente encontrado.</p>
+                                                                    <button onClick={() => { setShowClientDropdown(false); setShowQuickClient(true); setQuickClientForm({ name: clientSearch, phone: '', email: '' }); }}
+                                                                        className="w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+                                                                        <Plus className="w-3.5 h-3.5" /> Cadastrar "{clientSearch}"
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
 
-                                {/* Product selector — OBRIGATÓRIO */}
-                                <div>
-                                    <label className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-1 block">⚡ Produto/Tipo de Calha (obrigatório)</label>
-                                    {allProducts.length === 0 ? (
-                                        <p className="text-slate-500 text-sm italic">Nenhum produto cadastrado. <a href="/admin" className="text-blue-400 underline">Cadastre um produto</a> no painel admin.</p>
-                                    ) : (
-                                        <div className="flex flex-wrap gap-2">
-                                            {allProducts.map(p => (
-                                                <button key={p.id}
-                                                    onClick={() => {
-                                                        setSelectedProductId(p.id);
-                                                        setSelectedProductName(p.name);
-                                                        const pType = p.type_product || p.tipo_produto || 'product';
-                                                        setSelectedProductType(pType);
-                                                        if (pType === 'service') {
-                                                            setServiceDescription(p.description || p.name);
-                                                            setServiceValue(String(p.price || p.base_cost || ''));
-                                                            setServiceQty('1');
-                                                            setTimeout(() => serviceDescRef.current?.focus(), 100);
-                                                        }
-                                                    }}
-                                                    className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all cursor-pointer ${selectedProductId === p.id
-                                                        ? ((p.type_product === 'service' || p.tipo_produto === 'service') ? 'bg-purple-500 border-purple-400 text-white shadow-lg shadow-purple-500/30' : 'bg-amber-500 border-amber-400 text-slate-900 shadow-lg shadow-amber-500/30')
-                                                        : 'bg-white/5 border-white/10 text-white/70 hover:border-blue-400/50 hover:text-white'
-                                                        }`}>
-                                                    {(p.type_product === 'service' || p.tipo_produto === 'service') ? '🛠 ' : '📦 '}{p.name}
-                                                    {selectedProductId === p.id && ' ✔'}
-                                                </button>
-                                            ))}
+                                    {/* Product selector */}
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between px-1">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Produto / Calha</label>
+                                            {!selectedProductId && (
+                                                <span className="text-[10px] font-black text-amber-500 uppercase animate-pulse">Obrigatório</span>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex flex-wrap gap-2">
+                                                {allProducts.map(p => {
+                                                    const isSvc = p.type_product === 'service' || p.tipo_produto === 'service';
+                                                    return (
+                                                        <button key={p.id}
+                                                            onClick={() => {
+                                                                setSelectedProductId(p.id);
+                                                                setSelectedProductName(p.name);
+                                                                const pType = p.type_product || p.tipo_produto || 'product';
+                                                                setSelectedProductType(pType);
+                                                                if (pType === 'service') {
+                                                                    setServiceDescription(p.description || p.name);
+                                                                    setServiceValue(String(p.price || p.base_cost || ''));
+                                                                    setServiceQty('1');
+                                                                    setTimeout(() => serviceDescRef.current?.focus(), 100);
+                                                                }
+                                                            }}
+                                                            className={`flex-1 min-w-[140px] px-6 py-4 rounded-2xl border-2 font-black text-xs transition-all flex items-center justify-between
+                                                                ${selectedProductId === p.id
+                                                                    ? (isSvc ? 'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/20' : 'bg-brand-primary border-brand-primary text-white shadow-lg shadow-blue-500/20')
+                                                                    : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'
+                                                                }`}>
+                                                            <span>{p.name}</span>
+                                                            {selectedProductId === p.id && <Check className="w-4 h-4" />}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
                                             <button onClick={() => { setShowQuickService(true); setQuickServiceForm({ name: '', description: '', price: '', stock_quantity: '', unit: 'un', type_product: 'product' }); }}
-                                                className="px-4 py-2 rounded-xl text-sm font-bold border border-dashed border-blue-500/50 text-blue-400 hover:bg-blue-500/10 transition-all cursor-pointer flex items-center gap-2">
-                                                ➕ Novo Produto/Serviço
+                                                className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 active:bg-slate-50 transition-all">
+                                                <Plus className="w-4 h-4" /> Novo Produto
                                             </button>
                                         </div>
-                                    )}
-                                    {!selectedProductId && (
-                                        <p className="text-amber-400/70 text-xs mt-1">👆 Selecione o produto para liberar a adição de dobras.</p>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* ── Toggle Agrupar por Cômodo: só visível antes da 1ª dobra E quando produto é dobra ── */}
+                            {/* Grouping Toggle (Redesigned) */}
                             {bends.length === 0 && selectedProductType !== 'service' && (
-                                <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-2xl">
-                                    <div>
-                                        <p className="text-sm font-bold text-white">🏠 Agrupar por Cômodo</p>
-                                        <p className="text-xs text-slate-400 mt-0.5">
-                                            {groupByRoom ? 'Ativo — cada dobra será vinculada a um cômodo' : 'Desabilitado — dobras criadas sequencialmente'}
-                                        </p>
+                                <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-slate-100 flex items-center justify-between">
+                                    <div className="flex gap-4 items-center">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${groupByRoom ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'}`}>
+                                            <GitBranch className="w-6 h-6" />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                            <p className="text-sm font-black text-slate-900 leading-tight">Agrupar por Cômodo</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Organização de dobras</p>
+                                        </div>
                                     </div>
                                     <button
                                         onClick={() => { setGroupByRoom(v => !v); setCurrentGroupName(''); setLastGroupName(''); }}
-                                        className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0 ${groupByRoom ? 'bg-blue-500' : 'bg-white/20'}`}
+                                        className={`relative w-14 h-8 rounded-full transition-all flex-shrink-0 ${groupByRoom ? 'bg-brand-primary shadow-lg shadow-blue-500/30' : 'bg-slate-100'}`}
                                     >
-                                        <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${groupByRoom ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                                        <span className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-sm transition-all ${groupByRoom ? 'left-7' : 'left-1'}`} />
                                     </button>
                                 </div>
                             )}
 
-                            {/* ── Campo de Cômodo: só quando toggle ativo E produto não é serviço ── */}
+                            {/* Group Input (Redesigned) */}
                             {groupByRoom && selectedProductType !== 'service' && (
-                                <div className="space-y-2 p-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl">
-                                    <label className="text-xs font-bold text-blue-400 uppercase tracking-wider block">🏠 Cômodo / Grupo desta Dobra</label>
+                                <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-slate-100 space-y-4">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Localização / Cômodo</label>
                                     <div className="flex gap-2 flex-wrap">
                                         {Array.from(new Set(bends.map(b => b.group_name).filter(Boolean))).map(g => (
                                             <button key={g}
                                                 onClick={() => setCurrentGroupName(g || '')}
-                                                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${currentGroupName === g
-                                                    ? 'bg-blue-500 border-blue-400 text-white shadow shadow-blue-500/30'
-                                                    : 'bg-white/5 border-white/15 text-white/70 hover:border-blue-400 hover:text-white'
+                                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 transition-all
+                                                    ${currentGroupName === g
+                                                        ? 'bg-blue-50 border-brand-primary text-brand-primary'
+                                                        : 'bg-slate-50 border-slate-50 text-slate-400'
                                                     }`}
                                             >{g}</button>
                                         ))}
                                         <input
                                             type="text"
-                                            placeholder={lastGroupName ? `${lastGroupName} (último usado)` : 'Nova cômodo (ex: SALA)'}
+                                            placeholder="Ex: QUARTO, SALA..."
                                             value={currentGroupName}
                                             onChange={e => setCurrentGroupName(e.target.value.toUpperCase())}
-                                            className="flex-1 min-w-[160px] bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-400"
+                                            className="flex-1 min-w-[120px] bg-slate-50 border-none rounded-2xl px-5 py-3 text-xs font-black text-slate-900 placeholder-slate-300 outline-none"
                                         />
                                     </div>
-                                    {!currentGroupName && lastGroupName && (
-                                        <button onClick={() => setCurrentGroupName(lastGroupName)}
-                                            className="text-xs text-blue-400 hover:text-blue-300 cursor-pointer underline">
-                                            Usar "{lastGroupName}" novamente
-                                        </button>
-                                    )}
                                 </div>
                             )}
 
@@ -2669,78 +2620,80 @@ window.onload = function() {
                                 </div>
                             )}
 
-                            {/* Builder / Service Form */}
+                            {/* Builder / Service Form (Redesigned) */}
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                                className={`border rounded-3xl p-6 space-y-5 transition-colors ${selectedProductType === 'service' ? 'bg-purple-500/5 border-purple-500/20' : 'bg-white/5 border-white/10'}`}>
+                                className={`bg-white rounded-[3rem] p-8 space-y-8 shadow-2xl border border-slate-100 transition-colors ${selectedProductType === 'service' ? 'ring-4 ring-purple-100' : ''}`}>
 
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-xl font-bold text-white">
-                                        {selectedProductType === 'service' ? '🛠 Detalhes do Serviço' : `✏ Construindo Dobra #${bends.length + 1}`}
-                                    </h2>
+                                    <div className="space-y-1">
+                                        <h2 className="text-2xl font-black text-slate-900 leading-tight">
+                                            {selectedProductType === 'service' ? 'Detalhes do Serviço' : `Dobra #${bends.length + 1}`}
+                                        </h2>
+                                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest leading-none">
+                                            {selectedProductType === 'service' ? 'Execução e Mão de Obra' : 'Configuração de Corte'}
+                                        </p>
+                                    </div>
                                     {selectedProductType === 'product' && selectedProductId && (
                                         <button onClick={() => setShowLibrary(v => !v)}
-                                            className="text-xs text-blue-400 hover:text-blue-300 font-bold border border-blue-400/30 px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5">
-                                            {bendLibraryLoading ? (
-                                                <><RefreshCw className="w-3 h-3 animate-spin" /> Carregando...</>
-                                            ) : (
-                                                <>📚 Dobras salvas ({bendLibrary.length})</>
-                                            )}
+                                            className="w-12 h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center active:scale-95 transition-all">
+                                            <List className="w-6 h-6" />
                                         </button>
                                     )}
                                 </div>
 
                                 {selectedProductType === 'service' ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
-                                        <div className="md:col-span-3 space-y-2">
-                                            <label className="text-xs font-bold text-slate-400 uppercase">Descrição do Serviço (Editável)</label>
+                                    <div className="space-y-6 pt-2">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Descrição</label>
                                             <textarea
                                                 ref={serviceDescRef}
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 focus:ring-purple-500 transition-all min-h-[100px]"
-                                                placeholder="Ex: Instalação de 15 metros de calha modelo colonial com vedação..."
+                                                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 font-bold placeholder-slate-300 outline-none focus:ring-4 focus:ring-purple-100 transition-all min-h-[120px]"
+                                                placeholder="Descreva o serviço..."
                                                 value={serviceDescription}
                                                 onChange={e => setServiceDescription(e.target.value)}
                                             />
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400 uppercase">Valor do Serviço (R$)</label>
-                                            <div className="relative">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">R$</span>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Valor Unitário</label>
+                                                <div className="relative">
+                                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 font-black">R$</span>
+                                                    <input
+                                                        type="number"
+                                                        className="w-full bg-slate-50 border-none rounded-2xl pl-12 pr-6 py-4 text-slate-900 font-black focus:ring-4 focus:ring-purple-100 outline-none"
+                                                        placeholder="0,00"
+                                                        value={serviceValue}
+                                                        onChange={e => setServiceValue(e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Qtd</label>
                                                 <input
                                                     type="number"
-                                                    className="w-full bg-white/5 border border-white/10 rounded-2xl pl-10 pr-5 py-4 text-white outline-none focus:ring-2 focus:ring-purple-500 transition-all font-bold"
-                                                    placeholder="0,00"
-                                                    value={serviceValue}
-                                                    onChange={e => setServiceValue(e.target.value)}
+                                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 font-black focus:ring-4 focus:ring-purple-100 outline-none"
+                                                    value={serviceQty}
+                                                    onChange={e => setServiceQty(e.target.value)}
                                                 />
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-400 uppercase">Quantidade</label>
-                                            <input
-                                                type="number"
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white outline-none focus:ring-2 focus:ring-purple-500 transition-all font-bold"
-                                                value={serviceQty}
-                                                onChange={e => setServiceQty(e.target.value)}
-                                            />
-                                        </div>
-                                        <div className="space-y-2 flex flex-col justify-end">
-                                            <div className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white">
-                                                <span className="text-xs text-slate-400 block mb-1">Subtotal</span>
-                                                <span className="text-xl font-black text-purple-400">
-                                                    R$ {((parseFloat(serviceValue) || 0) * (parseFloat(serviceQty) || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                                </span>
+
+                                        <div className="bg-purple-50 rounded-[2rem] p-6 flex items-center justify-between">
+                                            <div>
+                                                <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Subtotal</p>
+                                                <h3 className="text-2xl font-black text-purple-600">
+                                                    {fmt(((parseFloat(serviceValue) || 0) * (parseFloat(serviceQty) || 0)))}
+                                                </h3>
+                                            </div>
+                                            <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600">
+                                                <Save className="w-6 h-6" />
                                             </div>
                                         </div>
-                                        <div className="md:col-span-3 flex justify-end pt-2 gap-3">
-                                            <button onClick={handleConfirmService} disabled={!serviceDescription || !serviceValue}
-                                                className="px-8 py-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white font-bold rounded-2xl flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-purple-600/20">
-                                                <Plus className="w-5 h-5" /> Adicionar Serviço
-                                            </button>
-                                            <button onClick={() => { handleConfirmService(); setTimeout(() => setStep('summary'), 200); }} disabled={!serviceDescription || !serviceValue}
-                                                className="px-8 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-bold rounded-2xl flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-blue-600/20">
-                                                <Save className="w-5 h-5" /> Salvar e Ir para Resumo
-                                            </button>
-                                        </div>
+
+                                        <button onClick={handleConfirmService} disabled={!serviceDescription || !serviceValue}
+                                            className="w-full py-5 bg-purple-600 text-white font-black rounded-2xl shadow-xl shadow-purple-200 active:scale-95 transition-all uppercase tracking-widest text-xs">
+                                            Confirmar Serviço
+                                        </button>
                                     </div>
                                 ) : (
                                     <>
@@ -2802,19 +2755,6 @@ window.onload = function() {
                                             {isOver && <div className="flex items-center gap-2 text-red-400 font-bold"><AlertTriangle className="w-4 h-4" /> Excede 120 cm!</div>}
                                         </div>
 
-                                        {/* Angle Selector or Risks */}
-                                        <div className={`grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-2 transition-all duration-300 ${!selectedProductId ? 'opacity-20 pointer-events-none grayscale' : ''}`}>
-                                            {/* ... existing risk buttons ... */}
-                                            {/* I'll use a shorter target to keep it precise */}
-                                            {currentRisks.length > 0 && (
-                                                <button onClick={() => setCurrentRisks(prev => prev.slice(0, -1))}
-                                                    className="aspect-square flex flex-col items-center justify-center gap-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-2xl border border-red-500/30 transition-all cursor-pointer active:scale-95">
-                                                    <RotateCcw className="w-5 h-5" />
-                                                    <span className="text-[10px] font-bold uppercase">Apagar</span>
-                                                </button>
-                                            )}
-                                        </div>
-
                                         {/* DIRECTION & MODIFIERS COMPACT LAYOUT */}
                                         <div className="flex flex-col md:flex-row gap-6 mt-4">
                                             {/* Passos: Direção */}
@@ -2829,74 +2769,85 @@ window.onload = function() {
                                                 </div>
                                             </div>
 
-                                            {/* Passos: Tamanho e Modificadores Visuais */}
-                                            <div className="flex-1 flex flex-col gap-4">
-                                                <div>
-                                                    <p className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Passo 2 — Modificadores Visuais</p>
+                                            {/* Modifiers & Size Input (Redesigned) */}
+                                            <div className="flex-1 space-y-8">
+                                                <div className="space-y-4">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Modificadores</p>
                                                     <div className="flex flex-wrap gap-2">
-                                                        {/* Toggle Ângulo */}
                                                         <button onClick={() => setIsAngle(!isAngle)} disabled={!pendingDir}
-                                                            className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border border-transparent
-                                                                    ${!pendingDir ? 'opacity-50 cursor-not-allowed bg-white/5 text-white/40'
-                                                                    : isAngle ? 'bg-amber-500 border-amber-500 text-white shadow-lg'
-                                                                        : 'bg-white/10 text-white/60 hover:border-amber-400 hover:text-amber-400'}`}>
-                                                            <span className="text-sm">∠</span> Ângulo
+                                                            className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border-2
+                                                            ${isAngle ? 'bg-amber-50 border-amber-500 text-amber-600 shadow-lg shadow-amber-500/10' : 'bg-white border-slate-100 text-slate-400'}`}>
+                                                            <RotateCcw className="w-4 h-4" /> Ângulo
                                                         </button>
-
-                                                        {/* Toggle Caída Lateral */}
                                                         <button onClick={() => { if (isLateralSlope) { setSlopeH1(''); setSlopeH2(''); } setIsLateralSlope(!isLateralSlope); }}
-                                                            className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border border-transparent
-                                                                    ${isLateralSlope ? 'bg-indigo-500 text-white shadow-lg' : 'bg-white/10 text-white/60 hover:text-white hover:border-indigo-400'}`}>
-                                                            <span className="text-sm">◺</span> Caída Lateral
+                                                            className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border-2
+                                                            ${isLateralSlope ? 'bg-indigo-50 border-indigo-500 text-indigo-600 shadow-lg shadow-indigo-500/10' : 'bg-white border-slate-100 text-slate-400'}`}>
+                                                            <Triangle className="w-4 h-4" /> Caída
                                                         </button>
                                                     </div>
 
-                                                    {/* Dynamic Modifiers Inputs */}
-                                                    <div className="mt-3 min-h-[40px]">
-                                                        {isAngle && pendingDir && (
-                                                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
-                                                                <label className="text-[10px] font-bold text-amber-500 uppercase">Graus:</label>
-                                                                <div className="flex bg-slate-900 border border-amber-500/30 rounded-lg px-2 py-1 items-center">
-                                                                    <input type="number" placeholder="45" value={pendingAngle} onChange={e => setPendingAngle(e.target.value)}
-                                                                        className="w-12 bg-transparent text-white font-bold text-xs focus:outline-none" />
-                                                                    <span className="text-amber-500/50 text-xs font-bold">°</span>
-                                                                </div>
-                                                            </div>
+                                                    <AnimatePresence>
+                                                        {(isAngle || isLateralSlope) && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                                                                className="bg-slate-50 border border-slate-100 rounded-[2rem] p-5 space-y-4 overflow-hidden">
+                                                                {isAngle && (
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span className="text-[10px] font-black text-slate-400 uppercase">Ângulo (º)</span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <input type="number" placeholder="45" value={pendingAngle} onChange={e => setPendingAngle(e.target.value)}
+                                                                                className="w-20 bg-white border-none rounded-xl px-4 py-2 text-center font-black text-slate-900 outline-none shadow-sm" />
+                                                                            <span className="text-slate-300 font-bold">°</span>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {isLateralSlope && (
+                                                                    <div className="space-y-4">
+                                                                        <div className="flex items-center justify-between">
+                                                                            <span className="text-[10px] font-black text-slate-400 uppercase">Lado</span>
+                                                                            <div className="flex bg-white rounded-xl p-1 shadow-sm">
+                                                                                {(['D', 'E'] as const).map(s => (
+                                                                                    <button key={s} onClick={() => setSlopeSide(s)}
+                                                                                        className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${slopeSide === s ? 'bg-slate-900 text-white' : 'text-slate-400'}`}>
+                                                                                        {s === 'D' ? 'DIR' : 'ESQ'}
+                                                                                    </button>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="grid grid-cols-2 gap-3">
+                                                                            <div className="space-y-2">
+                                                                                <span className="text-[8px] font-black text-slate-400 uppercase ml-1">H1</span>
+                                                                                <input type="number" step="0.1" placeholder="0.0" value={slopeH1} onChange={e => setSlopeH1(e.target.value)}
+                                                                                    className="w-full bg-white border-none rounded-xl px-4 py-2 text-center font-black text-slate-900 outline-none shadow-sm" />
+                                                                            </div>
+                                                                            <div className="space-y-2">
+                                                                                <span className="text-[8px] font-black text-slate-400 uppercase ml-1">H2</span>
+                                                                                <input type="number" step="0.1" placeholder="0.0" value={slopeH2} onChange={e => setSlopeH2(e.target.value)}
+                                                                                    className="w-full bg-white border-none rounded-xl px-4 py-2 text-center font-black text-slate-900 outline-none shadow-sm" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </motion.div>
                                                         )}
-                                                        {isLateralSlope && (
-                                                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
-                                                                <div className="flex bg-slate-800 rounded-lg overflow-hidden border border-indigo-500/30">
-                                                                    {(['D', 'E'] as const).map(s => (
-                                                                        <button key={s} onClick={() => setSlopeSide(s)}
-                                                                            className={`px-2 py-1 text-[10px] font-black transition-all cursor-pointer ${slopeSide === s ? 'bg-indigo-500 text-white' : 'text-white/40 hover:text-white'}`}>
-                                                                            {s === 'D' ? 'DIR' : 'ESQ'}
-                                                                        </button>
-                                                                    ))}
-                                                                </div>
-                                                                <input type="number" step="0.1" placeholder="H1" value={slopeH1} onChange={e => setSlopeH1(e.target.value)}
-                                                                    className="w-14 bg-slate-900 border border-indigo-500/30 rounded-lg px-2 py-1 text-white text-xs font-bold focus:outline-none focus:border-indigo-400" />
-                                                                <input type="number" step="0.1" placeholder="H2" value={slopeH2} onChange={e => setSlopeH2(e.target.value)}
-                                                                    className="w-14 bg-slate-900 border border-indigo-500/30 rounded-lg px-2 py-1 text-white text-xs font-bold focus:outline-none focus:border-indigo-400" />
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                    </AnimatePresence>
                                                 </div>
 
-                                                {/* Size & Add */}
-                                                <div className="mt-auto space-y-3">
-                                                    <p className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Passo 3 — Tamanho da Aba</p>
-                                                    <div className="flex flex-col sm:flex-row gap-3">
-                                                        <input ref={sizeInputRef} type="number" min="1" max="120" step="0.5" placeholder={isLateralSlope ? "Calculado" : "Medida (cm)"}
+                                                <div className="space-y-4">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Medida da Aba (cm)</p>
+                                                    <div className="flex gap-2">
+                                                        <input ref={sizeInputRef} type="number" min="1" max="120" step="0.5"
+                                                            placeholder={isLateralSlope ? "Calculado" : "0.00"}
                                                             value={isLateralSlope ? "" : pendingSize} onChange={e => { setPendingSize(e.target.value); setSizeError(''); }}
                                                             onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
                                                             disabled={!pendingDir || isLateralSlope}
-                                                            className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-5 py-4 text-white placeholder-white/30 text-lg font-black focus:outline-none focus:border-blue-400 transition-all disabled:opacity-40" />
+                                                            className="flex-1 bg-slate-50 border-none rounded-[1.5rem] px-6 py-5 text-2xl font-black text-slate-900 placeholder-slate-200 outline-none focus:ring-4 focus:ring-brand-primary/5 transition-all text-center" />
+
                                                         <button onClick={handleAddRisk} disabled={!pendingDir || (!pendingSize && !isLateralSlope)}
-                                                            className="btn-field bg-blue-500 hover:bg-blue-400 disabled:opacity-40 text-white shadow-blue-500/20">
-                                                            <Plus className="w-6 h-6" /> ADICIONAR RISCO
+                                                            className="w-20 bg-brand-primary text-white rounded-[1.5rem] shadow-xl shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center disabled:opacity-30">
+                                                            <Plus className="w-8 h-8" />
                                                         </button>
                                                     </div>
-                                                    {sizeError && <p className="text-red-400 text-sm mt-1.5 font-bold flex items-center gap-2 bg-red-400/10 p-2 rounded-lg border border-red-400/20"><AlertTriangle className="w-4 h-4" />{sizeError}</p>}
+                                                    {sizeError && <p className="text-rose-500 text-[10px] font-black uppercase tracking-tight text-center animate-bounce">{sizeError}</p>}
                                                 </div>
                                             </div>
                                         </div>
@@ -2952,7 +2903,7 @@ window.onload = function() {
                                                                             </div>
                                                                             <button onMouseDown={(e) => {
                                                                                 e.preventDefault();
-                                                                                e.stopPropagation();
+                                                                                ignoreSizeBlurRef.current = true;
                                                                                 const h1 = parseFloat(editSlopeH1) || r.sizeCm;
                                                                                 const h2 = parseFloat(editSlopeH2) || r.sizeCm;
                                                                                 const newSize = Math.max(h1, h2);
@@ -3040,28 +2991,31 @@ window.onload = function() {
                                             </div>
                                         )}
 
-                                        {/* Actions */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                                        {/* Action: Add to Quote (Redesigned) */}
+                                        <div className="flex flex-col gap-3">
                                             {currentRisks.length > 0 && (
                                                 <button onClick={() => setCurrentRisks(prev => prev.slice(0, -1))}
-                                                    className="btn-field bg-white/10 hover:bg-white/20 text-white border border-white/10">
-                                                    <Undo2 className="w-5 h-5" /> DESFAZER
+                                                    className="w-full py-4 border-2 border-rose-50 rounded-2xl text-rose-400 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 active:bg-rose-50 transition-all">
+                                                    <RotateCcw className="w-4 h-4" /> Apagar Último Risco
                                                 </button>
                                             )}
                                             <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
-                                                className="btn-field bg-green-600 hover:bg-green-500 disabled:opacity-40 text-white shadow-green-600/20 sm:col-start-2">
-                                                <Check className="w-6 h-6" /> CONFIRMAR DOBRA #{bends.length + 1}
+                                                className="w-full py-5 bg-slate-900 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-30">
+                                                <Check className="w-5 h-5" /> Adicionar ao Orçamento
                                             </button>
                                         </div>
                                     </>
                                 )}
                             </motion.div>
 
-                            {/* Confirmed bends with meters input */}
-                            {
-                                bends.length > 0 && (
-                                    <div className="space-y-4" ref={metersRef}>
-                                        <h3 className="text-white font-bold text-lg">Dobras Confirmadas ({bends.length})</h3>
+                            {/* Confirmed bends with meters input (Step 1) */}
+                            {bends.length > 0 && (
+                                <div className="space-y-4 pt-4" ref={metersRef}>
+                                    <div className="flex items-center justify-between px-2">
+                                        <h3 className="text-white font-black text-xs uppercase tracking-widest opacity-60">Itens do Orçamento ({bends.length})</h3>
+                                    </div>
+
+                                    <div className="space-y-4">
                                         {bends.map((bend, bi) => {
                                             const isService = bend.productType === 'service';
                                             const pCount = bends.filter((b, idx) => idx < bi && b.productType !== 'service').length + 1;
@@ -3069,219 +3023,238 @@ window.onload = function() {
                                             const label = isService ? `Serviço #${sCount}` : `Dobra #${pCount}`;
 
                                             return (
-                                                <motion.div key={bend.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-                                                    className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
-                                                    <div className="flex items-start justify-between">
+                                                <motion.div
+                                                    key={bend.id}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="bg-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden active:scale-[0.99] transition-all"
+                                                >
+                                                    {/* Header Piece Info */}
+                                                    <div className="flex items-start justify-between mb-4">
                                                         <div className="flex items-center gap-3">
-                                                            <span className={`w-8 h-8 ${isService ? 'bg-purple-500' : 'bg-green-500'} rounded-full flex items-center justify-center text-white font-black text-sm`}>{bi + 1}</span>
+                                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black ${isService ? 'bg-purple-500 shadow-lg shadow-purple-500/20' : 'bg-brand-primary shadow-lg shadow-brand-primary/20'}`}>
+                                                                {bi + 1}
+                                                            </div>
                                                             <div>
-                                                                <p className="text-white font-bold flex flex-wrap items-center gap-2">
-                                                                    <span>{label}</span>
-                                                                    {bend.group_name ? (
-                                                                        <span className="text-[10px] font-black uppercase text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded-md border border-blue-500/30">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-slate-900 font-black text-base">{label}</span>
+                                                                    {bend.group_name && (
+                                                                        <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter border border-slate-200">
                                                                             {bend.group_name}
                                                                         </span>
-                                                                    ) : (
-                                                                        <span className="text-[10px] font-black uppercase text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700">
-                                                                            Sem Grupo
-                                                                        </span>
                                                                     )}
+                                                                </div>
+                                                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                                                                    {isService ? 'Serviço Adicional' : `${bend.totalWidthCm.toFixed(1)}cm → ${bend.roundedWidthCm}cm`}
                                                                 </p>
-                                                                {bend.productType === 'service' ? (
-                                                                    <p className="text-slate-400 text-xs">Serviço: {bend.serviceQty}x R$ {bend.serviceValue?.toFixed(2)}</p>
-                                                                ) : (
-                                                                    <p className="text-slate-400 text-xs">{(bend.risks || []).length || 0} riscos · {bend.totalWidthCm.toFixed(1)} → <strong className="text-blue-400">{bend.roundedWidthCm}</strong></p>
-                                                                )}
                                                             </div>
                                                         </div>
-                                                        <div className="flex gap-1 sm:gap-2">
-                                                            <button onClick={() => { setChangingGroupId(bend.id); setTempGroupName(bend.group_name || ''); }}
-                                                                className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-xl transition-all cursor-pointer" title="Alterar Grupo">
-                                                                <List className="w-4 h-4" />
+
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => { setChangingGroupId(bend.id); setTempGroupName(bend.group_name || ''); }}
+                                                                className="w-10 h-10 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl active:bg-slate-100 transition-all border border-slate-100"
+                                                            >
+                                                                <List className="w-5 h-5" />
                                                             </button>
-                                                            {bend.productType === 'service' ? (
-                                                                <button onClick={() => {
-                                                                    setEditingServiceId(bend.id);
-                                                                    setEditServiceDesc(bend.serviceDescription || '');
-                                                                    setEditServiceVal(String(bend.serviceValue || ''));
-                                                                    setEditServiceQtyStr(String(bend.serviceQty || 1));
-                                                                }}
-                                                                    className="p-2 text-yellow-400 hover:bg-yellow-400/10 rounded-xl transition-all cursor-pointer" title="Editar Serviço">
-                                                                    <PenLine className="w-4 h-4" />
-                                                                </button>
-                                                            ) : (
-                                                                <button onClick={() => {
-                                                                    setSelectedProductType(bend.productType || 'product');
-                                                                    if (bend.product_id) {
-                                                                        setSelectedProductId(bend.product_id);
-                                                                        const prod = allProducts.find(p => p.id === bend.product_id);
-                                                                        if (prod) setSelectedProductName(prod.name);
-                                                                    } else {
-                                                                        setSelectedProductId(null);
-                                                                        setSelectedProductName('Produto personalizado');
-                                                                    }
-                                                                    setEditingBendLengths([...bend.lengths]);
-                                                                    setCurrentRisks(bend.risks || []);
-                                                                    setBends(prev => prev.filter(b => b.id !== bend.id));
-                                                                    topRef.current?.scrollIntoView({ behavior: 'smooth' });
-                                                                }}
-                                                                    className="p-2 text-yellow-400 hover:bg-yellow-400/10 rounded-xl transition-all cursor-pointer" title="Editar Dobra">
-                                                                    <RefreshCw className="w-4 h-4" />
-                                                                </button>
-                                                            )}
-                                                            <button onClick={() => setBends(prev => prev.filter(b => b.id !== bend.id))}
-                                                                className="p-2 text-red-400 hover:bg-red-400/10 rounded-xl transition-all cursor-pointer" title="Excluir">
-                                                                <Trash2 className="w-4 h-4" />
+                                                            <button
+                                                                onClick={() => setBends(prev => prev.filter(b => b.id !== bend.id))}
+                                                                className="w-10 h-10 flex items-center justify-center bg-rose-50 text-rose-500 rounded-xl active:bg-rose-500 active:text-white transition-all border border-rose-100"
+                                                            >
+                                                                <Trash2 className="w-5 h-5" />
                                                             </button>
                                                         </div>
                                                     </div>
 
-                                                    {/* Inline Group Editor */}
+                                                    {/* Group Editor Inline (Mobile Native Feel) */}
                                                     <AnimatePresence>
                                                         {changingGroupId === bend.id && (
-                                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                                                                <div className="bg-slate-900/50 border border-blue-500/30 p-4 rounded-xl flex flex-col gap-3">
-                                                                    <label className="text-xs text-blue-300 font-bold uppercase tracking-wider">Mover para qual grupo?</label>
-
-                                                                    {bends.some(b => b.group_name) && (
-                                                                        <div className="flex gap-2 flex-wrap">
-                                                                            {Array.from(new Set(bends.map(b => b.group_name).filter(Boolean))).map(g => (
-                                                                                <button key={g} onClick={() => {
-                                                                                    setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: g } : b));
-                                                                                    setChangingGroupId(null);
-                                                                                }} className="px-3 py-1.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-sm font-bold hover:bg-slate-700 transition-colors cursor-pointer">
-                                                                                    {g}
-                                                                                </button>
-                                                                            ))}
-                                                                        </div>
-                                                                    )}
-
+                                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-4">
+                                                                <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+                                                                    <p className="text-[10px] font-black text-slate-400 uppercase">Mover para qual grupo?</p>
+                                                                    <div className="flex gap-2 flex-wrap">
+                                                                        {Array.from(new Set(bends.map(b => b.group_name).filter(Boolean))).map(g => (
+                                                                            <button key={g} onClick={() => {
+                                                                                setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: g } : b));
+                                                                                setChangingGroupId(null);
+                                                                            }} className="px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl text-xs font-bold active:bg-slate-100 transition-colors">
+                                                                                {g}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
                                                                     <div className="flex gap-2">
-                                                                        <input type="text" placeholder="Ou digite um novo nome de grupo..." value={tempGroupName} onChange={e => setTempGroupName(e.target.value)}
-                                                                            className="flex-1 bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:border-blue-400 focus:outline-none transition-all" />
+                                                                        <input type="text" placeholder="Novo nome..." value={tempGroupName} onChange={e => setTempGroupName(e.target.value)}
+                                                                            className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-brand-primary outline-none" />
                                                                         <button onClick={() => {
                                                                             setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: tempGroupName.trim() || undefined } : b));
                                                                             setChangingGroupId(null);
-                                                                        }} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-sm transition-colors cursor-pointer">Salvar</button>
-                                                                        <button onClick={() => setChangingGroupId(null)} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg text-sm transition-colors cursor-pointer">Cancelar</button>
+                                                                        }} className="px-4 py-2 bg-brand-primary text-white font-black rounded-xl text-xs uppercase">Ok</button>
                                                                     </div>
                                                                 </div>
                                                             </motion.div>
                                                         )}
                                                     </AnimatePresence>
 
-                                                    {bend.productType === 'service' ? (
-                                                        <>
-                                                            <div className="bg-purple-500/10 border border-purple-500/20 rounded-2xl p-4">
-                                                                <p className="text-white font-bold text-sm">Descrição:</p>
-                                                                <p className="text-slate-300 text-sm whitespace-pre-wrap">{bend.serviceDescription}</p>
+                                                    {/* Piece Content */}
+                                                    {isService ? (
+                                                        <div className="space-y-4">
+                                                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                                                <p className="text-slate-600 font-medium text-sm leading-relaxed">{bend.serviceDescription}</p>
                                                             </div>
+
+                                                            <div className="flex gap-4">
+                                                                <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center border border-slate-100">
+                                                                    <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Qtd/Unid</span>
+                                                                    <span className="text-lg font-black text-slate-900">{bend.serviceQty}x</span>
+                                                                </div>
+                                                                <div className="flex-[2] bg-purple-50 rounded-2xl p-3 flex flex-col items-center border border-purple-100">
+                                                                    <span className="text-[9px] font-black text-purple-400 uppercase mb-1">Valor do Serviço</span>
+                                                                    <span className="text-xl font-black text-purple-700">{fmt((bend.serviceValue || 0) * (bend.serviceQty || 1))}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <button onClick={() => {
+                                                                setEditingServiceId(bend.id);
+                                                                setEditServiceDesc(bend.serviceDescription || '');
+                                                                setEditServiceVal(String(bend.serviceValue || ''));
+                                                                setEditServiceQtyStr(String(bend.serviceQty || 1));
+                                                            }} className="w-full py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
+                                                                <PenLine className="w-4 h-4" /> Editar Detalhes
+                                                            </button>
+
                                                             <AnimatePresence>
                                                                 {editingServiceId === bend.id && (
-                                                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                                                                        <div className="bg-slate-900/50 border border-yellow-500/30 p-4 rounded-xl flex flex-col gap-3">
-                                                                            <label className="text-xs text-yellow-300 font-bold uppercase tracking-wider">✏️ Editar Serviço</label>
+                                                                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                                                                        <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl space-y-6">
+                                                                            <h3 className="text-xl font-black text-slate-900">Editar Serviço</h3>
                                                                             <textarea rows={3} value={editServiceDesc} onChange={e => setEditServiceDesc(e.target.value)}
-                                                                                placeholder="Descrição do serviço..."
-                                                                                className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-sm text-white resize-none focus:border-yellow-400 focus:outline-none transition-all" />
-                                                                            <div className="flex gap-2">
-                                                                                <div className="flex-1">
-                                                                                    <label className="text-xs text-slate-400 mb-1 block">Valor Unit. (R$)</label>
-                                                                                    <input type="number" min="0" step="0.01" value={editServiceVal} onChange={e => setEditServiceVal(e.target.value)}
-                                                                                        className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:border-yellow-400 focus:outline-none transition-all" />
+                                                                                className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm text-slate-900 focus:ring-2 focus:ring-purple-500 transition-all outline-none" placeholder="Descrição..." />
+                                                                            <div className="grid grid-cols-2 gap-4">
+                                                                                <div>
+                                                                                    <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Quant.</label>
+                                                                                    <input type="number" value={editServiceQtyStr} onChange={e => setEditServiceQtyStr(e.target.value)}
+                                                                                        className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
                                                                                 </div>
-                                                                                <div className="w-24">
-                                                                                    <label className="text-xs text-slate-400 mb-1 block">Qtd</label>
-                                                                                    <input type="number" min="1" step="1" value={editServiceQtyStr} onChange={e => setEditServiceQtyStr(e.target.value)}
-                                                                                        className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:border-yellow-400 focus:outline-none transition-all" />
+                                                                                <div>
+                                                                                    <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Valor (R$)</label>
+                                                                                    <input type="number" step="0.01" value={editServiceVal} onChange={e => setEditServiceVal(e.target.value)}
+                                                                                        className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
                                                                                 </div>
                                                                             </div>
-                                                                            <div className="flex gap-2">
+                                                                            <div className="flex gap-3 pt-2">
+                                                                                <button onClick={() => setEditingServiceId(null)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200">Cancelar</button>
                                                                                 <button onClick={() => {
                                                                                     const newVal = parseFloat(editServiceVal) || 0;
                                                                                     const newQty = parseFloat(editServiceQtyStr) || 1;
-                                                                                    if (newVal <= 0) { setToast({ msg: 'Informe um valor válido', type: 'error' }); return; }
                                                                                     setBends(prev => prev.map(b => b.id === bend.id ? { ...b, serviceDescription: editServiceDesc, serviceValue: newVal, serviceQty: newQty } : b));
                                                                                     setEditingServiceId(null);
-                                                                                    setToast({ msg: 'Serviço atualizado!', type: 'success' });
-                                                                                }} className="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold rounded-lg text-sm transition-colors cursor-pointer flex items-center justify-center gap-1">
-                                                                                    <Check className="w-4 h-4" /> Salvar
-                                                                                </button>
-                                                                                <button onClick={() => setEditingServiceId(null)}
-                                                                                    className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-lg text-sm transition-colors cursor-pointer">Cancelar</button>
+                                                                                }} className="flex-[2] py-4 bg-purple-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-purple-600/20 active:bg-purple-700">Salvar Alterações</button>
                                                                             </div>
                                                                         </div>
                                                                     </motion.div>
                                                                 )}
                                                             </AnimatePresence>
-                                                        </>
+                                                        </div>
                                                     ) : (
-                                                        <>
-                                                            <div className="relative group cursor-pointer" onClick={() => bend.svgDataUrl && setZoomImg(bend.svgDataUrl)}>
-                                                                <BendCanvas
-                                                                    risks={(bend.risks || []).map((r, ri) => ri === 0 ? { ...r, executionIdx: getBendExecutionLabels(bend.id, bend.lengths) } : r)}
-                                                                    exportMode={true}
-                                                                />
-                                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-3xl"><ZoomIn className="w-7 h-7 text-white" /></div>
+                                                        <div className="space-y-5">
+                                                            {/* Visualization (Clean SVG) */}
+                                                            <div className="relative group active:scale-95 transition-transform" onClick={() => bend.svgDataUrl && setZoomImg(bend.svgDataUrl)}>
+                                                                <div className="w-full h-32 bg-slate-900 rounded-[2rem] overflow-hidden shadow-inner border border-white/5 relative">
+                                                                    <BendCanvas
+                                                                        risks={(bend.risks || []).map((r, ri) => ri === 0 ? { ...r, executionIdx: getBendExecutionLabels(bend.id, bend.lengths) } : r)}
+                                                                        exportMode={true}
+                                                                    />
+                                                                    <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md p-2 rounded-xl border border-white/10 opacity-60">
+                                                                        <ZoomIn className="w-4 h-4 text-white" />
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div>
-                                                                <p className="text-sm font-bold text-slate-300 mb-2 uppercase tracking-wider">Metros Corridos</p>
-                                                                <div className="space-y-2">
+
+                                                            {/* Dimensions Info */}
+                                                            <div className="flex gap-3">
+                                                                <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-slate-100">
+                                                                    <span className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Total Linear</span>
+                                                                    <span className="text-base font-black text-slate-900 leading-none">{bend.totalLengthM.toFixed(2)} <span className="text-[10px] font-bold">m</span></span>
+                                                                </div>
+                                                                <div className="flex-1 bg-brand-primary/5 rounded-2xl p-3 flex flex-col items-center justify-center border border-brand-primary/10">
+                                                                    <span className="text-[9px] font-black text-brand-primary uppercase leading-none mb-1">Área M²</span>
+                                                                    <span className="text-base font-black text-brand-primary leading-none">{bend.m2.toFixed(2)} <span className="text-[10px] font-bold">m²</span></span>
+                                                                </div>
+                                                                <div className="flex-1 bg-green-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-green-100">
+                                                                    <span className="text-[9px] font-black text-green-500 uppercase leading-none mb-1">Subtotal</span>
+                                                                    <span className="text-base font-black text-green-600 leading-none">{fmt(bend.m2 * pricePerM2)}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* METERS INPUTS (Improved for touch) */}
+                                                            <div className="space-y-3">
+                                                                <div className="flex items-center justify-between">
+                                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pt-1">
+                                                                        <List className="w-3 h-3" /> Metros Corridos (Cortes)
+                                                                    </p>
+                                                                    <button onClick={() => {
+                                                                        setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: [...b.lengths, ''] } : b));
+                                                                        setTimeout(() => document.getElementById(`cut-input-${bend.id}-${bend.lengths.length}`)?.focus(), 100);
+                                                                    }} className="text-[10px] font-black text-brand-primary flex items-center gap-1 active:opacity-50">
+                                                                        <Plus className="w-3.5 h-3.5" /> NOVO CORTE
+                                                                    </button>
+                                                                </div>
+
+                                                                <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
                                                                     {bend.lengths.map((l, li) => (
-                                                                        <div key={li} className="flex gap-2 items-center">
-                                                                            <span className="text-slate-500 text-xs w-4">{li + 1}.</span>
-                                                                            <div className="flex-1 relative">
-                                                                                <input type="number" id={`cut-input-${bend.id}-${li}`} min="0.01" step="0.01" placeholder="0.00" value={l}
-                                                                                    onChange={e => updateLength(bend.id, li, e.target.value)}
-                                                                                    className="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 text-white placeholder-white/30 text-xl font-black focus:outline-none focus:border-blue-400 transition-all pr-12" />
-                                                                                {optResult.pieceToSeq && optResult.pieceToSeq[`${bend.id}-${li}`] && (
-                                                                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1 pointer-events-none">
-                                                                                        {optResult.pieceToSeq[`${bend.id}-${li}`].map((chapa, cIdx) => (
-                                                                                            <span key={cIdx} className="text-[10px] font-black text-amber-900 bg-amber-400 px-2 py-0.5 rounded-md shadow-sm border border-amber-500" title={`Cortar na Chapa #${chapa}`}>
-                                                                                                Chapa {chapa}
-                                                                                            </span>
-                                                                                        ))}
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                            <span className="text-slate-400 text-sm">m</span>
+                                                                        <div key={li} className="relative group">
+                                                                            <input
+                                                                                type="number"
+                                                                                id={`cut-input-${bend.id}-${li}`}
+                                                                                min="0.01"
+                                                                                step="0.01"
+                                                                                placeholder="0.00"
+                                                                                value={l}
+                                                                                onChange={e => updateLength(bend.id, li, e.target.value)}
+                                                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-4 text-center text-lg font-black text-slate-900 focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
+                                                                            />
                                                                             {bend.lengths.length > 1 && (
-                                                                                <button onClick={() => { const ls = bend.lengths.filter((_, i) => i !== li); setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: ls, ...calcM2(b.roundedWidthCm, ls) } : b)); }}
-                                                                                    className="p-2 text-red-400 hover:bg-red-400/10 hover:text-red-300 rounded-lg cursor-pointer transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                                                                <button
+                                                                                    onClick={() => { const ls = bend.lengths.filter((_, i) => i !== li); setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: ls, ...calcM2(b.roundedWidthCm, ls) } : b)); }}
+                                                                                    className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-75 transition-all z-10"
+                                                                                >
+                                                                                    ×
+                                                                                </button>
+                                                                            )}
+                                                                            {optResult.pieceToSeq && optResult.pieceToSeq[`${bend.id}-${li}`] && (
+                                                                                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none opacity-40">
+                                                                                    <span className="text-[7px] font-black text-slate-400 bg-white border border-slate-100 px-1 rounded uppercase tracking-tighter">
+                                                                                        C{optResult.pieceToSeq[`${bend.id}-${li}`][0]}
+                                                                                    </span>
+                                                                                </div>
                                                                             )}
                                                                         </div>
                                                                     ))}
                                                                 </div>
-                                                                <button onClick={() => {
-                                                                    setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: [...b.lengths, ''] } : b));
-                                                                    setTimeout(() => document.getElementById(`cut-input-${bend.id}-${bend.lengths.length}`)?.focus(), 100);
-                                                                }}
-                                                                    className="mt-2 text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer">
-                                                                    <Plus className="w-3.5 h-3.5" /> Adicionar comprimento
-                                                                </button>
                                                             </div>
-                                                        </>
+
+                                                            {/* Edit piece action */}
+                                                            <button onClick={() => {
+                                                                setSelectedProductType(bend.productType || 'product');
+                                                                if (bend.product_id) {
+                                                                    setSelectedProductId(bend.product_id);
+                                                                    const prod = allProducts.find(p => p.id === bend.product_id);
+                                                                    if (prod) setSelectedProductName(prod.name);
+                                                                }
+                                                                setEditingBendLengths([...bend.lengths]);
+                                                                setCurrentRisks(bend.risks || []);
+                                                                setBends(prev => prev.filter(b => b.id !== bend.id));
+                                                                topRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                                            }} className="w-full py-4 bg-slate-50 text-slate-400 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:bg-slate-100 transition-all">
+                                                                <RefreshCw className="w-4 h-4" /> Modificar Geometria / Produto
+                                                            </button>
+                                                        </div>
                                                     )}
-                                                    <div className="flex gap-4 text-sm bg-white/5 rounded-2xl p-4 flex-wrap">
-                                                        {bend.productType === 'service' ? (
-                                                            <div className="flex-1 flex justify-between items-center">
-                                                                <div><p className="text-slate-400 text-xs">Quantidade</p><p className="text-white font-bold">{bend.serviceQty}</p></div>
-                                                                <div className="border-l border-white/10 pl-4"><p className="text-slate-400 text-xs">Valor Unit.</p><p className="text-white font-bold">R$ {bend.serviceValue?.toFixed(2)}</p></div>
-                                                                <div className="border-l border-white/10 pl-4 ml-auto text-right"><p className="text-slate-400 text-xs">Total do Serviço</p><p className="text-purple-400 font-black text-xl">R$ {((bend.serviceValue || 0) * (bend.serviceQty || 1)).toFixed(2)}</p></div>
-                                                            </div>
-                                                        ) : (
-                                                            <>
-                                                                <div><p className="text-slate-400 text-xs">Total metros</p><p className="text-white font-bold">{bend.totalLengthM.toFixed(2)} m</p></div>
-                                                                <div className="border-l border-white/10 pl-4"><p className="text-slate-400 text-xs">Largura</p><p className="text-white font-bold">{(bend.roundedWidthCm / 100).toFixed(2)} m</p></div>
-                                                                <div className="border-l border-white/10 pl-4"><p className="text-slate-400 text-xs">Área</p><p className="text-blue-400 font-black text-lg">{bend.m2.toFixed(2)} m²</p></div>
-                                                                <div className="border-l border-white/10 pl-4 ml-auto text-right"><p className="text-slate-400 text-xs">Subtotal</p><p className="text-green-400 font-black text-xl">R$ {(bend.m2 * pricePerM2).toFixed(2)}</p></div>
-                                                            </>
-                                                        )}
-                                                    </div>
                                                 </motion.div>
                                             );
                                         })}
-                                        <div className="flex justify-center mt-6">
+
+                                        <div className="flex justify-center pt-2">
                                             <button onClick={() => {
                                                 if (selectedProductType === 'service') {
                                                     serviceDescRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -3289,55 +3262,64 @@ window.onload = function() {
                                                 } else {
                                                     topRef.current?.scrollIntoView({ behavior: 'smooth' });
                                                 }
-                                            }} className="px-6 py-3 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-2xl flex items-center gap-2 cursor-pointer shadow-lg shadow-blue-500/20 transition-all">
-                                                <Plus className="w-5 h-5" /> {selectedProductType === 'service' ? 'Adicionar Novo Serviço' : 'Adicionar Nova Dobra'}
+                                            }} className="px-8 py-4 bg-brand-primary text-white font-black rounded-[1.8rem] flex items-center gap-3 cursor-pointer shadow-xl shadow-brand-primary/20 active:scale-95 transition-all uppercase text-xs tracking-widest">
+                                                <Plus className="w-5 h-5" /> Adicionar Outro Item
                                             </button>
                                         </div>
                                     </div>
-                                )
-                            }
+                                </div>
+                            )}
 
-                            {/* Total sticky bar */}
-                            {
-                                bends.length > 0 && (
-                                    <div className="sticky bottom-4 z-10 bg-slate-900/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 flex flex-col gap-4 shadow-2xl shadow-blue-500/10">
-                                        <div className="flex justify-between items-center w-full bg-white/5 p-3 rounded-2xl">
-                                            <div><p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total</p><p className="text-white font-black text-2xl">{totalM2.toFixed(2)} m²</p></div>
-                                            <div className="text-right"><p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Estimado</p><p className="text-green-400 font-black text-3xl">R$ {totalValue.toFixed(2)}</p></div>
+                            {/* Total sticky bar (Step 1) */}
+                            {bends.length > 0 && (
+                                <div className="sticky bottom-6 z-30 px-4">
+                                    <div className="bg-slate-900/90 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] p-6 flex flex-col gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                                        <div className="flex justify-between items-center w-full bg-white/5 p-4 rounded-2xl border border-white/5">
+                                            <div>
+                                                <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Total m²</p>
+                                                <p className="text-white font-black text-2xl">{totalM2.toFixed(2)}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Estimado</p>
+                                                <p className="text-brand-primary font-black text-3xl">{fmt(totalValue)}</p>
+                                            </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 w-full">
                                             <button onClick={handleSaveDraft} disabled={savingDraft}
-                                                className="btn-field bg-white/10 text-white border border-white/10 text-sm">
-                                                <Save className="w-5 h-5" /> SALVAR
+                                                className="h-16 flex items-center justify-center gap-2 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                                                <Save className="w-5 h-5" /> Salvar
                                             </button>
-                                            <button onClick={() => setStep('summary')} className="btn-field bg-blue-600 text-white shadow-blue-600/20">
-                                                RESUMO <ChevronRight className="w-6 h-6" />
+                                            <button onClick={() => setStep('summary')} className="h-16 flex items-center justify-center gap-2 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-lg shadow-brand-primary/20">
+                                                Avançar <ChevronRight className="w-5 h-5" />
                                             </button>
                                         </div>
                                     </div>
-                                )
-                            }
-                        </div >
+                                </div>
+                            )}
+                        </div>
                     )
                 }
 
                 {/* ══ STEP 2: SUMMARY ══ */}
-                {
-                    step === 'summary' && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-6" id="quote-print">
-                                <div className="flex items-start justify-between flex-wrap gap-4">
-                                    <div>
-                                        <h2 className="text-2xl font-black text-white">Resumo do Orçamento</h2>
-                                        <p className="text-slate-400 text-sm mt-1">{new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                                        <p className="text-slate-300 text-sm mt-1">Cliente: <strong>{user?.name || user?.username}</strong></p>
-                                    </div>
-                                    {/* Payment status badge */}
-                                    <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 rounded-2xl px-4 py-2">
-                                        <span className="text-blue-300 font-black text-sm">📤 PRONTO PARA ENVIO</span>
-                                    </div>
+                {step === 'summary' && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-20">
+                        <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl space-y-8" id="quote-print">
+                            <div className="flex items-start justify-between">
+                                <div className="space-y-1">
+                                    <h2 className="text-2xl font-black text-slate-900 leading-tight">Resumo Geral</h2>
+                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                                 </div>
+                                <div className="bg-blue-50 border border-blue-100 px-4 py-2 rounded-2xl">
+                                    <p className="text-blue-600 font-black text-[10px] uppercase tracking-tighter">Versão Final</p>
+                                </div>
+                            </div>
 
+                            <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cliente</p>
+                                <p className="text-xl font-black text-slate-900">{user?.name || user?.username || clientName || 'Consumidor Final'}</p>
+                            </div>
+
+                            <div className="space-y-4">
                                 {(() => {
                                     const grouped = bends.reduce((acc, b) => {
                                         const key = b.group_name || 'Sem Grupo';
@@ -3347,321 +3329,204 @@ window.onload = function() {
                                     }, {} as Record<string, Bend[]>);
 
                                     return Object.entries(grouped).map(([groupName, groupBends]) => (
-                                        <div key={groupName} className="space-y-4 mt-8 first:mt-4">
+                                        <div key={groupName} className="space-y-4">
                                             {Object.keys(grouped).length > 1 && (
-                                                <h3 className="text-xl font-black text-white px-2 mt-4 flex items-center gap-3">
-                                                    <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
-                                                    {groupName}
-                                                </h3>
+                                                <div className="flex items-center gap-3 pt-4">
+                                                    <div className="w-2 h-2 bg-brand-primary rounded-full" />
+                                                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">{groupName}</h3>
+                                                </div>
                                             )}
                                             {groupBends.map((b) => {
                                                 const globalIdx = bends.findIndex(x => x.id === b.id);
                                                 const isService = b.productType === 'service';
 
-                                                if (isService) {
-                                                    return (
-                                                        <div key={b.id} className="border border-purple-500/10 rounded-2xl p-5 space-y-3 bg-purple-500/[0.03]">
-                                                            <div className="flex items-center gap-3">
-                                                                <span className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-black text-sm">{globalIdx + 1}</span>
-                                                                <div className="flex-1">
-                                                                    <p className="text-white font-bold flex items-center gap-2">
-                                                                        Serviço — {b.product_id ? allProducts.find(p => p.id === b.product_id)?.name : 'Geral'}
-                                                                    </p>
-                                                                    <p className="text-slate-400 text-xs whitespace-pre-wrap">{b.serviceDescription}</p>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                    <p className="text-white font-bold">Qtd: {b.serviceQty}</p>
-                                                                    <p className="text-purple-400 font-black">R$ {((b.serviceValue || 0) * (b.serviceQty || 1)).toFixed(2)}</p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                }
-
                                                 return (
-                                                    <div key={b.id} className="border border-white/10 rounded-2xl p-5 space-y-3 bg-white/[0.02]">
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-black text-sm">{globalIdx + 1}</span>
+                                                    <div key={b.id} className="bg-slate-50 border border-slate-100 rounded-3xl p-5 flex items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs ${isService ? 'bg-purple-500' : 'bg-slate-900'}`}>{globalIdx + 1}</div>
                                                             <div>
-                                                                <p className="text-white font-bold flex items-center gap-2">
-                                                                    Dobra {globalIdx + 1}
+                                                                <p className="text-slate-900 font-black text-sm">
+                                                                    {isService ? 'Serviço' : 'Peça Industrial'} — {b.product_id ? allProducts.find(p => p.id === b.product_id)?.name : 'Geral'}
                                                                 </p>
-                                                                <p className="text-slate-400 text-xs">{(b.risks || []).map(r => `${DIRECTION_ICONS[r.direction]} ${r.sizeCm}`).join(' · ')}</p>
-                                                            </div>
-                                                            <div className="ml-auto text-right">
-                                                                <p className="text-white font-bold">{(b.roundedWidthCm / 100).toFixed(2)}m × {b.totalLengthM.toFixed(2)}m</p>
-                                                                <p className="text-blue-400 font-black">{b.m2.toFixed(2)} m²</p>
-                                                                <p className="text-green-400 font-bold text-sm">R$ {(b.m2 * pricePerM2).toFixed(2)}</p>
+                                                                <p className="text-slate-500 text-[10px] font-medium leading-tight line-clamp-1">
+                                                                    {isService ? b.serviceDescription : (b.risks || []).map(r => `${r.sizeCm}cm`).join(' · ')}
+                                                                </p>
                                                             </div>
                                                         </div>
-                                                        {!isService && (
-                                                            <div className="relative group cursor-pointer" onClick={() => b.svgDataUrl && setZoomImg(b.svgDataUrl)}>
-                                                                <BendCanvas
-                                                                    risks={(b.risks || []).map((r, ri) => ri === 0 ? { ...r, executionIdx: getBendExecutionLabels(b.id, b.lengths) } : r)}
-                                                                    exportMode={true}
-                                                                />
-                                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-3xl"><ZoomIn className="w-8 h-8 text-white" /></div>
-                                                            </div>
-                                                        )}
+                                                        <div className="text-right shrink-0">
+                                                            <p className="text-slate-900 font-black text-sm">{isService ? `x${b.serviceQty}` : `${b.m2.toFixed(2)}m²`}</p>
+                                                            <p className={`text-[10px] font-black ${isService ? 'text-purple-600' : 'text-brand-primary'}`}>
+                                                                {fmt(isService ? (b.serviceValue || 0) * (b.serviceQty || 1) : b.m2 * pricePerM2)}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 );
                                             })}
-
                                         </div>
                                     ));
                                 })()}
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pb-6 border-b border-white/5">
-                                    <div className="p-5 bg-white/5 rounded-2xl border border-white/10">
-                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Valor Venda (m²)</label>
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-white/60 font-bold">R$</span>
-                                            <input
-                                                type="number"
-                                                value={overridePricePerM2}
-                                                onChange={e => setOverridePricePerM2(e.target.value)}
-                                                className="bg-white/20 border border-white/20 rounded-xl px-4 py-2 text-xl font-black text-white outline-none w-full focus:ring-2 focus:ring-blue-500 transition-all"
-                                                placeholder="0,00"
-                                            />
-                                        </div>
-                                        <p className="text-[10px] text-slate-500 mt-2 italic">Valor usado para calcular as dobras deste orçamento</p>
-                                    </div>
-
-                                    <div className="p-5 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between gap-6">
-                                        <div className="min-w-fit">
-                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Custo (m²)</label>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-white/40 font-bold text-xs">R$</span>
-                                                <input
-                                                    type="number"
-                                                    value={overrideCostPerM2}
-                                                    onChange={e => setOverrideCostPerM2(e.target.value)}
-                                                    className="bg-white/20 border border-white/20 rounded-xl px-4 py-2 text-xl font-black text-white outline-none w-24 focus:ring-2 focus:ring-blue-500 transition-all"
-                                                    placeholder="0,00"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 text-blue-400">Custo da Calha</label>
-                                            <div className="flex items-center justify-end gap-2">
-                                                <span className="text-white/60 font-bold">R$</span>
-                                                <span className="text-2xl font-black text-white">
-                                                    {totalCostValue.toFixed(2)}
-                                                </span>
-                                            </div>
-                                            <p className="text-[10px] text-slate-500 mt-1 italic uppercase tracking-wider">Custo estimado total</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div ref={summaryTotalsRef} className="flex flex-col md:flex-row justify-between items-center gap-6 mt-8">
-                                    <div className="flex items-center gap-10">
-                                        <div className="text-center group">
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-blue-400 transition-colors text-left">Subtotal</p>
-                                            <h4 className="text-2xl font-black text-white">R$ {totalValue.toFixed(2)}</h4>
-                                        </div>
-
-                                        <div className="text-center group">
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-amber-400 transition-colors text-left">Desconto</p>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-white/40 font-bold">- R$</span>
-                                                <input
-                                                    type="number"
-                                                    value={discountAmount}
-                                                    onChange={e => setDiscountAmount(e.target.value)}
-                                                    className="w-24 bg-white/10 rounded-lg px-2 py-1 text-white font-black text-lg outline-none focus:ring-2 focus:ring-amber-500"
-                                                    placeholder="0,00"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-6">
-                                        <div className="text-right border-r border-white/10 pr-6">
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lucro Estimado</p>
-                                            <h4 className={`text-xl font-black ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                                R$ {profit.toFixed(2)}
-                                            </h4>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Total Final</p>
-                                            <h2 className="text-5xl font-black text-white tracking-tighter shadow-blue-500/20 drop-shadow-xl">
-                                                R$ {finalWithDiscount.toFixed(2)}
-                                            </h2>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-bold text-slate-300 mb-2">Observações (opcional)</label>
-                                    <textarea rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Ex: endereço da obra, referência do local, cor, material, urgência..."
-                                        className="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-3 text-white placeholder-white/30 focus:outline-none focus:border-blue-400 transition-all" />
-                                </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-3 justify-between mt-8">
-                                <div className="flex flex-wrap gap-3 w-full sm:w-auto">
-                                    <button onClick={() => { setBends([]); setCurrentRisks([]); setEditingQuoteId(null); setShowMyQuotes(true); setStep('bends'); }}
-                                        className="px-6 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-2xl flex items-center justify-center gap-2 font-bold cursor-pointer transition-all shadow-lg shadow-black/20 flex-1 sm:flex-none">
-                                        <List className="w-5 h-5" /> Ver Listagem
-                                    </button>
-                                    <button onClick={() => setStep('bends')}
-                                        className="px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl flex items-center justify-center gap-2 font-bold cursor-pointer transition-all shadow-lg flex-1 sm:flex-none">
-                                        <ChevronLeft className="w-5 h-5" /> Editar Dobras
-                                    </button>
+                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Venda (m²)</label>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-slate-300 font-black">R$</span>
+                                            <input type="number" value={overridePricePerM2} onChange={e => setOverridePricePerM2(e.target.value)}
+                                                className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
+                                        </div>
+                                    </div>
+                                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Custo (m²)</label>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-slate-300 font-black">R$</span>
+                                            <input type="number" value={overrideCostPerM2} onChange={e => setOverrideCostPerM2(e.target.value)}
+                                                className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex flex-wrap gap-3 w-full sm:w-auto mt-4 sm:mt-0">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mt-4">
-                                        <button onClick={() => handleViewClientReport({ id: 'PREVIA', clientName }, bends)}
-                                            className="btn-field bg-green-600 text-white shadow-green-600/20">
-                                            <Printer className="w-5 h-5" /> PRÉVIA CLIENTE
+
+                                <div className="flex items-center justify-between bg-brand-primary rounded-[2.5rem] p-8 text-white shadow-xl shadow-brand-primary/20">
+                                    <div>
+                                        <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Total Geral</p>
+                                        <div className="flex items-center gap-2">
+                                            <h2 className="text-4xl font-black tracking-tighter">{fmt(finalWithDiscount)}</h2>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Lucro Est.</p>
+                                        <p className="text-2xl font-black">{fmt(profit)}</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Notas / Observações</label>
+                                    <textarea rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Endereço, cor, material..."
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all outline-none text-sm" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Summary Actions Footer */}
+                        <div className="grid grid-cols-2 gap-3 pb-8">
+                            <button onClick={() => setStep('bends')}
+                                className="h-16 flex items-center justify-center gap-2 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200 transition-all">
+                                <ChevronLeft className="w-5 h-5" /> Voltar
+                            </button>
+                            <button onClick={handleSubmit} disabled={submitting}
+                                className="h-16 flex items-center justify-center gap-3 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-xl shadow-brand-primary/20">
+                                {submitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                {submitting ? 'Enviando...' : 'Finalizar e Enviar'}
+                            </button>
+
+                            <div className="col-span-2 grid grid-cols-3 gap-3">
+                                <button onClick={() => handleViewClientReport({ id: 'PREVIA', clientName }, bends)}
+                                    className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
+                                    <Printer className="w-5 h-5 text-slate-400" />
+                                    <span className="text-[8px] font-black uppercase">Preview</span>
+                                </button>
+                                <button onClick={() => {
+                                    const w2 = window.open('', '_blank');
+                                    handleDownloadQuoteCompactPDF({ id: 'PREVIA', totalM2: totalM2, totalValue: totalM2 * pricePerM2, clientName }, bends, w2);
+                                }} className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
+                                    <FileDown className="w-5 h-5 text-slate-400" />
+                                    <span className="text-[8px] font-black uppercase">Obra</span>
+                                </button>
+                                <button onClick={handleDownloadPDF}
+                                    className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
+                                    <FileDown className="w-5 h-5 text-slate-400" />
+                                    <span className="text-[8px] font-black uppercase">Prod.</span>
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* ══ STEP 3: SUCCESS & SHARING ══ */}
+                {(step === 'success' || step === 'payment') && savedQuote && (() => {
+                    const clientPhone = (() => {
+                        const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
+                        const raw = linked?.phone || savedQuote.clientPhone || '';
+                        return raw.replace(/[^+\d]/g, '');
+                    })();
+
+                    const quoteNum = String(savedQuote.id).substring(0, 8).toUpperCase();
+                    const reportUrl = `${window.location.origin}/api/quotes/${savedQuote.id}/client-report`;
+                    const waMsg = encodeURIComponent(
+                        `Olá ${savedQuote.clientName || clientName || ''}! 😊\n\nSegue seu orçamento Nº ${quoteNum} no valor de *${fmt(finalWithDiscount)}*.\n\n📄 Visualize e imprima seu orçamento:\n${reportUrl}\n\nQualquer dúvida estou à disposição!`
+                    );
+                    const waLink = clientPhone ? `https://wa.me/${clientPhone}?text=${waMsg}` : null;
+
+                    return (
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-8 pb-32">
+                            <div className="bg-white rounded-[3rem] p-10 shadow-2xl border border-slate-100 flex flex-col items-center text-center space-y-8 w-full max-w-sm">
+                                <div className="w-24 h-24 bg-green-500 rounded-[2rem] flex items-center justify-center shadow-xl shadow-green-500/20 rotate-3 animate-bounce">
+                                    <Check className="w-12 h-12 text-white" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h2 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{quoteNum}</h2>
+                                    <p className="text-slate-500 font-medium px-4">Pronto para ser compartilhado com seu cliente.</p>
+                                </div>
+
+                                <div className="bg-slate-50 rounded-3xl p-6 w-full border border-slate-100 space-y-1">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Valor Final</p>
+                                    <p className="text-3xl font-black text-brand-primary">{fmt(finalWithDiscount)}</p>
+                                    <div className="pt-3 mt-3 border-t border-slate-200/50">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente</p>
+                                        <p className="text-lg font-black text-slate-900 truncate">{savedQuote.clientName || clientName || 'Consumidor Final'}</p>
+                                        <p className="text-slate-400 text-xs font-mono">{clientPhone || 'Sem telefone'}</p>
+                                    </div>
+                                </div>
+
+                                <div className="w-full space-y-4 pt-4">
+                                    {waLink ? (
+                                        <a href={waLink} target="_blank" rel="noopener noreferrer"
+                                            className="h-20 w-full bg-[#25D366] text-white rounded-[1.8rem] flex items-center justify-center gap-4 font-black text-lg shadow-xl shadow-green-500/20 active:scale-95 transition-all">
+                                            <Send className="w-6 h-6" /> WhatsApp
+                                        </a>
+                                    ) : (
+                                        <div className="p-4 bg-amber-50 text-amber-700 rounded-2xl text-xs font-bold border border-amber-100">
+                                            ⚠️ Cadastre um telefone para habilitar o envio por WhatsApp
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button onClick={() => { handleResetQuote(); setStep('bends'); }}
+                                            className="h-16 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                                            <Plus className="w-5 h-5 mx-auto mb-1" /> Novo
+                                        </button>
+                                        <button onClick={() => { setShowMyQuotes(true); setStep('bends'); }}
+                                            className="h-16 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest active:bg-slate-50 transition-all">
+                                            <List className="w-5 h-5 mx-auto mb-1" /> Histórico
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
+                                        <button onClick={() => handleViewClientReport(savedQuote, bends)}
+                                            className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
+                                            <Printer className="w-5 h-5" />
+                                            <span className="text-[8px] font-black uppercase tracking-tighter">Preview</span>
                                         </button>
                                         <button onClick={() => {
                                             const w2 = window.open('', '_blank');
-                                            w2?.document.write('Gerando modelo A4 Compacto...');
-                                            handleDownloadQuoteCompactPDF({ id: 'PREVIA', totalM2: totalM2, totalValue: totalM2 * pricePerM2, clientName }, bends, w2);
-                                        }}
-                                            className="btn-field bg-slate-700 text-white">
-                                            <Printer className="w-5 h-5" /> PDF OBRA
+                                            handleDownloadQuoteCompactPDF(savedQuote, bends, w2);
+                                        }} className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
+                                            <Printer className="w-5 h-5" />
+                                            <span className="text-[8px] font-black uppercase tracking-tighter">Obra</span>
                                         </button>
                                         <button onClick={handleDownloadPDF}
-                                            className="btn-field bg-indigo-600 text-white shadow-indigo-600/20">
-                                            <FileDown className="w-5 h-5" /> PDF PROD
-                                        </button>
-                                        <button onClick={handleSubmit} disabled={submitting}
-                                            className="btn-field bg-blue-600 text-white shadow-blue-600/20 col-span-full lg:col-span-1">
-                                            {submitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />}
-                                            {submitting ? 'ENVIANDO...' : 'ENVIAR AGORA'}
+                                            className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
+                                            <FileDown className="w-5 h-5" />
+                                            <span className="text-[8px] font-black uppercase tracking-tighter">Produção</span>
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </motion.div>
-                    )
-                }
-
-                {/* ══ STEP 3: ENVIO DE ORÇAMENTO ══ */}
-                {
-                    step === 'payment' && savedQuote && (() => {
-                        // Telefone do cliente: prioriza cliente vinculado, depois settings.whatsapp
-                        const clientPhone: string = (() => {
-                            const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
-                            const raw = linked?.phone || savedQuote.clientPhone || '';
-                            // Remove tudo exceto '+' e dígitos
-                            return raw.replace(/[^+\d]/g, '');
-                        })();
-
-                        const quoteNum = String(savedQuote.id).substring(0, 8).toUpperCase();
-                        const finalVal = finalWithDiscount;
-
-                        // Link permanente do relatório hospedado no servidor
-                        const reportUrl = `${window.location.origin}/api/quotes/${savedQuote.id}/client-report`;
-                        const waMsg = encodeURIComponent(
-                            `Olá ${savedQuote.clientName || clientName || ''}! 😊\n\nSegue seu orçamento Nº ${quoteNum} no valor de *R$ ${finalVal.toFixed(2)}*.\n\n📄 Visualize e imprima seu orçamento:\n${reportUrl}\n\nQualquer dúvida estou à disposição!`
-                        );
-                        const waLink = clientPhone ? `https://wa.me/${clientPhone}?text=${waMsg}` : null;
-
-                        const resetAll = () => {
-                            handleResetQuote();
-                        };
-
-                        return (
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-
-                                {/* ── Confirmação */}
-                                <div className="text-center bg-green-500/10 border border-green-500/30 rounded-3xl p-8">
-                                    <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-lg shadow-green-500/30">✓</div>
-                                    <h2 className="text-3xl font-black text-white mb-2">Orçamento #{quoteNum} criado!</h2>
-                                    <p className="text-slate-300">Revise e envie o orçamento para o cliente via WhatsApp.</p>
-                                </div>
-
-                                {/* ── Valor + status */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
-                                        <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Valor Final</p>
-                                        <p className="text-4xl font-black text-green-400">R$ {finalVal.toFixed(2)}</p>
-                                    </div>
-                                    <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-center">
-                                        <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Cliente</p>
-                                        <p className="text-xl font-black text-white truncate">{savedQuote.clientName || clientName || 'Consumidor Final'}</p>
-                                        {clientPhone
-                                            ? <p className="text-green-400 text-xs font-mono mt-1">{clientPhone}</p>
-                                            : <p className="text-yellow-400 text-xs mt-1">⚠ Sem telefone cadastrado</p>
-                                        }
-                                    </div>
-                                </div>
-
-                                {/* ── WHATSAPP CTA ── */}
-                                <div className="bg-green-500/10 border border-green-500/30 rounded-3xl p-6 space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 bg-green-500 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-green-500/30 flex-shrink-0">📱</div>
-                                        <div>
-                                            <h3 className="text-lg font-black text-white">Enviar via WhatsApp</h3>
-                                            <p className="text-sm text-slate-400">Abre o WhatsApp com mensagem e número do orçamento preenchidos</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Preview da mensagem */}
-                                    <div className="bg-black/20 rounded-2xl p-4 border border-white/10">
-                                        <p className="text-xs text-slate-500 uppercase tracking-wider mb-2 font-bold">Mensagem que será enviada:</p>
-                                        <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">
-                                            {`Olá ${savedQuote.clientName || clientName || ''}! 😊\n\nSegue seu orçamento Nº ${quoteNum} no valor de R$ ${finalVal.toFixed(2)}.\n\n📄 Visualize e imprima seu orçamento:\n${window.location.origin}/api/quotes/${savedQuote.id}/client-report\n\nQualquer dúvida estou à disposição!`}
-                                        </p>
-                                    </div>
-
-                                    {waLink ? (
-                                        <a href={waLink} target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center justify-center gap-3 w-full py-4 bg-green-500 hover:bg-green-400 text-white font-black rounded-2xl transition-all text-lg shadow-lg shadow-green-500/30 active:scale-[0.98]">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                            </svg>
-                                            Enviar Orçamento pelo WhatsApp
-                                        </a>
-                                    ) : (
-                                        <div className="w-full py-4 bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 font-bold rounded-2xl text-center text-sm">
-                                            ⚠ Cliente sem telefone — cadastre um telefone para enviar pelo WhatsApp
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* ── Outros PDFs e ações */}
-                                <div className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
-                                    <h4 className="text-white font-bold text-sm uppercase tracking-wider">📄 Documentos</h4>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                        <button onClick={() => handleViewClientReport(savedQuote, bends)}
-                                            className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-2xl cursor-pointer transition-all shadow-lg shadow-green-600/20 active:scale-[0.98]">
-                                            <Printer className="w-4 h-4" /> Orçamento Cliente
-                                        </button>
-                                        <button onClick={() => {
-                                            const w2 = window.open('', '_blank');
-                                            w2?.document.write('Gerando A4 Compacto...');
-                                            handleDownloadQuoteCompactPDF(savedQuote, bends, w2);
-                                        }} className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 hover:bg-slate-600 border border-white/10 text-white font-bold rounded-2xl cursor-pointer transition-all">
-                                            <Printer className="w-4 h-4" /> A4 Compacto (Obra)
-                                        </button>
-                                        <button onClick={handleDownloadPDF}
-                                            className="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl cursor-pointer transition-all shadow-lg shadow-indigo-600/20">
-                                            <FileDown className="w-4 h-4" /> PDF Completo
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* ── Ações finais */}
-                                <div className="flex flex-wrap gap-3">
-                                    <button onClick={() => { setShowMyQuotes(true); resetAll(); fetch('/api/quotes', { credentials: 'include' }).then(r => r.json()).then(setMyQuotes).catch(() => { }); }}
-                                        className="flex-1 px-5 py-3.5 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all">
-                                        <List className="w-4 h-4" /> Ver Listagem
-                                    </button>
-                                    <button onClick={resetAll}
-                                        className="px-5 py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition-all">
-                                        <Plus className="w-4 h-4" /> Novo Orçamento
-                                    </button>
-                                </div>
-
-                            </motion.div>
-                        );
-                    })()
-                }
+                    );
+                })()}
             </div >
 
 
