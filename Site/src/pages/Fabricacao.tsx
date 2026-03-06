@@ -30,6 +30,7 @@ export default function Fabricacao() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [items, setItems] = useState<any[]>([]);
+    const [clientSearch, setClientSearch] = useState('');
     const [clientName, setClientName] = useState('');
     const [finishing, setFinishing] = useState(false);
     const [estimate, setEstimate] = useState<any>(null);
@@ -56,10 +57,12 @@ export default function Fabricacao() {
             if (res.ok) {
                 const data = await res.json();
                 setRemnants(data || []);
+                return data || [];
             }
         } catch (e) {
             console.error('Erro ao carregar sobras:', e);
         }
+        return [];
     };
 
     const handleAddRemnant = async () => {
@@ -99,8 +102,11 @@ export default function Fabricacao() {
         }
     };
 
-    const runOptimization = () => {
+    const runOptimization = async () => {
         setIsOptimizing(true);
+        // Recarregar sobras antes para garantir que as novas disparadas pelo usuário estejam lá
+        const freshRemnants = await fetchRemnants();
+
         try {
             const estimateItems = estimate?.estimate_items || [];
             const planPiecesIds = new Set<string>();
@@ -153,13 +159,13 @@ export default function Fabricacao() {
 
             allPieces.sort((a, b) => b.length - a.length);
 
-            let availableRemnants = remnants.map(r => ({ ...r, remainingLength: parseFloat(r.length_m) }));
+            let availableRemnants = freshRemnants.map((r: any) => ({ ...r, remainingLength: parseFloat(r.length_m) }));
             const pieceToSeq: Record<string, any> = {};
             let currentSeq = 1;
 
             allPieces.forEach(piece => {
                 const fits = availableRemnants
-                    .filter(r => r.width_cm >= piece.width && r.remainingLength >= piece.length)
+                    .filter(r => r.width_cm >= (piece.width - 0.1) && r.remainingLength >= piece.length)
                     .sort((a, b) => a.width_cm - b.width_cm);
 
                 let seqData: any = {
@@ -182,10 +188,38 @@ export default function Fabricacao() {
                 pieceToSeq[`${piece.bendId}-${piece.pieceIdx}`] = seqData;
             });
 
-            setOptimizedPlan(processedBends.map(b => ({
+            const newPlan = processedBends.map(b => ({
                 ...b,
                 sequences: b.lengths.map((_: any, idx: number) => pieceToSeq[`${b.id}-${idx}`])
-            })));
+            }));
+
+            setOptimizedPlan(newPlan);
+
+            // SALVAR NO BANCO DE DADOS
+            const itemsToUpdate = [];
+            for (const bend of newPlan) {
+                for (const seq of bend.sequences) {
+                    if (seq.productionItemId) {
+                        itemsToUpdate.push({
+                            id: seq.productionItemId,
+                            sequence_number: seq.seq,
+                            material_source: seq.source,
+                            source_detail: seq.sourceDetail,
+                            estimate_id: estimateId,
+                            production_order_id: seq.productionItem?.production_order_id
+                        });
+                    }
+                }
+            }
+
+            if (itemsToUpdate.length > 0) {
+                await fetch('/api/fabricacao/plan/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: itemsToUpdate }),
+                    credentials: 'include'
+                });
+            }
 
         } catch (e) {
             console.error('Erro na otimização:', e);
@@ -204,6 +238,51 @@ export default function Fabricacao() {
                 setItems(data.items || []);
                 setClientName(data.clientName || 'Cliente');
                 setEstimate(data.estimate || null);
+
+                // RECONSTRUIR PLANO OTIMIZADO SE JÁ EXISTIR SEQUENCIAMENTO
+                const savedItems = data.items || [];
+                const hasPlan = savedItems.some((i: any) => i.sequence_number);
+
+                if (hasPlan && data.estimate) {
+                    const estItems = data.estimate.estimate_items || [];
+                    const processed = estItems
+                        .filter((ei: any) => ei.description.includes('[BEND]'))
+                        .map((ei: any, bendIndex: number) => {
+                            let bendData: any = {};
+                            try { bendData = JSON.parse(ei.description.replace('[BEND]', '')); } catch (e) { return null; }
+                            const lengths = Array.isArray(bendData.lengths) ? bendData.lengths.filter((l: any) => parseFloat(l) > 0) : [];
+
+                            const bendId = bendData.id || `bend-${bendIndex}`;
+
+                            // Mapear sequencias salvas para este bend
+                            // Nota: A correspondência original era por bendId e pieceIdx
+                            // Aqui vamos tentar encontrar os itens que pertencem a este bend
+                            const bendPieces = savedItems
+                                .filter((si: any) => si.description.includes(bendId) || si.description.includes(bendData.productName))
+                                .sort((a: any, b: any) => a.sequence_number - b.sequence_number);
+
+                            if (bendPieces.length === 0) return null;
+
+                            return {
+                                id: bendId,
+                                room: ei.room || 'Geral',
+                                description: bendData.productName || 'Dobra',
+                                width: bendData.roundedWidthCm || 0,
+                                risks: bendData.risks || [],
+                                lengths: bendPieces.map((p: any) => p.metragem),
+                                sequences: bendPieces.map((p: any) => ({
+                                    seq: p.sequence_number,
+                                    productionItemId: p.id,
+                                    productionItem: p,
+                                    concluido: p.concluido,
+                                    source: p.material_source,
+                                    sourceDetail: p.source_detail
+                                }))
+                            };
+                        }).filter(Boolean);
+
+                    if (processed.length > 0) setOptimizedPlan(processed);
+                }
             } else {
                 const err = await res.json();
                 alert(err.error || 'Erro ao carregar fabricação');
@@ -341,8 +420,18 @@ export default function Fabricacao() {
                                 {isOptimizing ? 'CALCULANDO...' : 'RECALCULAR PLANO'}
                             </button>
 
-                            <button onClick={() => navigate(-1)}
-                                className="btn-field bg-slate-100 text-slate-700 border border-slate-200 shadow-sm w-full sm:w-auto">
+                            <button
+                                onClick={() => {
+                                    // Feedback visual rápido antes de sair
+                                    const btn = document.getElementById('btn-save-exit');
+                                    if (btn) {
+                                        btn.innerHTML = 'SALVO! SAINDO...';
+                                        btn.classList.add('bg-green-600', 'text-white');
+                                    }
+                                    setTimeout(() => navigate(-1), 800);
+                                }}
+                                id="btn-save-exit"
+                                className="btn-field bg-slate-100 text-slate-700 border border-slate-200 shadow-sm w-full sm:w-auto transition-all duration-300">
                                 <Save className="w-5 h-5" /> SALVAR E SAIR
                             </button>
                         </div>
@@ -414,16 +503,16 @@ export default function Fabricacao() {
                                                             <div className="w-2 h-2 rounded-full bg-green-500 shadow-sm" />
                                                         </div>
 
-                                                        <div className="p-4 flex gap-4 flex-1">
+                                                        <div className="p-4 flex flex-col md:flex-row gap-4 flex-1">
                                                             {/* Gráfico da Dobra */}
-                                                            <div className="w-3/5 min-h-[140px] flex items-center justify-center bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
+                                                            <div className="w-full md:w-3/5 min-h-[140px] flex items-center justify-center bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
                                                                 <div className="w-full scale-90">
                                                                     <BendCanvas risks={bend.risks} exportMode={true} />
                                                                 </div>
                                                             </div>
 
                                                             {/* Lista de Cortes Interativa */}
-                                                            <div className="w-2/5 border-l border-slate-100 pl-4 flex flex-col">
+                                                            <div className="w-full md:w-2/5 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-4 flex flex-col">
                                                                 <div className="flex-1 space-y-1">
                                                                     {bend.lengths.map((len: number, lIdx: number) => {
                                                                         const seqData = bend.sequences[lIdx];
@@ -432,7 +521,7 @@ export default function Fabricacao() {
                                                                         return (
                                                                             <div key={`l-${lIdx}`}
                                                                                 onClick={() => seqData.productionItemId && handleToggle({ id: seqData.productionItemId, concluido: isDone })}
-                                                                                className={`flex items-center justify-end gap-3 py-1 px-2 rounded-lg cursor-pointer transition-all ${isDone ? 'bg-green-50' : 'hover:bg-blue-50'}`}
+                                                                                className={`flex items-center justify-end gap-3 py-1.5 px-3 rounded-xl cursor-pointer transition-all ${isDone ? 'bg-green-50 border border-green-200' : 'bg-slate-50 border border-transparent hover:border-blue-200 hover:bg-blue-50'}`}
                                                                             >
                                                                                 <span className={`text-red-600 font-black text-sm italic mr-auto ${isDone ? 'opacity-30' : ''}`}>
                                                                                     {seqData?.seq}
@@ -440,16 +529,16 @@ export default function Fabricacao() {
                                                                                 <span className={`text-slate-900 font-black text-xs ${isDone ? 'line-through opacity-40 text-green-700' : ''}`}>
                                                                                     {len.toFixed(2)}m
                                                                                 </span>
-                                                                                <div className={`w-3 h-3 rounded-full border flex items-center justify-center flex-shrink-0 ${isDone ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300'}`}>
-                                                                                    {isDone && <CheckCircle className="w-2 h-2" />}
+                                                                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isDone ? 'bg-green-500 border-green-500 text-white' : 'border-slate-300'}`}>
+                                                                                    {isDone && <CheckCircle className="w-2.5 h-2.5" />}
                                                                                 </div>
                                                                             </div>
                                                                         );
                                                                     })}
                                                                 </div>
                                                                 <div className="mt-3 pt-2 border-t border-slate-200 flex justify-between items-center">
-                                                                    <span className="text-[8px] font-bold text-slate-400 uppercase">Total</span>
-                                                                    <span className="text-[11px] font-black text-slate-900">
+                                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</span>
+                                                                    <span className="text-sm font-black text-slate-900 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
                                                                         {bend.lengths.reduce((a: number, c: number) => a + c, 0).toFixed(2)}m
                                                                     </span>
                                                                 </div>

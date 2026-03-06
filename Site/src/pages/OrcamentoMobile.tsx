@@ -1604,6 +1604,7 @@ tr:nth-child(even) td{background:#f8fafc}
 .ct{font-weight:900;color:#111;font-size:9px;border-top:1px solid #94a3b8;margin-top:2px;padding-top:2px;display:flex;gap:3px;align-items:center;}
 @media print{
   *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  html, body { width: 210mm; height: 297mm; margin: 0; padding: 10mm; }
   body{padding:6px}
   .bends-grid{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:5px !important;}
   .bend-card{page-break-inside:avoid !important;break-inside:avoid !important;}
@@ -1773,12 +1774,12 @@ window.onload = function() {
 
     // ── Render helpers (Mobile) ──
     const DirBtn = ({ d, active, onClick }: { d: typeof DIR_GRID[0]; active: boolean; onClick: () => void }) => (
-        <button onClick={onClick} className={`relative aspect-square flex flex-col items-center justify-center p-2 rounded-3xl border-2 font-black transition-all active:scale-90
+        <button onClick={onClick} className={`relative aspect-square flex flex-col items-center justify-center p-1.5 rounded-2xl border-2 font-black transition-all active:scale-90
             ${active
                 ? `bg-brand-primary border-brand-primary text-white shadow-xl shadow-blue-500/30`
-                : 'bg-white border-slate-100 text-slate-400'}`}>
-            <span className="text-2xl leading-none mb-1">{active ? <Check className="w-5 h-5" /> : d.icon}</span>
-            <span className="text-[8px] uppercase tracking-tighter text-center">{d.label}</span>
+                : 'bg-white border-slate-200 text-slate-400 shadow-sm'}`}>
+            <span className="text-xl leading-none mb-0.5">{active ? <Check className="w-4 h-4" /> : d.icon}</span>
+            <span className="text-[7px] uppercase tracking-tighter text-center">{d.label}</span>
         </button>
     );
 
@@ -2387,11 +2388,29 @@ window.onload = function() {
                                                     <input type="text" value={quickClientForm.name}
                                                         onChange={e => setQuickClientForm(p => ({ ...p, name: e.target.value }))}
                                                         placeholder="Nome do cliente"
-                                                        className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 transition-all text-sm font-bold" />
+                                                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all text-sm font-bold" />
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp</label>
                                                     <div className="flex gap-2">
+                                                        <select
+                                                            value={quickClientForm.phone.startsWith('+') ? quickClientForm.phone.split(' ')[0] : '+55'}
+                                                            onChange={e => {
+                                                                const local = quickClientForm.phone.replace(/^\+\d+\s?/, '');
+                                                                setQuickClientForm(p => ({ ...p, phone: `${e.target.value} ${local}`.trim() }));
+                                                            }}
+                                                            className="bg-slate-50 border-2 border-slate-200 rounded-2xl px-3 py-4 text-slate-900 focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all text-sm font-bold w-[90px] flex-shrink-0"
+                                                        >
+                                                            <option value="+55">+55 🇧🇷</option>
+                                                            <option value="+1">+1 🇺🇸</option>
+                                                            <option value="+44">+44 🇬🇧</option>
+                                                            <option value="+351">+351 🇵🇹</option>
+                                                            <option value="+54">+54 🇦🇷</option>
+                                                            <option value="+595">+595 🇵🇾</option>
+                                                            <option value="+598">+598 🇺🇾</option>
+                                                            <option value="+56">+56 🇨🇱</option>
+                                                            <option value="+57">+57 🇨🇴</option>
+                                                        </select>
                                                         <input
                                                             type="text"
                                                             value={quickClientForm.phone.startsWith('+') ? quickClientForm.phone.replace(/^\+\d+\s?/, '') : quickClientForm.phone}
@@ -2402,10 +2421,11 @@ window.onload = function() {
                                                                 if (val.length > 2) masked = `(${val.substring(0, 2)}) ${val.substring(2)}`;
                                                                 if (val.length > 6) masked = `(${val.substring(0, 2)}) ${val.substring(2, 6)}-${val.substring(6)}`;
                                                                 if (val.length > 10) masked = `(${val.substring(0, 2)}) ${val.substring(2, 7)}-${val.substring(7)}`;
-                                                                setQuickClientForm(p => ({ ...p, phone: `+55 ${masked}`.trim() }));
+                                                                const countryCode = quickClientForm.phone.startsWith('+') ? quickClientForm.phone.split(' ')[0] : '+55';
+                                                                setQuickClientForm(p => ({ ...p, phone: `${countryCode} ${masked}`.trim() }));
                                                             }}
                                                             placeholder="(00) 00000-0000"
-                                                            className="flex-1 bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 transition-all text-sm font-bold" />
+                                                            className="flex-1 bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all text-sm font-bold" />
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2">
@@ -2413,7 +2433,7 @@ window.onload = function() {
                                                     <input type="email" value={quickClientForm.email}
                                                         onChange={e => setQuickClientForm(p => ({ ...p, email: e.target.value }))}
                                                         placeholder="cliente@email.com"
-                                                        className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 transition-all text-sm font-bold" />
+                                                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all text-sm font-bold" />
                                                 </div>
                                             </div>
                                             <button disabled={quickClientSaving}
@@ -2485,7 +2505,7 @@ window.onload = function() {
                                                     }}
                                                     onFocus={() => setShowClientDropdown(true)}
                                                     placeholder="Nome do cliente ou buscar..."
-                                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 font-bold focus:ring-4 focus:ring-brand-primary/5 transition-all outline-none"
+                                                    className="w-full bg-slate-50 border-2 border-blue-500/20 rounded-2xl px-6 py-4 text-slate-900 placeholder-slate-300 font-bold focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all outline-none"
                                                 />
                                                 {selectedClientId && (
                                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-green-500 rounded-full p-1 shadow-lg">
@@ -2525,7 +2545,7 @@ window.onload = function() {
                                                             ).length === 0 && (
                                                                     <div className="px-6 py-5 space-y-3">
                                                                         <p className="text-slate-400 text-xs font-medium">Nenhum cliente encontrado.</p>
-                                                                        <button onClick={() => { setShowClientDropdown(false); setShowQuickClient(true); setQuickClientForm({ name: clientSearch, phone: '', email: '' }); }}
+                                                                        <button onClick={() => { setShowClientDropdown(false); setShowQuickClient(true); setQuickClientForm({ name: clientSearch, phone: '+55 ', email: '' }); }}
                                                                             className="w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
                                                                             <Plus className="w-3.5 h-3.5" /> Cadastrar "{clientSearch}"
                                                                         </button>
@@ -2566,7 +2586,7 @@ window.onload = function() {
                                                                 className={`flex-1 min-w-[140px] px-6 py-4 rounded-2xl border-2 font-black text-xs transition-all flex items-center justify-between
                                                                 ${selectedProductId === p.id
                                                                         ? (isSvc ? 'bg-purple-600 border-purple-600 text-white shadow-lg shadow-purple-500/20' : 'bg-brand-primary border-brand-primary text-white shadow-lg shadow-blue-500/20')
-                                                                        : 'bg-slate-50 border-slate-50 text-slate-400 hover:border-slate-200'
+                                                                        : (isSvc ? 'bg-white border-purple-500/30 text-purple-600' : 'bg-white border-blue-500/30 text-blue-600 hover:border-blue-500')
                                                                     }`}>
                                                                 <span>{p.name}</span>
                                                                 {selectedProductId === p.id && <Check className="w-4 h-4" />}
@@ -2913,14 +2933,40 @@ window.onload = function() {
                                             </div>
 
                                             {/* DIRECTION & MODIFIERS COMPACT LAYOUT */}
-                                            <div className="flex flex-col md:flex-row gap-6 mt-4">
-                                                {/* Passos: Direção */}
-                                                <div className="flex-1">
-                                                    <p className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">Passo 1 — Direção</p>
-                                                    <div className="grid grid-cols-3 gap-3 w-full max-w-[280px] mx-auto md:mx-0">
+                                            <div className="flex flex-col gap-6 mt-4">
+                                                {/* Step 1 & 2 Together for Mobile */}
+                                                <div className="bg-slate-50 border border-slate-200 rounded-[2.5rem] p-5 space-y-4 shadow-inner">
+                                                    <div className="flex items-center justify-between px-1">
+                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passo 1 & 2 — Direção e Medida</p>
+                                                        {sizeError && <p className="text-rose-500 text-[10px] font-black uppercase tracking-tight animate-bounce">{sizeError}</p>}
+                                                    </div>
+
+                                                    <div className="grid grid-cols-3 gap-3 w-full">
                                                         {[DIR_GRID[0], DIR_GRID[1], DIR_GRID[2]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
                                                         <DirBtn key="left" d={DIR_GRID[3]} active={pendingDir === 'left'} onClick={() => selectDirection('left')} />
-                                                        <div className="rounded-2xl border-2 border-white/5 flex items-center justify-center bg-white/5"><span className="text-white/40 text-[10px] font-black uppercase">Start</span></div>
+
+                                                        {/* Integrated Size Input */}
+                                                        <div className="relative group flex items-center justify-center">
+                                                            <input
+                                                                ref={sizeInputRef}
+                                                                type="number"
+                                                                step="0.5"
+                                                                placeholder="cm"
+                                                                value={pendingSize}
+                                                                onChange={e => setPendingSize(e.target.value)}
+                                                                onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
+                                                                className="w-full aspect-square bg-white border-2 border-brand-primary/30 rounded-2xl text-center text-lg font-black text-slate-900 placeholder-slate-200 outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all p-0"
+                                                            />
+                                                            {pendingSize && (
+                                                                <button
+                                                                    onClick={handleAddRisk}
+                                                                    className="absolute -bottom-1 -right-1 w-7 h-7 bg-brand-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-75 transition-all"
+                                                                >
+                                                                    <Plus className="w-4 h-4 pointer-events-none" />
+                                                                </button>
+                                                            )}
+                                                        </div>
+
                                                         <DirBtn key="right" d={DIR_GRID[4]} active={pendingDir === 'right'} onClick={() => selectDirection('right')} />
                                                         {[DIR_GRID[5], DIR_GRID[6], DIR_GRID[7]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
                                                     </div>
