@@ -1,33 +1,42 @@
 import express from 'express';
-// O Vite agora será carregado apenas quando necessário (Modo Dev)
-// import { createServer as createViteServer } from 'vite'; 
 import { createClient } from '@supabase/supabase-js';
-import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import cookieParser from 'cookie-parser';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Compatvel com Vercel (import.meta.url pode falhar no @vercel/node)
+let __dirname: string;
+try {
+  const { fileURLToPath } = await import('url');
+  const __filename = fileURLToPath(import.meta.url);
+  __dirname = path.dirname(__filename);
+} catch {
+  __dirname = process.cwd();
+}
 
 dotenv.config();
 
-
 const app = express();
 const PORT = 3000;
-
-
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 
+// CORS para o Vercel
 app.use((req, res, next) => {
-  console.log(`[REQUEST] ${req.method} ${req.url}`);
+  const origin = req.headers.origin || '';
+  const allowed = ['https://calhaflow.vercel.app', 'http://localhost:3000', 'http://localhost:5173'];
+  if (allowed.includes(origin) || !origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
   next();
 });
 
