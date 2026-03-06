@@ -3685,164 +3685,161 @@ window.onload = function() {
                         );
                     })()}
                 </div>
-                );
+            </div>
+        );
     }
 
-                function renderDesktopUI() {
+    function renderDesktopUI() {
         // Calculate totals for desktop
         const totalM2 = bends.reduce((acc, b) => acc + (b.m2 || 0), 0);
-                const totalPrice = totalM2 * pricePerM2;
+        const totalPrice = totalM2 * pricePerM2;
         const totalWeight = bends.reduce((acc, b) => {
             const prod = allProducts.find(p => p.id === b.product_id);
-                if (!prod || !prod.weight) return acc;
-                return acc + (parseFloat(prod.weight) * b.totalLengthM);
+            if (!prod || !prod.weight) return acc;
+            return acc + (parseFloat(prod.weight) * b.totalLengthM);
         }, 0);
 
-                return (
-                <div className="flex min-h-screen bg-slate-50 pt-20">
-                    {/* Desktop Sidebar: Controls */}
-                    <div className="w-96 bg-slate-900 border-r border-white/10 p-6 overflow-y-auto max-h-[calc(100vh-80px)] sticky top-20 flex flex-col gap-6">
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <Plus className="w-5 h-5 text-blue-400" />
-                                <h2 className="text-white font-black uppercase tracking-widest text-sm">Novo Item</h2>
-                            </div>
-
-                            {/* Client Search */}
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cliente</label>
-                                <input type="text" value={clientSearch} onChange={e => { setClientSearch(e.target.value); setShowClientDropdown(true); }}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
-                                    placeholder="Pesquisar cliente..." />
-                            </div>
-
-                            {/* Product Selector */}
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Material</label>
-                                <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50">
-                                    <option value="">Selecione o Material</option>
-                                    {allProducts.filter(p => p.type === 'product').map(p => <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>)}
-                                </select>
-                            </div>
+        return (
+            <div className="flex min-h-screen bg-slate-50 pt-20">
+                {/* Desktop Sidebar: Controls */}
+                <div className="w-96 bg-slate-900 border-r border-white/10 p-6 overflow-y-auto max-h-[calc(100vh-80px)] sticky top-20 flex flex-col gap-6">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Plus className="w-5 h-5 text-blue-400" />
+                            <h2 className="text-white font-black uppercase tracking-widest text-sm">Novo Item</h2>
                         </div>
 
-                        {/* Bend Builder Controls */}
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
-                            <BendCanvas risks={currentRisks} svgRef={svgRef} />
+                        {/* Client Search */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cliente</label>
+                            <input type="text" value={clientSearch} onChange={e => { setClientSearch(e.target.value); setShowClientDropdown(true); }}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
+                                placeholder="Pesquisar cliente..." />
+                        </div>
 
-                            <div className="grid grid-cols-3 gap-2">
-                                {DIR_GRID.map(d => (
-                                    <DirBtnDesktop key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />
-                                ))}
-                            </div>
+                        {/* Product Selector */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Material</label>
+                            <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50">
+                                <option value="">Selecione o Material</option>
+                                {allProducts.filter(p => p.type === 'product').map(p => <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
 
-                            <div className="space-y-4">
-                                <div className="flex gap-2">
-                                    <input ref={sizeInputRef} type="number" step="0.5" placeholder="Medida (cm)" value={pendingSize}
-                                        onChange={e => setPendingSize(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
-                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-center outline-none focus:ring-2 focus:ring-blue-500/50" />
-                                    <button onClick={handleAddRisk} className="w-14 bg-blue-500 hover:bg-blue-400 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-blue-500/20">
-                                        <Plus className="w-6 h-6" />
-                                    </button>
-                                </div>
-                                <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
-                                    className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black rounded-xl shadow-lg shadow-green-600/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-30">
-                                    Adicionar Dobra
+                    {/* Bend Builder Controls */}
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
+                        <BendCanvas risks={currentRisks} svgRef={svgRef} />
+
+                        <div className="grid grid-cols-3 gap-2">
+                            {DIR_GRID.map(d => (
+                                <DirBtnDesktop key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />
+                            ))}
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex gap-2">
+                                <input ref={sizeInputRef} type="number" step="0.5" placeholder="Medida (cm)" value={pendingSize}
+                                    onChange={e => setPendingSize(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
+                                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-center outline-none focus:ring-2 focus:ring-blue-500/50" />
+                                <button onClick={handleAddRisk} className="w-14 bg-blue-500 hover:bg-blue-400 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                                    <Plus className="w-6 h-6" />
                                 </button>
                             </div>
-                        </div>
-
-                        <div className="mt-auto pt-6 border-t border-white/5">
-                            <button onClick={handleSaveDraft} className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
-                                <Save className="w-4 h-4" /> Salvar Rascunho
+                            <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
+                                className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black rounded-xl shadow-lg shadow-green-600/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-30">
+                                Adicionar Dobra
                             </button>
                         </div>
                     </div>
 
-                    {/* Main Content: Table and Totals */}
-                    <div className="flex-1 p-8 space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
-                        <div className="flex justify-between items-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                            <div>
-                                <h1 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{uid().toUpperCase()}</h1>
-                                <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Status: {STATUS_LABELS.draft.label}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Valor Total</p>
-                                <p className="text-4xl font-black text-blue-600 leading-none">R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                            </div>
-                        </div>
-
-                        {/* Desktop Table */}
-                        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                            <table className="w-full border-collapse">
-                                <thead>
-                                    <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-widest text-left">
-                                        <th className="px-6 py-4">#</th>
-                                        <th className="px-6 py-4">Representação</th>
-                                        <th className="px-6 py-4">Desenvolvimento</th>
-                                        <th className="px-6 py-4">Metros</th>
-                                        <th className="px-6 py-4">Área (m²)</th>
-                                        <th className="px-6 py-4 text-right">Subtotal</th>
-                                        <th className="px-6 py-4 text-center">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-50">
-                                    {bends.map((b, i) => (
-                                        <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-6 py-6 font-bold text-slate-400">{i + 1}</td>
-                                            <td className="px-6 py-6">
-                                                <div className="w-24 h-12 bg-slate-900 rounded-lg overflow-hidden border border-slate-200">
-                                                    <BendCanvas risks={b.risks} exportMode={true} />
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-6">
-                                                <div className="flex flex-wrap gap-1">
-                                                    {b.risks.map((r, ri) => (
-                                                        <span key={ri} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">
-                                                            {DIRECTION_ICONS[r.direction]}{r.sizeCm}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                                <p className="text-[10px] font-black text-blue-500 mt-1 uppercase tracking-tighter">Total: {b.roundedWidthCm}cm</p>
-                                            </td>
-                                            <td className="px-6 py-6 font-bold text-slate-700">{b.totalLengthM.toFixed(2)}m</td>
-                                            <td className="px-6 py-6 font-bold text-slate-700">{b.m2.toFixed(2)}m²</td>
-                                            <td className="px-6 py-6 text-right font-black text-slate-900">R$ {(b.m2 * pricePerM2).toFixed(2)}</td>
-                                            <td className="px-6 py-6 text-center">
-                                                <button onClick={() => setBends(prev => prev.filter(item => item.id !== b.id))}
-                                                    className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer">
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {bends.length === 0 && (
-                                        <tr>
-                                            <td colSpan={7} className="px-6 py-20 text-center">
-                                                <ShoppingCart className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                                                <p className="text-slate-400 font-medium">Nenhuma dobra adicionada ao orçamento.</p>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="flex justify-end gap-3 pt-4 pb-20">
-                            <button onClick={handleResetQuote} className="px-8 py-4 bg-white border border-slate-200 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
-                                Reiniciar Orçamento
-                            </button>
-                            <button onClick={handleSubmit} className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2">
-                                <Send className="w-5 h-5" /> Finalizar e Gerar PDF
-                            </button>
-                        </div>
+                    <div className="mt-auto pt-6 border-t border-white/5">
+                        <button onClick={handleSaveDraft} className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                            <Save className="w-4 h-4" /> Salvar Rascunho
+                        </button>
                     </div>
                 </div>
-                );
+
+                {/* Main Content: Table and Totals */}
+                <div className="flex-1 p-8 space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
+                    <div className="flex justify-between items-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                        <div>
+                            <h1 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{uid().toUpperCase()}</h1>
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Status: {STATUS_LABELS.draft.label}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Valor Total</p>
+                            <p className="text-4xl font-black text-blue-600 leading-none">R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                        </div>
+                    </div>
+
+                    {/* Desktop Table */}
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                        <table className="w-full border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-widest text-left">
+                                    <th className="px-6 py-4">#</th>
+                                    <th className="px-6 py-4">Representação</th>
+                                    <th className="px-6 py-4">Desenvolvimento</th>
+                                    <th className="px-6 py-4">Metros</th>
+                                    <th className="px-6 py-4">Área (m²)</th>
+                                    <th className="px-6 py-4 text-right">Subtotal</th>
+                                    <th className="px-6 py-4 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {bends.map((b, i) => (
+                                    <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="px-6 py-6 font-bold text-slate-400">{i + 1}</td>
+                                        <td className="px-6 py-6">
+                                            <div className="w-24 h-12 bg-slate-900 rounded-lg overflow-hidden border border-slate-200">
+                                                <BendCanvas risks={b.risks} exportMode={true} />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-6">
+                                            <div className="flex flex-wrap gap-1">
+                                                {b.risks.map((r, ri) => (
+                                                    <span key={ri} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">
+                                                        {DIRECTION_ICONS[r.direction]}{r.sizeCm}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <p className="text-[10px] font-black text-blue-500 mt-1 uppercase tracking-tighter">Total: {b.roundedWidthCm}cm</p>
+                                        </td>
+                                        <td className="px-6 py-6 font-bold text-slate-700">{b.totalLengthM.toFixed(2)}m</td>
+                                        <td className="px-6 py-6 font-bold text-slate-700">{b.m2.toFixed(2)}m²</td>
+                                        <td className="px-6 py-6 text-right font-black text-slate-900">R$ {(b.m2 * pricePerM2).toFixed(2)}</td>
+                                        <td className="px-6 py-6 text-center">
+                                            <button onClick={() => setBends(prev => prev.filter(item => item.id !== b.id))}
+                                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer">
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {bends.length === 0 && (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-20 text-center">
+                                            <ShoppingCart className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                                            <p className="text-slate-400 font-medium">Nenhuma dobra adicionada ao orçamento.</p>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4 pb-20">
+                        <button onClick={handleResetQuote} className="px-8 py-4 bg-white border border-slate-200 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
+                            Reiniciar Orçamento
+                        </button>
+                        <button onClick={handleSubmit} className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2">
+                            <Send className="w-5 h-5" /> Finalizar e Gerar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     }
 }
-
-                export default Orcamento;
-
-
