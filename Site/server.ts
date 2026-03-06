@@ -3933,14 +3933,13 @@ async function startServer() {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
-      appType: 'custom'
+      appType: 'spa'
     });
     app.use(vite.middlewares);
     console.log('⚡ Modo Desenvolvimento: Vite Middleware carregado.');
-  }
-  // Solo servir estático se NÃO estiver no Vercel (ex: rodando node server.ts em VPS)
-  // No Vercel, o próprio Vercel serve a pasta 'dist' nativamente.
-  if (!process.env.VERCEL) { // This if condition was missing in the provided snippet, adding it back for correctness
+  } else if (!process.env.VERCEL) {
+    // Solo servir estático na PRÓDUÇÃO (rodando node server.ts em VPS)
+    // No Vercel, o próprio Vercel serve a pasta 'dist' nativamente.
     app.use(express.static('dist'));
     app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')));
   }
