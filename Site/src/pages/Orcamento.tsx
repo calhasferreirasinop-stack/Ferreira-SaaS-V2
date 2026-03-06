@@ -2818,12 +2818,12 @@ window.onload = function() {
                                         {/* DIRECTION & MODIFIERS COMPACT LAYOUT */}
                                         <div className="flex flex-col md:flex-row gap-6 mt-4">
                                             {/* Passos: Direção */}
-                                            <div>
-                                                <p className="text-xs font-bold text-slate-400 mb-3 uppercase tracking-wider">Passo 1 — Direção</p>
-                                                <div className="grid grid-cols-3 gap-2 w-48">
+                                            <div className="flex-1">
+                                                <p className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">Passo 1 — Direção</p>
+                                                <div className="grid grid-cols-3 gap-3 w-full max-w-[280px] mx-auto md:mx-0">
                                                     {[DIR_GRID[0], DIR_GRID[1], DIR_GRID[2]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
                                                     <DirBtn key="left" d={DIR_GRID[3]} active={pendingDir === 'left'} onClick={() => selectDirection('left')} />
-                                                    <div className="rounded-2xl border-2 border-white/5 flex items-center justify-center"><span className="text-white/20 text-[10px]">INÍCIO</span></div>
+                                                    <div className="rounded-2xl border-2 border-white/5 flex items-center justify-center bg-white/5"><span className="text-white/40 text-[10px] font-black uppercase">Start</span></div>
                                                     <DirBtn key="right" d={DIR_GRID[4]} active={pendingDir === 'right'} onClick={() => selectDirection('right')} />
                                                     {[DIR_GRID[5], DIR_GRID[6], DIR_GRID[7]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
                                                 </div>
@@ -2883,20 +2883,20 @@ window.onload = function() {
                                                 </div>
 
                                                 {/* Size & Add */}
-                                                <div className="mt-auto">
+                                                <div className="mt-auto space-y-3">
                                                     <p className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Passo 3 — Tamanho da Aba</p>
-                                                    <div className="flex gap-2 max-w-[280px]">
+                                                    <div className="flex flex-col sm:flex-row gap-3">
                                                         <input ref={sizeInputRef} type="number" min="1" max="120" step="0.5" placeholder={isLateralSlope ? "Calculado" : "Medida (cm)"}
                                                             value={isLateralSlope ? "" : pendingSize} onChange={e => { setPendingSize(e.target.value); setSizeError(''); }}
                                                             onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
                                                             disabled={!pendingDir || isLateralSlope}
-                                                            className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white placeholder-white/30 text-sm font-bold focus:outline-none focus:border-blue-400 transition-all disabled:opacity-40" />
+                                                            className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-5 py-4 text-white placeholder-white/30 text-lg font-black focus:outline-none focus:border-blue-400 transition-all disabled:opacity-40" />
                                                         <button onClick={handleAddRisk} disabled={!pendingDir || (!pendingSize && !isLateralSlope)}
-                                                            className="px-4 py-2 bg-blue-500 hover:bg-blue-400 disabled:opacity-40 text-white font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed shadow-lg shadow-blue-500/20">
-                                                            <Plus className="w-4 h-4" /> Adicionar
+                                                            className="btn-field bg-blue-500 hover:bg-blue-400 disabled:opacity-40 text-white shadow-blue-500/20">
+                                                            <Plus className="w-6 h-6" /> ADICIONAR RISCO
                                                         </button>
                                                     </div>
-                                                    {sizeError && <p className="text-red-400 text-[10px] mt-1.5 font-bold flex items-center gap-1"><AlertTriangle className="w-3 h-3" />{sizeError}</p>}
+                                                    {sizeError && <p className="text-red-400 text-sm mt-1.5 font-bold flex items-center gap-2 bg-red-400/10 p-2 rounded-lg border border-red-400/20"><AlertTriangle className="w-4 h-4" />{sizeError}</p>}
                                                 </div>
                                             </div>
                                         </div>
@@ -3041,16 +3041,16 @@ window.onload = function() {
                                         )}
 
                                         {/* Actions */}
-                                        <div className="flex gap-3 flex-wrap mt-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
                                             {currentRisks.length > 0 && (
                                                 <button onClick={() => setCurrentRisks(prev => prev.slice(0, -1))}
-                                                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center gap-2 text-sm font-bold transition-all cursor-pointer">
-                                                    <Undo2 className="w-4 h-4" /> Desfazer
+                                                    className="btn-field bg-white/10 hover:bg-white/20 text-white border border-white/10">
+                                                    <Undo2 className="w-5 h-5" /> DESFAZER
                                                 </button>
                                             )}
                                             <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
-                                                className="px-6 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-2xl flex items-center gap-2 transition-all cursor-pointer ml-auto">
-                                                <Check className="w-5 h-5" /> Confirmar Dobra #{bends.length + 1}
+                                                className="btn-field bg-green-600 hover:bg-green-500 disabled:opacity-40 text-white shadow-green-600/20 sm:col-start-2">
+                                                <Check className="w-6 h-6" /> CONFIRMAR DOBRA #{bends.length + 1}
                                             </button>
                                         </div>
                                     </>
@@ -3231,9 +3231,9 @@ window.onload = function() {
                                                                         <div key={li} className="flex gap-2 items-center">
                                                                             <span className="text-slate-500 text-xs w-4">{li + 1}.</span>
                                                                             <div className="flex-1 relative">
-                                                                                <input type="number" id={`cut-input-${bend.id}-${li}`} min="0.01" step="0.01" placeholder="Ex: 3.50" value={l}
+                                                                                <input type="number" id={`cut-input-${bend.id}-${li}`} min="0.01" step="0.01" placeholder="0.00" value={l}
                                                                                     onChange={e => updateLength(bend.id, li, e.target.value)}
-                                                                                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/30 font-bold focus:outline-none focus:border-blue-400 transition-all pr-12" />
+                                                                                    className="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 text-white placeholder-white/30 text-xl font-black focus:outline-none focus:border-blue-400 transition-all pr-12" />
                                                                                 {optResult.pieceToSeq && optResult.pieceToSeq[`${bend.id}-${li}`] && (
                                                                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1 pointer-events-none">
                                                                                         {optResult.pieceToSeq[`${bend.id}-${li}`].map((chapa, cIdx) => (
@@ -3300,24 +3300,18 @@ window.onload = function() {
                             {/* Total sticky bar */}
                             {
                                 bends.length > 0 && (
-                                    <div className="sticky bottom-4 z-10 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-3xl p-5 flex items-center justify-between gap-4 flex-wrap">
-                                        <div className="flex gap-6">
-                                            <div><p className="text-slate-400 text-xs">Total m²</p><p className="text-white font-black text-xl">{totalM2.toFixed(2)} m²</p></div>
-                                            <div className="border-l border-white/10 pl-6"><p className="text-slate-400 text-xs">Valor Estimado</p><p className="text-green-400 font-black text-2xl">R$ {totalValue.toFixed(2)}</p></div>
+                                    <div className="sticky bottom-4 z-10 bg-slate-900/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 flex flex-col gap-4 shadow-2xl shadow-blue-500/10">
+                                        <div className="flex justify-between items-center w-full bg-white/5 p-3 rounded-2xl">
+                                            <div><p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total</p><p className="text-white font-black text-2xl">{totalM2.toFixed(2)} m²</p></div>
+                                            <div className="text-right"><p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Estimado</p><p className="text-green-400 font-black text-3xl">R$ {totalValue.toFixed(2)}</p></div>
                                         </div>
-                                        <div className="flex gap-3 flex-wrap">
-                                            {editingQuoteId && (
-                                                <button onClick={() => { handleResetQuote(); setShowMyQuotes(true); }}
-                                                    className="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-2xl flex items-center gap-2 font-bold cursor-pointer transition-all">
-                                                    <List className="w-4 h-4" /> Voltar para Listagem
-                                                </button>
-                                            )}
+                                        <div className="grid grid-cols-2 gap-3 w-full">
                                             <button onClick={handleSaveDraft} disabled={savingDraft}
-                                                className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl flex items-center gap-2 font-bold cursor-pointer disabled:opacity-50">
-                                                <Save className="w-4 h-4" /> Salvar Rascunho
+                                                className="btn-field bg-white/10 text-white border border-white/10 text-sm">
+                                                <Save className="w-5 h-5" /> SALVAR
                                             </button>
-                                            <button onClick={() => setStep('summary')} className="px-6 py-3 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-2xl flex items-center gap-2 transition-all cursor-pointer">
-                                                Ver Resumo <ChevronRight className="w-5 h-5" />
+                                            <button onClick={() => setStep('summary')} className="btn-field bg-blue-600 text-white shadow-blue-600/20">
+                                                RESUMO <ChevronRight className="w-6 h-6" />
                                             </button>
                                         </div>
                                     </div>
@@ -3517,26 +3511,29 @@ window.onload = function() {
                                     </button>
                                 </div>
                                 <div className="flex flex-wrap gap-3 w-full sm:w-auto mt-4 sm:mt-0">
-                                    <button onClick={() => handleViewClientReport({ id: 'PREVIA', clientName }, bends)}
-                                        className="px-6 py-3.5 bg-green-600 hover:bg-green-500 text-white rounded-2xl flex items-center justify-center gap-2 font-bold cursor-pointer transition-all shadow-lg shadow-green-600/20 flex-1 sm:flex-none">
-                                        <Printer className="w-5 h-5" /> Prévia Cliente
-                                    </button>
-                                    <button onClick={() => {
-                                        const w2 = window.open('', '_blank');
-                                        w2?.document.write('Gerando modelo A4 Compacto...');
-                                        handleDownloadQuoteCompactPDF({ id: 'PREVIA', totalM2: totalM2, totalValue: totalM2 * pricePerM2, clientName }, bends, w2);
-                                    }}
-                                        className="px-6 py-3.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 text-white rounded-2xl flex items-center justify-center gap-2 font-bold cursor-pointer transition-all shadow-lg flex-1 sm:flex-none">
-                                        <Printer className="w-5 h-5" /> PDF Compacto (Obra)
-                                    </button>
-                                    <button onClick={handleDownloadPDF}
-                                        className="px-6 py-3.5 bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl flex items-center justify-center gap-2 font-bold cursor-pointer transition-all shadow-lg shadow-indigo-500/20 flex-1 sm:flex-none">
-                                        <FileDown className="w-5 h-5" /> PDF Completo (Prod)
-                                    </button>
-                                    <button onClick={handleSubmit} disabled={submitting}
-                                        className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black rounded-2xl flex items-center justify-center gap-2 cursor-pointer text-lg transition-all shadow-lg shadow-blue-500/20 w-full sm:w-auto">
-                                        {submitting ? <><RefreshCw className="w-6 h-6 animate-spin" /> Enviando...</> : <><Send className="w-6 h-6" /> Enviar orçamento</>}
-                                    </button>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full mt-4">
+                                        <button onClick={() => handleViewClientReport({ id: 'PREVIA', clientName }, bends)}
+                                            className="btn-field bg-green-600 text-white shadow-green-600/20">
+                                            <Printer className="w-5 h-5" /> PRÉVIA CLIENTE
+                                        </button>
+                                        <button onClick={() => {
+                                            const w2 = window.open('', '_blank');
+                                            w2?.document.write('Gerando modelo A4 Compacto...');
+                                            handleDownloadQuoteCompactPDF({ id: 'PREVIA', totalM2: totalM2, totalValue: totalM2 * pricePerM2, clientName }, bends, w2);
+                                        }}
+                                            className="btn-field bg-slate-700 text-white">
+                                            <Printer className="w-5 h-5" /> PDF OBRA
+                                        </button>
+                                        <button onClick={handleDownloadPDF}
+                                            className="btn-field bg-indigo-600 text-white shadow-indigo-600/20">
+                                            <FileDown className="w-5 h-5" /> PDF PROD
+                                        </button>
+                                        <button onClick={handleSubmit} disabled={submitting}
+                                            className="btn-field bg-blue-600 text-white shadow-blue-600/20 col-span-full lg:col-span-1">
+                                            {submitting ? <RefreshCw className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />}
+                                            {submitting ? 'ENVIANDO...' : 'ENVIAR AGORA'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

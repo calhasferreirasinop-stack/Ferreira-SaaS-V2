@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import ErrorBoundary from './components/ErrorBoundary';
 import OfflineIndicator from './components/OfflineIndicator';
+import BottomNav from './components/BottomNav';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Blog from './pages/Blog';
@@ -23,7 +24,7 @@ function AppContent() {
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
       <OfflineIndicator />
       <Navbar />
-      <main className="flex-grow pt-[env(safe-area-inset-top)]">
+      <main className="flex-grow pt-[env(safe-area-inset-top)] pb-20 md:pb-0">
         <Routes>
           {/* === MODO BETA PRIVADO === */}
           {/* Página inicial redireciona para login */}
@@ -70,9 +71,10 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </main>
-      {/* Footer and WhatsApp always visible EXCEPT on admin */}
+      {/* Footer and WhatsApp always visible EXCEPT on admin/producao */}
       {!isAdmin && <Footer />}
       {!isAdmin && <WhatsAppButton />}
+      <BottomNav />
     </div>
   );
 }
