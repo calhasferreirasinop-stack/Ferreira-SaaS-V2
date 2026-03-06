@@ -2,20 +2,15 @@ import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import path from 'path';
 import fs from 'fs';
+import multer from 'multer';
 import cookieParser from 'cookie-parser';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 
-// Compatvel com Vercel (import.meta.url pode falhar no @vercel/node)
-let __dirname: string;
-try {
-  const { fileURLToPath } = await import('url');
-  const __filename = fileURLToPath(import.meta.url);
-  __dirname = path.dirname(__filename);
-} catch {
-  __dirname = process.cwd();
-}
+// __dirname seguro para Vercel (CommonJS) e local (ESM)
+const __dirname = process.cwd();
+
 
 dotenv.config();
 
