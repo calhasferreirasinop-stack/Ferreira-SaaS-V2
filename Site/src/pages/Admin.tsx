@@ -243,9 +243,9 @@ export default function Admin() {
 
   const loading_final = loading;
   if (loading_final) return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
-      <div className="w-14 h-14 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
-      <p className="text-slate-500 font-semibold text-sm">Carregando painel…</p>
+    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center gap-4">
+      <div className="w-14 h-14 border-4 border-brand-primary border-t-white rounded-full animate-spin" />
+      <p className="text-white/60 font-medium text-sm">Carregando painel…</p>
     </div>
   );
 
@@ -285,56 +285,73 @@ export default function Admin() {
         )}
       </AnimatePresence>
 
-      {/* Mobile Top Bar (visible only on mobile) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-[150] bg-white border-b border-slate-100 shadow-sm px-4 pt-[env(safe-area-inset-top)] flex items-center justify-between h-16">
-        <div>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Central do Usuário</p>
-          <p className="text-sm font-black text-slate-800 truncate max-w-[200px]">{currentUser?.name || currentUser?.username}</p>
+      {/* Mobile Top Bar (Native App Feel) */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-[150] bg-slate-900/95 backdrop-blur-xl border-b border-white/5 px-4 pt-[env(safe-area-inset-top)] flex items-center justify-between h-[calc(64px+env(safe-area-inset-top))]">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center shadow-lg shadow-brand-primary/30">
+            <Hammer className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">CalhaFlow</p>
+            <p className="text-sm font-bold text-white truncate max-w-[150px]">{currentUser?.name || currentUser?.username}</p>
+          </div>
         </div>
-        <button onClick={() => setMobileNavOpen(true)}
-          className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-xl cursor-pointer">
-          <Menu className="w-5 h-5 text-slate-700" />
-        </button>
+        <div className="flex items-center gap-2">
+          {pendingCount > 0 && (
+            <div className="bg-orange-500 text-white text-[10px] font-black px-2 py-1 rounded-full animate-pulse">
+              {pendingCount}
+            </div>
+          )}
+          <button onClick={() => setMobileNavOpen(true)}
+            className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl border border-white/10 active:scale-95 transition-all">
+            <Menu className="w-5 h-5 text-white" />
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Nav Drawer Overlay */}
+      {/* Mobile Nav Drawer (Premium Native Feel) */}
       <AnimatePresence>
         {mobileNavOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/50 z-[160] md:hidden"
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[160] md:hidden"
               onClick={() => setMobileNavOpen(false)} />
-            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
-              transition={{ type: 'tween', duration: 0.25 }}
-              className="fixed top-0 left-0 bottom-0 w-72 max-w-[85vw] bg-white z-[170] md:hidden flex flex-col shadow-2xl">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 bottom-0 w-[80vw] bg-slate-900 z-[170] md:hidden flex flex-col shadow-2xl border-l border-white/5">
+              <div className="flex items-center justify-between px-6 py-8 border-b border-white/5">
                 <div>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Menu</p>
-                  <p className="text-sm font-black text-slate-800">{currentUser?.name || currentUser?.username}</p>
+                  <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.2em] mb-1">MENU PRINCIPAL</p>
+                  <p className="text-lg font-bold text-white">{currentUser?.name || currentUser?.username}</p>
                 </div>
                 <button onClick={() => setMobileNavOpen(false)}
-                  className="w-9 h-9 flex items-center justify-center bg-slate-100 rounded-xl cursor-pointer">
-                  <X className="w-5 h-5 text-slate-600" />
+                  className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl border border-white/10">
+                  <X className="w-5 h-5 text-white" />
                 </button>
               </div>
-              <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+              <nav className="flex-1 overflow-y-auto p-4 space-y-2">
                 {allTabs.map((tab: any) => (
                   <button key={tab.id} onClick={() => { setActiveTab(tab.id as TabId); setMobileNavOpen(false); }}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all cursor-pointer
-                      ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <tab.icon className="w-4 h-4" />
+                    className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-[13px] font-bold transition-all active:scale-[0.98]
+                      ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-xl shadow-brand-primary/20' : 'text-white/60 hover:bg-white/5'}`}>
+                    <div className={clsx(
+                      "w-8 h-8 rounded-lg flex items-center justify-center",
+                      activeTab === tab.id ? "bg-white/20" : "bg-white/5 text-brand-primary"
+                    )}>
+                      <tab.icon className="w-4 h-4" />
+                    </div>
                     <span className="flex-1 text-left">{tab.label}</span>
                     {tab.badge > 0 && (
-                      <span className={`text-xs font-black px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-white text-brand-primary' : 'bg-orange-500 text-white'}`}>
+                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-white text-brand-primary' : 'bg-brand-primary text-white'}`}>
                         {tab.badge}
                       </span>
                     )}
                   </button>
                 ))}
               </nav>
-              <div className="border-t border-slate-100 p-3">
+              <div className="p-6 border-t border-white/5">
                 <button onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-all cursor-pointer">
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-sm font-bold text-rose-400 bg-rose-400/10 border border-rose-400/20 active:scale-95 transition-all">
                   <LogOut className="w-4 h-4" /> Sair da conta
                 </button>
               </div>

@@ -178,91 +178,146 @@ export default function ProductsTab({ showToast }: Props) {
             {/* List */}
             {loading ? (
                 <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-4 border-brand-primary border-t-white rounded-full animate-spin" />
                 </div>
             ) : products.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
                     <Package className="w-16 h-16 text-slate-200 mx-auto mb-4" />
                     <p className="text-slate-500 font-medium">Nenhum produto cadastrado ainda.</p>
-                    <button
-                        onClick={() => handleOpenModal()}
-                        className="mt-6 px-6 py-3 bg-brand-primary text-white rounded-2xl font-bold hover:opacity-90 transition-opacity"
-                    >
-                        Cadastrar primeiro produto
-                    </button>
                 </div>
             ) : (
-                <div className="overflow-hidden rounded-3xl border border-slate-100 shadow-sm bg-white">
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                                <th className="px-6 py-4 font-bold text-slate-600">Nome</th>
-                                <th className="px-6 py-4 font-bold text-slate-600">Tipo</th>
-                                <th className="px-6 py-4 font-bold text-slate-600">Descrição</th>
-                                <th className="px-6 py-4 font-bold text-slate-600 text-right">Preço (R$)</th>
-                                <th className="px-6 py-4 font-bold text-slate-600 text-right">Estoque (m²)</th>
-                                <th className="px-6 py-4 font-bold text-slate-600 text-right">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {products.map((p, i) => (
-                                <motion.tr
-                                    key={p.id}
-                                    initial={{ opacity: 0, y: 5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.03 }}
-                                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
-                                >
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${(p.type_product === 'service' || p.tipo_produto === 'service')
-                                                ? 'bg-purple-100 text-purple-600'
-                                                : 'bg-brand-primary/10 text-brand-primary'
-                                                }`}>
-                                                {(p.type_product === 'service' || p.tipo_produto === 'service') ? <Wrench className="w-4 h-4" /> : <Package className="w-4 h-4" />}
-                                            </div>
-                                            <span className="font-bold text-slate-800">{p.name}</span>
+                <>
+                    {/* === MOBILE: Cards View (hidden on md+) === */}
+                    <div className="md:hidden space-y-4">
+                        {products.map((p, i) => (
+                            <motion.div
+                                key={p.id}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: i * 0.05 }}
+                                className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm relative overflow-hidden active:scale-[0.98] transition-all"
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${(p.type_product === 'service' || p.tipo_produto === 'service')
+                                            ? 'bg-purple-100 text-purple-600'
+                                            : 'bg-blue-100 text-blue-600'
+                                            }`}>
+                                            {(p.type_product === 'service' || p.tipo_produto === 'service') ? <Wrench className="w-6 h-6" /> : <Package className="w-6 h-6" />}
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <TypeBadge type={p.type_product || p.tipo_produto || 'product'} />
-                                    </td>
-                                    <td className="px-6 py-4 text-slate-500 max-w-xs truncate">{p.description || '—'}</td>
-                                    <td className="px-6 py-4 text-right font-bold text-green-600">
-                                        {fmt(p.price ?? p.base_cost)}
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
+                                        <div>
+                                            <h3 className="font-black text-slate-900 leading-tight">{p.name}</h3>
+                                            <TypeBadge type={p.type_product || p.tipo_produto || 'product'} />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-lg font-black text-brand-primary">{fmt(p.price ?? p.base_cost)}</span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">por {p.unit || 'm²'}</span>
+                                    </div>
+                                </div>
+
+                                {p.description && (
+                                    <p className="text-xs text-slate-500 mb-4 line-clamp-2">{p.description}</p>
+                                )}
+
+                                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                    <div className="text-xs font-bold text-slate-500">
                                         {(p.type_product === 'service' || p.tipo_produto === 'service') ? (
-                                            <span className="text-slate-400 text-xs">N/A</span>
+                                            <span className="opacity-40">Serviço s/ estoque</span>
                                         ) : (
-                                            <span className={`font-bold ${parseFloat(p.stock_quantity) <= 5 ? 'text-orange-500' : 'text-slate-700'}`}>
-                                                {parseFloat(p.stock_quantity || 0).toFixed(2)}
+                                            <span className={parseFloat(p.stock_quantity) <= 5 ? 'text-orange-500' : ''}>
+                                                Estoque: <span className="text-slate-900">{parseFloat(p.stock_quantity || 0).toFixed(2)} {p.unit || 'm²'}</span>
                                             </span>
                                         )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex gap-2 justify-end">
-                                            <button
-                                                onClick={() => handleOpenModal(p)}
-                                                className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-brand-primary hover:text-white transition-colors"
-                                                title="Editar"
-                                            >
-                                                <Pencil className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(p.id)}
-                                                className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-red-500 hover:text-white transition-colors"
-                                                title="Excluir"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </motion.tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => handleOpenModal(p)}
+                                            className="w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-600 rounded-xl active:bg-brand-primary active:text-white transition-all">
+                                            <Pencil className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => handleDelete(p.id)}
+                                            className="w-10 h-10 flex items-center justify-center bg-slate-100 text-slate-600 rounded-xl active:bg-red-500 active:text-white transition-all">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    {/* === DESKTOP: Table View (hidden on mobile) === */}
+                    <div className="hidden md:block overflow-hidden rounded-3xl border border-slate-100 shadow-sm bg-white">
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-slate-50 border-b border-slate-100">
+                                <tr>
+                                    <th className="px-6 py-4 font-bold text-slate-600">Nome</th>
+                                    <th className="px-6 py-4 font-bold text-slate-600">Tipo</th>
+                                    <th className="px-6 py-4 font-bold text-slate-600">Descrição</th>
+                                    <th className="px-6 py-4 font-bold text-slate-600 text-right">Preço (R$)</th>
+                                    <th className="px-6 py-4 font-bold text-slate-600 text-right">Estoque (m²)</th>
+                                    <th className="px-6 py-4 font-bold text-slate-600 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {products.map((p, i) => (
+                                    <motion.tr
+                                        key={p.id}
+                                        initial={{ opacity: 0, y: 5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.03 }}
+                                        className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
+                                    >
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${(p.type_product === 'service' || p.tipo_produto === 'service')
+                                                    ? 'bg-purple-100 text-purple-600'
+                                                    : 'bg-brand-primary/10 text-brand-primary'
+                                                    }`}>
+                                                    {(p.type_product === 'service' || p.tipo_produto === 'service') ? <Wrench className="w-4 h-4" /> : <Package className="w-4 h-4" />}
+                                                </div>
+                                                <span className="font-bold text-slate-800">{p.name}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <TypeBadge type={p.type_product || p.tipo_produto || 'product'} />
+                                        </td>
+                                        <td className="px-6 py-4 text-slate-500 max-w-xs truncate">{p.description || '—'}</td>
+                                        <td className="px-6 py-4 text-right font-bold text-green-600">
+                                            {fmt(p.price ?? p.base_cost)}
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            {(p.type_product === 'service' || p.tipo_produto === 'service') ? (
+                                                <span className="text-slate-400 text-xs">N/A</span>
+                                            ) : (
+                                                <span className={`font-bold ${parseFloat(p.stock_quantity) <= 5 ? 'text-orange-500' : 'text-slate-700'}`}>
+                                                    {parseFloat(p.stock_quantity || 0).toFixed(2)}
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex gap-2 justify-end">
+                                                <button
+                                                    onClick={() => handleOpenModal(p)}
+                                                    className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-brand-primary hover:text-white transition-colors"
+                                                    title="Editar"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(p.id)}
+                                                    className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-red-500 hover:text-white transition-colors"
+                                                    title="Excluir"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </motion.tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
             )}
 
             {/* Modal */}
