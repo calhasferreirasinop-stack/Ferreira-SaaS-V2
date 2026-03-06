@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import ErrorBoundary from './components/ErrorBoundary';
+import OfflineIndicator from './components/OfflineIndicator';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Blog from './pages/Blog';
@@ -20,8 +21,9 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
+      <OfflineIndicator />
       <Navbar />
-      <main className="flex-grow">
+      <main className="flex-grow pt-[env(safe-area-inset-top)]">
         <Routes>
           {/* === MODO BETA PRIVADO === */}
           {/* Página inicial redireciona para login */}

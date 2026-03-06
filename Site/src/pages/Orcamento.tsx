@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Trash2, ChevronRight, ChevronLeft, Check, AlertTriangle, Printer, Copy, Send, RefreshCw, Undo2, FileDown, ZoomIn, X, PenLine, Save, List, Eye, CreditCard, Triangle, RotateCcw, Filter, ShoppingCart, GitBranch, Factory, RefreshCcw, XCircle, Hammer } from 'lucide-react';
 import { renderToString } from 'react-dom/server';
 import BendCanvas, { Risk, RiskDirection, DIRECTION_ICONS, OPPOSITE_DIRECTION } from '../components/BendCanvas';
+import { useOfflineSync } from '../hooks/useOfflineSync';
 
 // ─── Official rounding rule ────────────────────────────────────────────────────
 // floor to nearest 5, compute remainder. If remainder > 1 → round UP, else stay.
@@ -184,6 +185,7 @@ const calculateOptimization = (allBends: Bend[]) => {
 
 export default function Orcamento() {
     const navigate = useNavigate();
+    const { isOnline, saveOffline } = useOfflineSync();
     const [user, setUser] = useState<any>(null);
     const [settings, setSettings] = useState<any>({});
     const [step, setStep] = useState<'bends' | 'summary' | 'payment'>('bends');
@@ -725,6 +727,45 @@ export default function Orcamento() {
         try {
             const url = editingQuoteId ? `/api/quotes/${editingQuoteId}` : '/api/quotes';
             const method = editingQuoteId ? 'PUT' : 'POST';
+
+            if (!isOnline) {
+                // MODO OFFLINE: Salva no IndexedDB
+                const estimateData = {
+                    clientName: clientName || user?.name || user?.username,
+                    clientId: selectedClientId || undefined,
+                    productId: selectedProductId || undefined,
+                    type_product: selectedProductType,
+                    pricePerM2Override: overridePricePerM2 || undefined,
+                    costPerM2Override: overrideCostPerM2 || undefined,
+                    discount_amount: parseFloat(discountAmount) || 0,
+                    isGrouped: groupByRoom,
+                    notes,
+                    bends: currentBends.map(b => ({
+                        productType: b.productType || 'product',
+                        serviceDescription: b.serviceDescription,
+                        serviceValue: b.serviceValue,
+                        serviceQty: b.serviceQty,
+                        group_name: b.group_name,
+                        risks: b.risks,
+                        totalWidthCm: b.totalWidthCm,
+                        roundedWidthCm: b.roundedWidthCm,
+                        lengths: b.lengths.filter(l => parseFloat(l) > 0).map(Number),
+                        totalLengthM: b.totalLengthM,
+                        m2: b.m2,
+                        svgDataUrl: b.svgDataUrl,
+                        product_id: b.product_id || selectedProductId || undefined,
+                    })),
+                    totalValue,
+                    finalValue: finalWithDiscount,
+                };
+
+                await saveOffline(estimateData, user?.company_id);
+                setToast({ msg: 'Modo Offline: Orçamento salvo localmente e será sincronizado ao conectar!', type: 'success' });
+                setStep('bends');
+                handleResetQuote();
+                return;
+            }
+
             const res = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
@@ -778,6 +819,41 @@ export default function Orcamento() {
         if (!bends.length) { setToast({ msg: 'Adicione pelo menos uma dobra', type: 'error' }); return; }
         setSavingDraft(true);
         try {
+            if (!isOnline) {
+                const estimateData = {
+                    clientName: clientName || user?.name || user?.username,
+                    clientId: selectedClientId || undefined,
+                    productId: selectedProductId || undefined,
+                    type_product: selectedProductType,
+                    pricePerM2Override: overridePricePerM2 || undefined,
+                    costPerM2Override: overrideCostPerM2 || undefined,
+                    discount_amount: parseFloat(discountAmount) || 0,
+                    isGrouped: groupByRoom,
+                    notes,
+                    bends: bends.map(b => ({
+                        productType: b.productType || 'product',
+                        serviceDescription: b.serviceDescription,
+                        serviceValue: b.serviceValue,
+                        serviceQty: b.serviceQty,
+                        group_name: b.group_name,
+                        risks: b.risks,
+                        totalWidthCm: b.totalWidthCm,
+                        roundedWidthCm: b.roundedWidthCm,
+                        lengths: b.lengths.filter(l => parseFloat(l) > 0).map(Number),
+                        totalLengthM: b.totalLengthM,
+                        m2: b.m2,
+                        svgDataUrl: b.svgDataUrl,
+                        product_id: b.product_id || selectedProductId || undefined,
+                    })),
+                    totalValue,
+                    finalValue: finalWithDiscount,
+                    status: 'draft'
+                };
+                await saveOffline(estimateData, user?.company_id);
+                setToast({ msg: 'Rascunho salvo offline!', type: 'success' });
+                return;
+            }
+
             const url = editingQuoteId ? `/api/quotes/${editingQuoteId}` : '/api/quotes';
             const method = editingQuoteId ? 'PUT' : 'POST';
             const res = await fetch(url, {
