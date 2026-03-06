@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, AlertTriangle, Trash2, Package, ArrowUpCircle, ArrowDownCircle, RefreshCw } from 'lucide-react';
 
+// VERSION: BUILD_FIX_V3 - Layout Duplo e Mensagens em Português
+
 interface Props {
     inventory: any[];
     onSave: () => void;
@@ -29,7 +31,6 @@ export default function InventoryTab({ inventory, onSave, showToast }: Props) {
     }, []);
 
     const totalAvailable = inventory.reduce((s, i) => s + parseFloat(i.availableM2 || 0), 0);
-    // Global low stock: check total sum of ALL bobinas
     const isGlobalLowStock = totalAvailable < globalThreshold;
 
     const totalCost = (parseFloat(form.costPerUnit) || 0) * (parseInt(form.quantity) || 1);
@@ -111,7 +112,7 @@ export default function InventoryTab({ inventory, onSave, showToast }: Props) {
             </div>
 
             {activeSubTab === 'stock' && (
-                <>
+                <div className="space-y-6 animate-in fade-in duration-500">
                     {/* Summary with GLOBAL threshold */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <div className="bg-blue-50 rounded-2xl p-4">
@@ -272,11 +273,11 @@ export default function InventoryTab({ inventory, onSave, showToast }: Props) {
                             </table>
                         </div>
                     )}
-                </>
+                </div>
             )}
 
             {activeSubTab === 'movements' && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-in fade-in duration-500">
                     <div className="flex justify-between items-center">
                         <h3 className="font-bold text-slate-900">Movimentação de Estoque</h3>
                         <button onClick={fetchMovements} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold text-slate-600 flex items-center gap-2 cursor-pointer">
