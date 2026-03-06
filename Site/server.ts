@@ -3248,6 +3248,55 @@ app.post('/api/fabricacao/order/:orderId/finish', authenticate, async (req: any,
   }
 });
 
+// REMNANTS (SOBRAS)
+app.get('/api/fabricacao/remnants', authenticate, async (req: any, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('fabrication_remnants')
+      .select('*')
+      .eq('company_id', req.user.companyId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    res.json(data || []);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/fabricacao/remnants', authenticate, async (req: any, res) => {
+  const { width_cm, length_m } = req.body;
+  if (!width_cm || !length_m) return res.status(400).json({ error: 'Largura e comprimento são obrigatórios' });
+  try {
+    const { data, error } = await supabase
+      .from('fabrication_remnants')
+      .insert({
+        company_id: req.user.companyId,
+        width_cm: parseFloat(width_cm),
+        length_m: parseFloat(length_m)
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/fabricacao/remnants/:id', authenticate, async (req: any, res) => {
+  try {
+    const { error } = await supabase
+      .from('fabrication_remnants')
+      .delete()
+      .eq('id', req.params.id)
+      .eq('company_id', req.user.companyId);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // =====================
 // INVENTORY Routes (SaaS V2 Map: /api/inventory -> products table)
 // =====================
