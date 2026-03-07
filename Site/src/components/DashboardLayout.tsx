@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
 
-type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin' | 'dashboard';
+type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin' | 'dashboard' | 'orcamento';
 
 export default function DashboardLayout() {
     const navigate = useNavigate();
@@ -66,6 +66,7 @@ export default function DashboardLayout() {
         // APP
         { id: 'clients', label: 'Clientes', icon: Users, path: '/app/clientes', show: true, group: 'app' },
         { id: 'products', label: 'Produtos', icon: Package, path: '/app/produtos', show: true, group: 'app' },
+        { id: 'orcamento', label: 'Calculadora de Orçamento', icon: Hammer, path: '/app/orcamentos', show: true, group: 'app' },
         { id: 'quotes', label: 'Gestão de Orçamentos', icon: ClipboardList, path: '/app/gestao-orcamentos', show: true, badge: pendingCount, group: 'app' },
         { id: 'production_admin', label: 'Produção', icon: Factory, path: '/app/producao', show: true, group: 'app' },
         { id: 'inventory', label: 'Estoque', icon: Package, path: '/app/estoque', show: isAdminRole, group: 'app' },
@@ -83,6 +84,33 @@ export default function DashboardLayout() {
 
     return (
         <div className="pt-20 md:pt-32 pb-24 bg-slate-50 min-h-screen">
+            {/* Desktop Header */}
+            <div className="hidden md:block fixed top-0 left-0 right-0 z-[140] bg-white/80 backdrop-blur-xl border-b border-slate-100 h-20">
+                <div className="max-w-[1600px] mx-auto h-full px-8 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-brand-primary rounded-2xl flex items-center justify-center shadow-lg shadow-brand-primary/20">
+                            <Hammer className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-black text-slate-900 tracking-tight">CalhaFlow <span className="text-brand-primary">SaaS</span></h1>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{location.pathname.startsWith('/admin') ? 'Administração Global' : (location.pathname.startsWith('/site') ? 'Gestão de Conteúdo' : 'Operações da Empresa')}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                        <div className="flex flex-col items-end">
+                            <span className="text-sm font-bold text-slate-900">{currentUser?.name || currentUser?.username}</span>
+                            <span className="text-[10px] font-bold text-amber-500 flex items-center gap-1 uppercase tracking-widest">
+                                {isMaster && <Crown className="w-3 h-3" />} {currentUser?.role}
+                            </span>
+                        </div>
+                        <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
+                            <UserIcon className="w-5 h-5 text-slate-400" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Mobile Top Bar */}
             <div className="md:hidden fixed top-0 left-0 right-0 z-[150] bg-slate-900/95 backdrop-blur-xl border-b border-white/5 px-4 pt-[env(safe-area-inset-top)] flex items-center justify-between h-[calc(64px+env(safe-area-inset-top))]">
                 <div className="flex items-center gap-3">
@@ -178,11 +206,11 @@ export default function DashboardLayout() {
                 )}
             </AnimatePresence>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Sidebar - Desktop */}
                     <aside className="hidden md:block md:w-64 shrink-0">
-                        <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 sticky top-32">
+                        <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 sticky top-24">
                             <div className="px-4 mb-4">
                                 <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">
                                     {isMaster ? 'Master Admin' : 'Painel Control'}
@@ -193,7 +221,7 @@ export default function DashboardLayout() {
                                 {/* SITE MENUS */}
                                 <div className="mb-2">
                                     <button onClick={() => setShowSiteMenus(!showSiteMenus)}
-                                        className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 transition-colors">
+                                        className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-slate-900 transition-colors">
                                         <span>Conteúdo do Site</span>
                                         <motion.span animate={{ rotate: showSiteMenus ? 0 : -90 }}><ChevronDown className="w-3 h-3" /></motion.span>
                                     </button>
@@ -215,7 +243,7 @@ export default function DashboardLayout() {
 
                                 {/* APP MENUS */}
                                 <div className="space-y-1">
-                                    <p className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Operacional</p>
+                                    <p className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">Operacional</p>
                                     {allTabs.filter(t => t.group === 'app').map((tab) => (
                                         <Link key={tab.id} to={tab.path}
                                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all
@@ -230,7 +258,7 @@ export default function DashboardLayout() {
                                 {/* ADMIN MENUS */}
                                 {allTabs.some(t => t.group === 'admin') && (
                                     <div className="space-y-1 mt-4 pt-4 border-t border-slate-100">
-                                        <p className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Gestão</p>
+                                        <p className="px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">Gestão</p>
                                         {allTabs.filter(t => t.group === 'admin').map((tab) => (
                                             <Link key={tab.id} to={tab.path}
                                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all
