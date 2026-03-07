@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare, Menu, X, Factory } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import UsersTab from '../components/admin/UsersTab';
@@ -16,7 +16,7 @@ import ReportTab from '../components/admin/ReportTab';
 type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin';
 
 export default function Admin() {
-  const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<TabId>('quotes'); // default; adjusted by useEffect once user loads
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [settings, setSettings] = useState<any>({});
@@ -49,6 +49,23 @@ export default function Admin() {
   }, [toast]);
 
   const showToast = (message: string, type: 'success' | 'error') => setToast({ show: true, message, type });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab') as TabId;
+    // Map alternate names if needed
+    const tabMap: Record<string, TabId> = {
+      'revenue': 'financial',
+      'clients': 'clients',
+      'products': 'products',
+      'settings': 'settings'
+    };
+    if (tab && tabMap[tab]) {
+      setActiveTab(tabMap[tab]);
+    } else if (tab && (['settings', 'services', 'posts', 'gallery', 'testimonials', 'users', 'quotes', 'inventory', 'financial', 'receivables', 'reports', 'logs', 'clients', 'products', 'production_admin'] as string[]).includes(tab)) {
+      setActiveTab(tab as TabId);
+    }
+  }, [location.search]);
 
   useEffect(() => { checkAuth(); fetchPixKeys(); fetchCompanies(); }, []);
 
@@ -163,9 +180,15 @@ export default function Admin() {
     if (heroFile) fd.append('heroImage', heroFile);
     const res = await fetch('/api/settings', { method: 'POST', body: fd, credentials: 'include' });
     if (res.status === 401) return navigate('/login');
-    showToast('Configurações salvas!', 'success');
-    setLogoFile(null); setHeroFile(null);
-    fetchData(true);
+
+    if (res.ok) {
+      showToast('Configurações salvas!', 'success');
+      setLogoFile(null); setHeroFile(null);
+      fetchData(true);
+    } else {
+      const errorData = await res.json().catch(() => ({}));
+      showToast(errorData.error || 'Erro ao salvar configurações', 'error');
+    }
   };
 
   const handleDelete = async (type: string, id: number) => {

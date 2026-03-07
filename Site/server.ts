@@ -1000,9 +1000,15 @@ app.post('/api/settings', requireAdmin, upload.fields([{ name: 'logo' }, { name:
   const currentSettings = company?.settings || {};
   const updatedSettings = { ...currentSettings, ...newSettings };
 
-  if (files?.logo?.[0]) updatedSettings.logoUrl = `/uploads/${files.logo[0].filename}`;
-  if (files?.heroImage?.[0]) updatedSettings.heroImageUrl = `/uploads/${files.heroImage[0].filename}`;
-  if (files?.pixQrCode?.[0]) updatedSettings.pixQrCodeUrl = `/uploads/${files.pixQrCode[0].filename}`;
+  if (files?.logo?.[0]) {
+    updatedSettings.logoUrl = await uploadToSupabase(files.logo[0]);
+  }
+  if (files?.heroImage?.[0]) {
+    updatedSettings.heroImageUrl = await uploadToSupabase(files.heroImage[0]);
+  }
+  if (files?.pixQrCode?.[0]) {
+    updatedSettings.pixQrCodeUrl = await uploadToSupabase(files.pixQrCode[0]);
+  }
 
   await supabase.from('companies').update({ settings: updatedSettings }).eq('id', req.user.companyId);
   res.json({ success: true });
@@ -1164,11 +1170,18 @@ app.post('/api/services/delete/:id', requireAdmin, async (req: any, res) => {
 });
 
 app.post('/api/services/:id/home-image', requireAdmin, upload.single('homeImage'), async (req: any, res) => {
-  const id = req.params.id; // UUID
-  const homeImageUrl = `/uploads/${req.file!.filename}`;
-  await supabase.from('services').update({ homeImageUrl })
-    .eq('id', id).eq('company_id', req.user.companyId);
-  res.json({ success: true, homeImageUrl });
+  try {
+    const id = req.params.id; // UUID
+    if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+
+    const homeImageUrl = await uploadToSupabase(req.file);
+    await supabase.from('services').update({ homeImageUrl })
+      .eq('id', id).eq('company_id', req.user.companyId);
+
+    res.json({ success: true, homeImageUrl });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // =====================

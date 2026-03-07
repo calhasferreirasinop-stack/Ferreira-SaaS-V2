@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Trash2, ChevronRight, ChevronLeft, Check, AlertTriangle, Printer, Copy, Send, RefreshCw, Undo2, FileDown, ZoomIn, X, PenLine, Save, List, Eye, CreditCard, Triangle, RotateCcw, Filter, ShoppingCart, GitBranch, Factory, RefreshCcw, XCircle, Hammer } from 'lucide-react';
+import { Plus, Trash2, ChevronRight, ChevronLeft, Check, AlertTriangle, Printer, Copy, Send, RefreshCw, Undo2, FileDown, ZoomIn, X, PenLine, Save, List, Eye, CreditCard, Triangle, RotateCcw, Filter, ShoppingCart, GitBranch, Factory, RefreshCcw, XCircle, Hammer, Search } from 'lucide-react';
 import { renderToString } from 'react-dom/server';
 import BendCanvas, { Risk, RiskDirection, DIRECTION_ICONS, OPPOSITE_DIRECTION } from '../components/BendCanvas';
 import { useOfflineSync } from '../hooks/useOfflineSync';
@@ -203,6 +203,7 @@ export default function Orcamento() {
     // Quotes listing
     const [myQuotes, setMyQuotes] = useState<any[]>([]);
     const [showMyQuotes, setShowMyQuotes] = useState(true);
+    const [quoteSearch, setQuoteSearch] = useState('');
     const [clientName, setClientName] = useState('');
     const [pixKeys, setPixKeys] = useState<any[]>([]);
     const [savingDraft, setSavingDraft] = useState(false);
@@ -534,7 +535,7 @@ export default function Orcamento() {
 
     const selectDirection = (dir: RiskDirection) => {
         setPendingDir(dir);
-        setTimeout(() => sizeInputRef.current?.focus(), 50);
+        setTimeout(() => sizeInputRef.current?.focus(), 150);
     };
 
     const handleAddRisk = () => {
@@ -1777,12 +1778,12 @@ window.onload = function() {
 
     // ── Render helpers (Mobile) ──
     const DirBtn = ({ d, active, onClick }: { d: typeof DIR_GRID[0]; active: boolean; onClick: () => void }) => (
-        <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-1 rounded-xl border font-black transition-all active:scale-90 w-full aspect-square
+        <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-0.5 rounded-lg border font-black transition-all active:scale-90 w-full aspect-square
             ${active
                 ? `bg-brand-primary border-brand-primary text-white shadow-lg shadow-blue-500/20`
                 : 'bg-white border-slate-200 text-slate-400 shadow-sm'}`}>
-            <span className="text-lg leading-none mb-0.5">{active ? <Check className="w-4 h-4" /> : d.icon}</span>
-            <span className="text-[6px] uppercase tracking-tighter text-center leading-none">{d.label}</span>
+            <span className="text-sm leading-none mb-0.5">{active ? <Check className="w-3 h-3" /> : d.icon}</span>
+            <span className="text-[5px] uppercase tracking-tighter text-center leading-none px-0.5">{d.label}</span>
         </button>
     );
 
@@ -2205,68 +2206,101 @@ window.onload = function() {
                                 </button>
                             </div>
 
+                            <div className="px-2">
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                        <Search className="h-5 w-5 text-slate-500 group-focus-within:text-brand-primary transition-colors" />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Pesquisar por nome, celular ou ID..."
+                                        value={quoteSearch}
+                                        onChange={e => setQuoteSearch(e.target.value)}
+                                        className="w-full bg-white border border-slate-100 rounded-[1.8rem] pl-14 pr-6 py-5 text-slate-900 placeholder-slate-400 focus:ring-4 focus:ring-brand-primary/10 transition-all shadow-sm outline-none font-bold"
+                                    />
+                                    {quoteSearch && (
+                                        <button onClick={() => setQuoteSearch('')} className="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400">
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 gap-4">
-                                {myQuotes.map(q => {
-                                    const st = STATUS_LABELS[q.status] || STATUS_LABELS.pending;
-                                    const isDraft = q.status === 'draft' || q.status === 'rascunho';
-                                    const quoteNum = String(q.id).substring(0, 8).toUpperCase();
+                                {myQuotes
+                                    .filter(q => {
+                                        if (!quoteSearch.trim()) return true;
+                                        const search = quoteSearch.toLowerCase();
+                                        const quoteNum = String(q.id).substring(0, 8).toLowerCase();
+                                        const name = (q.clientName || '').toLowerCase();
+                                        const phone = (q.clientPhone || '').replace(/\D/g, '');
+                                        const searchPhone = search.replace(/\D/g, '');
 
-                                    return (
-                                        <div key={q.id} className="bg-white rounded-[2.5rem] p-6 shadow-xl border border-slate-100 flex flex-col gap-5">
-                                            {/* Top Info */}
-                                            <div className="flex justify-between items-start">
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`w-2 h-2 rounded-full ${st.color.replace('bg-', 'bg-')}`}></span>
-                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{st.label}</span>
+                                        return quoteNum.includes(search) ||
+                                            name.includes(search) ||
+                                            (searchPhone && phone.includes(searchPhone));
+                                    })
+                                    .map(q => {
+                                        const st = STATUS_LABELS[q.status] || STATUS_LABELS.pending;
+                                        const isDraft = q.status === 'draft' || q.status === 'rascunho';
+                                        const quoteNum = String(q.id).substring(0, 8).toUpperCase();
+
+                                        return (
+                                            <div key={q.id} className="bg-white rounded-[2.5rem] p-6 shadow-xl border border-slate-100 flex flex-col gap-5">
+                                                {/* Top Info */}
+                                                <div className="flex justify-between items-start">
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`w-2 h-2 rounded-full ${st.color.replace('bg-', 'bg-')}`}></span>
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{st.label}</span>
+                                                        </div>
+                                                        <h3 className="text-lg font-black text-slate-900 leading-tight truncate max-w-[180px]">
+                                                            {q.clientName || 'Cliente sem nome'}
+                                                        </h3>
+                                                        <p className="text-[10px] font-mono text-slate-400">ID: #{quoteNum} • {new Date(q.createdAt).toLocaleDateString('pt-BR')}</p>
                                                     </div>
-                                                    <h3 className="text-lg font-black text-slate-900 leading-tight truncate max-w-[180px]">
-                                                        {q.clientName || 'Cliente sem nome'}
-                                                    </h3>
-                                                    <p className="text-[10px] font-mono text-slate-400">ID: #{quoteNum} • {new Date(q.createdAt).toLocaleDateString('pt-BR')}</p>
+                                                    <div className="text-right">
+                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total</p>
+                                                        <p className="text-xl font-black text-brand-primary">R$ {parseFloat(q.finalValue || q.totalValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                    </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total</p>
-                                                    <p className="text-xl font-black text-brand-primary">R$ {parseFloat(q.finalValue || q.totalValue || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+
+                                                {/* Action Bar */}
+                                                <div className="flex gap-2 pt-1 border-t border-slate-50 overflow-x-auto no-scrollbar pb-1">
+                                                    {isDraft ? (
+                                                        <button onClick={() => handleEditQuote(q)}
+                                                            className="flex-1 min-w-[100px] h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:bg-blue-100 transition-all">
+                                                            <PenLine className="w-3.5 h-3.5" /> Editar
+                                                        </button>
+                                                    ) : (
+                                                        <button onClick={() => handleViewReport(q)}
+                                                            className="flex-1 min-w-[100px] h-12 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:bg-slate-100 transition-all">
+                                                            <Eye className="w-3.5 h-3.5" /> Ver
+                                                        </button>
+                                                    )}
+
+                                                    <button onClick={() => navigate(`/fabricacao/${q.id}`)}
+                                                        className="h-12 w-12 bg-brand-secondary/10 text-brand-secondary rounded-2xl flex items-center justify-center active:scale-95 transition-all" title="Fabricação">
+                                                        <Hammer className="w-5 h-5" />
+                                                    </button>
+
+                                                    <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
+                                                        className="h-12 w-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center active:scale-95 transition-all" title="PDF Cliente">
+                                                        <FileDown className="w-5 h-5" />
+                                                    </button>
+
+                                                    <button onClick={() => {
+                                                        setCancelModalQuote(q);
+                                                        setCancelReason('');
+                                                        setCancelReasonText('');
+                                                    }}
+                                                        className="h-12 w-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center active:scale-95 transition-all" title="Cancelar">
+                                                        <XCircle className="w-5 h-5" />
+                                                    </button>
                                                 </div>
                                             </div>
-
-                                            {/* Action Bar */}
-                                            <div className="flex gap-2 pt-1 border-t border-slate-50 overflow-x-auto no-scrollbar pb-1">
-                                                {isDraft ? (
-                                                    <button onClick={() => handleEditQuote(q)}
-                                                        className="flex-1 min-w-[100px] h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:bg-blue-100 transition-all">
-                                                        <PenLine className="w-3.5 h-3.5" /> Editar
-                                                    </button>
-                                                ) : (
-                                                    <button onClick={() => handleViewReport(q)}
-                                                        className="flex-1 min-w-[100px] h-12 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-widest active:bg-slate-100 transition-all">
-                                                        <Eye className="w-3.5 h-3.5" /> Ver
-                                                    </button>
-                                                )}
-
-                                                <button onClick={() => navigate(`/fabricacao/${q.id}`)}
-                                                    className="h-12 w-12 bg-brand-secondary/10 text-brand-secondary rounded-2xl flex items-center justify-center active:scale-95 transition-all" title="Fabricação">
-                                                    <Hammer className="w-5 h-5" />
-                                                </button>
-
-                                                <button onClick={() => window.open(`/api/quotes/${q.id}/client-report`, '_blank')}
-                                                    className="h-12 w-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center active:scale-95 transition-all" title="PDF Cliente">
-                                                    <FileDown className="w-5 h-5" />
-                                                </button>
-
-                                                <button onClick={() => {
-                                                    setCancelModalQuote(q);
-                                                    setCancelReason('');
-                                                    setCancelReasonText('');
-                                                }}
-                                                    className="h-12 w-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center active:scale-95 transition-all" title="Cancelar">
-                                                    <XCircle className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
                             </div>
                         </motion.div>
                     )}
@@ -3705,7 +3739,14 @@ window.onload = function() {
                                                 className="h-16 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
                                                 <Plus className="w-5 h-5 mx-auto mb-1" /> Novo
                                             </button>
-                                            <button onClick={() => { setShowMyQuotes(true); setStep('bends'); }}
+                                            <button onClick={() => {
+                                                handleResetQuote();
+                                                setBends([]);
+                                                setCurrentRisks([]);
+                                                setEditingQuoteId(null);
+                                                setShowMyQuotes(true);
+                                                setStep('bends');
+                                            }}
                                                 className="h-16 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest active:bg-slate-50 transition-all">
                                                 <List className="w-5 h-5 mx-auto mb-1" /> Histórico
                                             </button>
