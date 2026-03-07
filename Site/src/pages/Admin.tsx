@@ -140,6 +140,8 @@ export default function Admin() {
       setActiveTab(tabMap[tab]);
     } else if (tab && (['settings', 'services', 'posts', 'gallery', 'testimonials', 'users', 'quotes', 'inventory', 'financial', 'receivables', 'reports', 'logs', 'clients', 'products', 'production_admin'] as string[]).includes(tab)) {
       setActiveTab(tab as TabId);
+    } else {
+      setActiveTab('quotes');
     }
   }, [location.search]);
 

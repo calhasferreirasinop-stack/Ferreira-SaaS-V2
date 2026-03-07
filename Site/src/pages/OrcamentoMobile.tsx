@@ -3030,11 +3030,14 @@ window.onload = function() {
                                                                 <div className="space-y-3">
                                                                     <div className="flex items-center justify-between">
                                                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lado</span>
-                                                                        <div className="flex bg-slate-100 rounded-lg p-1">
-                                                                            {(['D', 'E'] as const).map(s => (
-                                                                                <button key={s} onClick={() => setSlopeSide(s)}
-                                                                                    className={`px-3 py-1 rounded-lg text-[9px] font-black transition-all ${slopeSide === s ? 'bg-slate-900 text-white' : 'text-slate-400'}`}>{s === 'D' ? 'DIR' : 'ESQ'}</button>
-                                                                            ))}
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="flex bg-slate-100 rounded-lg p-1">
+                                                                                {(['D', 'E'] as const).map(s => (
+                                                                                    <button key={s} onClick={() => setSlopeSide(s)}
+                                                                                        className={`px-3 py-1 rounded-lg text-[9px] font-black transition-all ${slopeSide === s ? 'bg-slate-900 text-white' : 'text-slate-400'}`}>{s === 'D' ? 'DIR' : 'ESQ'}</button>
+                                                                                ))}
+                                                                            </div>
+                                                                            <button onClick={handleAddRisk} className="px-3 py-1.5 bg-brand-primary text-white rounded-lg text-[9px] font-black uppercase shadow-sm active:scale-95">Confirmar</button>
                                                                         </div>
                                                                     </div>
                                                                     <div className="grid grid-cols-2 gap-2">
@@ -3062,15 +3065,31 @@ window.onload = function() {
                                                         <div className="flex flex-wrap gap-2">
                                                             {currentRisks.map((r, i) => (
                                                                 <div key={i} className="relative">
-                                                                    <div className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all ${editDirIdx === i || editSizeIdx === i ? 'bg-brand-primary/5 border-brand-primary shadow-sm' : 'bg-slate-50 border-slate-200'}`}>
-                                                                        <button onClick={() => { setEditDirIdx(editDirIdx === i ? null : i); setEditSizeIdx(null); }}
+                                                                    <div className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all ${editDirIdx === i || editSizeIdx === i || editingAngleIdx === i ? 'bg-brand-primary/5 border-brand-primary shadow-sm' : 'bg-slate-50 border-slate-200'}`}>
+                                                                        <button onClick={() => { setEditDirIdx(editDirIdx === i ? null : i); setEditSizeIdx(null); setEditingAngleIdx(null); }}
                                                                             className={`text-sm font-bold transition-transform active:scale-90 ${editDirIdx === i ? 'text-brand-primary scale-125' : 'text-slate-900'}`}>
                                                                             {DIRECTION_ICONS[r.direction]}
                                                                         </button>
                                                                         <span className="w-[1px] h-3 bg-slate-200" />
-                                                                        <button onClick={() => { setEditSizeIdx(editSizeIdx === i ? null : i); setEditSizeVal(String(r.sizeCm)); setEditDirIdx(null); }}
-                                                                            className={`text-sm font-black transition-transform active:scale-90 ${editSizeIdx === i ? 'text-brand-primary scale-110' : 'text-slate-900'}`}>
+                                                                        <button onClick={() => {
+                                                                            setEditSizeIdx(editSizeIdx === i ? null : i);
+                                                                            setEditSizeVal(String(r.sizeCm));
+                                                                            if (r.slopeData) {
+                                                                                setEditSlopeH1(String(r.slopeData.h1));
+                                                                                setEditSlopeH2(String(r.slopeData.h2));
+                                                                                setEditSlopeSide(r.slopeData.side);
+                                                                            }
+                                                                            setEditDirIdx(null);
+                                                                            setEditingAngleIdx(null);
+                                                                        }}
+                                                                            className={`text-sm font-black transition-transform active:scale-90 flex items-center gap-1 ${editSizeIdx === i ? 'text-brand-primary scale-110' : 'text-slate-900'}`}>
+                                                                            {r.slopeData ? <Triangle className="w-2.5 h-2.5 text-indigo-500 fill-indigo-500/20" /> : null}
                                                                             {r.sizeCm}
+                                                                        </button>
+                                                                        <span className="w-[1px] h-3 bg-slate-200" />
+                                                                        <button onClick={() => { setEditingAngleIdx(editingAngleIdx === i ? null : i); setEditAngleVal(r.angle !== null ? String(r.angle) : ''); setEditDirIdx(null); setEditSizeIdx(null); }}
+                                                                            className={`text-sm font-black transition-transform active:scale-90 ${editingAngleIdx === i ? 'text-brand-primary scale-110' : 'text-slate-400'}`}>
+                                                                            {r.angle !== null && r.angle !== undefined ? `${r.angle}°` : <RotateCcw className="w-3.5 h-3.5 opacity-50" />}
                                                                         </button>
                                                                         <button onClick={() => setCurrentRisks(prev => prev.filter((_, idx) => idx !== i))} className="text-slate-300 ml-1 active:text-rose-500"><X className="w-3 h-3" /></button>
                                                                     </div>
@@ -3080,29 +3099,76 @@ window.onload = function() {
                                                                         {editDirIdx === i && (
                                                                             <motion.div initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 10 }}
                                                                                 className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-[60] bg-white border border-slate-200 p-2 rounded-2xl shadow-2xl flex gap-1.5">
-                                                                                {DIR_GRID.map(d => (
-                                                                                    <button key={d.dir} onClick={() => commitEditDir(i, d.dir)}
-                                                                                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold transition-all active:scale-90 ${r.direction === d.dir ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400'}`}>
-                                                                                        {d.icon}
-                                                                                    </button>
-                                                                                ))}
+                                                                                <div className="grid grid-cols-3 gap-1.5">
+                                                                                    {DIR_GRID.map(d => (
+                                                                                        <button key={d.dir} onClick={() => commitEditDir(i, d.dir)}
+                                                                                            className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold transition-all active:scale-90 ${r.direction === d.dir ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                                                                                            {d.icon}
+                                                                                        </button>
+                                                                                    ))}
+                                                                                </div>
                                                                                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 translate-y-px w-3 h-3 bg-white border-r border-b border-slate-200 rotate-45" />
                                                                             </motion.div>
                                                                         )}
                                                                     </AnimatePresence>
 
-                                                                    {/* Inline Size Editor */}
+                                                                    {/* Inline Size/Slope Editor */}
                                                                     <AnimatePresence>
                                                                         {editSizeIdx === i && (
                                                                             <motion.div initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                                                                                className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-[60] bg-white border border-slate-200 p-3 rounded-2xl shadow-2xl flex flex-col gap-2 min-w-[140px]">
+                                                                                <p className="text-[8px] font-black text-slate-400 uppercase text-center">{r.slopeData ? 'Alturas Caída' : 'Nova Medida'}</p>
+                                                                                {r.slopeData ? (
+                                                                                    <div className="space-y-2">
+                                                                                        <div className="grid grid-cols-2 gap-2">
+                                                                                            <input autoFocus type="number" inputMode="decimal" step="0.1" value={editSlopeH1}
+                                                                                                onChange={e => setEditSlopeH1(e.target.value)}
+                                                                                                placeholder="H1"
+                                                                                                className="w-full bg-slate-50 border-none rounded-xl px-2 py-2 text-center font-black text-slate-900 outline-none focus:ring-2 focus:ring-brand-primary" />
+                                                                                            <input type="number" inputMode="decimal" step="0.1" value={editSlopeH2}
+                                                                                                onChange={e => setEditSlopeH2(e.target.value)}
+                                                                                                placeholder="H2"
+                                                                                                className="w-full bg-slate-50 border-none rounded-xl px-2 py-2 text-center font-black text-slate-900 outline-none focus:ring-2 focus:ring-brand-primary" />
+                                                                                        </div>
+                                                                                        <div className="flex gap-2">
+                                                                                            <button onClick={() => commitEditSlope(i, true)} className="flex-1 bg-slate-100 text-slate-400 p-2 rounded-xl text-[8px] font-black uppercase">Normal</button>
+                                                                                            <button onClick={() => commitEditSlope(i)} className="flex-1 bg-brand-primary text-white p-2 rounded-xl active:scale-90"><Check className="w-4 h-4 mx-auto" /></button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <div className="flex flex-col gap-2">
+                                                                                        <div className="flex gap-2">
+                                                                                            <input autoFocus type="number" inputMode="decimal" step="0.1" value={editSizeVal}
+                                                                                                onChange={e => setEditSizeVal(e.target.value)}
+                                                                                                onKeyDown={e => e.key === 'Enter' && commitEditSize(i)}
+                                                                                                className="w-full bg-slate-50 border-none rounded-xl px-3 py-2 text-center font-black text-slate-900 outline-none focus:ring-2 focus:ring-brand-primary" />
+                                                                                            <button onClick={() => commitEditSize(i)} className="bg-brand-primary text-white p-2 rounded-xl active:scale-90"><Check className="w-4 h-4" /></button>
+                                                                                        </div>
+                                                                                        <button onClick={() => {
+                                                                                            setEditSlopeH1(editSizeVal);
+                                                                                            setEditSlopeH2(editSizeVal);
+                                                                                            setEditSlopeSide('D');
+                                                                                            commitEditSlope(i);
+                                                                                        }} className="w-full bg-indigo-50 text-indigo-500 p-2 rounded-xl text-[8px] font-black uppercase">Mudar para Caída</button>
+                                                                                    </div>
+                                                                                )}
+                                                                                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 translate-y-px w-3 h-3 bg-white border-r border-b border-slate-200 rotate-45" />
+                                                                            </motion.div>
+                                                                        )}
+                                                                    </AnimatePresence>
+
+                                                                    {/* Inline Angle Editor */}
+                                                                    <AnimatePresence>
+                                                                        {editingAngleIdx === i && (
+                                                                            <motion.div initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 10 }}
                                                                                 className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-[60] bg-white border border-slate-200 p-3 rounded-2xl shadow-2xl flex flex-col gap-2 min-w-[120px]">
-                                                                                <p className="text-[8px] font-black text-slate-400 uppercase text-center">Nova Medida</p>
+                                                                                <p className="text-[8px] font-black text-slate-400 uppercase text-center">Ângulo (º)</p>
                                                                                 <div className="flex gap-2">
-                                                                                    <input autoFocus type="number" inputMode="decimal" step="0.1" value={editSizeVal}
-                                                                                        onChange={e => setEditSizeVal(e.target.value)}
-                                                                                        onKeyDown={e => e.key === 'Enter' && commitEditSize(i)}
+                                                                                    <input autoFocus type="number" inputMode="decimal" step="1" value={editAngleVal}
+                                                                                        onChange={e => setEditAngleVal(e.target.value)}
+                                                                                        onKeyDown={e => e.key === 'Enter' && commitEditAngle(i)}
                                                                                         className="w-full bg-slate-50 border-none rounded-xl px-3 py-2 text-center font-black text-slate-900 outline-none focus:ring-2 focus:ring-brand-primary" />
-                                                                                    <button onClick={() => commitEditSize(i)} className="bg-brand-primary text-white p-2 rounded-xl active:scale-90"><Check className="w-4 h-4" /></button>
+                                                                                    <button onClick={() => commitEditAngle(i)} className="bg-brand-primary text-white p-2 rounded-xl active:scale-90"><Check className="w-4 h-4" /></button>
                                                                                 </div>
                                                                                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 translate-y-px w-3 h-3 bg-white border-r border-b border-slate-200 rotate-45" />
                                                                             </motion.div>
@@ -3580,6 +3646,9 @@ window.onload = function() {
                             const clientPhone = (() => {
                                 const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
                                 const raw = linked?.phone || savedQuote.clientPhone || '';
+                                if (raw.trim().startsWith('+')) {
+                                    return raw.replace(/\D/g, '');
+                                }
                                 let digits = raw.replace(/\D/g, '');
                                 if (!digits) return '';
                                 if (digits.length === 10 || digits.length === 11) return `55${digits}`;
