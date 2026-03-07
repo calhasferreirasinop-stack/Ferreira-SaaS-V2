@@ -1234,11 +1234,11 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(-
 .total-row.grand .tv{font-size:18px;font-weight:900}
 @page { size: A4; margin: 0; }
 body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-.print-btn { position: fixed; top: 15px; right: 15px; z-index: 1000; background: #4338ca; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3); font-size: 13px; }
-.page { width: 210mm; min-height: 297mm; padding: 12mm; margin: 15px auto; background: white; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; box-sizing: border-box; overflow: hidden; }
+.print-btn { position: fixed; bottom: 30px; right: 30px; z-index: 1000; background: #4338ca; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; shadow: 0 10px 25px rgba(67, 56, 202, 0.4); font-size: 14px; }
+.page { width: 210mm; min-height: 297mm; padding: 12mm; margin: 15px auto; background: white; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; box-sizing: border-box; overflow: hidden; transform: scale(0.95); transform-origin: top center; }
 @media print {
-    body { background: white; }
-    .page { margin: 0; box-shadow: none; width: 210mm; height: 297mm; }
+    body { background: white; margin: 0; padding: 0; }
+    .page { margin: 0 auto; box-shadow: none; width: 210mm; height: 297mm; transform: scale(0.9); transform-origin: top center; }
     .print-btn { display: none !important; }
 }
 
@@ -1776,12 +1776,12 @@ window.onload = function() {
 
     // ── Render helpers (Mobile) ──
     const DirBtn = ({ d, active, onClick }: { d: typeof DIR_GRID[0]; active: boolean; onClick: () => void }) => (
-        <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-0.5 rounded-lg border font-black transition-all active:scale-90 w-full max-w-[56px] mx-auto aspect-square
+        <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-0.5 rounded-lg border font-black transition-all active:scale-90 w-full max-w-[48px] mx-auto aspect-square
             ${active
                 ? `bg-brand-primary border-brand-primary text-white shadow-lg shadow-blue-500/20`
                 : 'bg-white border-slate-200 text-slate-400 shadow-sm'}`}>
-            <span className="text-xs leading-none mb-0.5">{active ? <Check className="w-3 h-3" /> : d.icon}</span>
-            <span className="text-[5px] uppercase tracking-tighter text-center leading-none px-0.5">{d.label}</span>
+            <span className="text-[10px] leading-none mb-0.5">{active ? <Check className="w-3 h-3" /> : d.icon}</span>
+            <span className="text-[4px] uppercase tracking-tighter text-center leading-none px-0.5 font-bold">{d.label}</span>
         </button>
     );
 
@@ -2938,92 +2938,100 @@ window.onload = function() {
                                                     )}
                                                 </AnimatePresence>
 
-                                                {/* Step 1 & 2: Direction & Medida */}
-                                                <div className="bg-slate-50 border border-slate-200 rounded-[2rem] p-4 space-y-4 shadow-inner">
-                                                    <div className="flex items-center justify-between px-1">
-                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Direção e Medida</p>
-                                                        {sizeError && <p className="text-rose-500 text-[10px] font-black uppercase tracking-tight animate-bounce">{sizeError}</p>}
-                                                    </div>
-
-                                                    <div className="grid grid-cols-3 gap-2 w-full max-w-[240px] mx-auto">
-                                                        {[DIR_GRID[0], DIR_GRID[1], DIR_GRID[2]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
-                                                        <DirBtn key="left" d={DIR_GRID[3]} active={pendingDir === 'left'} onClick={() => selectDirection('left')} />
-
-                                                        <div className="relative group flex items-center justify-center">
-                                                            <input ref={sizeInputRef} type="number" inputMode="decimal" step="0.5" placeholder="cm"
-                                                                value={pendingSize} onChange={e => setPendingSize(e.target.value)}
-                                                                onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
-                                                                className="w-full aspect-square bg-white border-2 border-brand-primary/30 rounded-2xl text-center text-lg font-black text-slate-900 placeholder-slate-200 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all p-0" />
-                                                            {pendingSize && (
-                                                                <button onClick={handleAddRisk} className="absolute -bottom-1 -right-1 w-7 h-7 bg-brand-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-75 transition-all">
-                                                                    <Plus className="w-4 h-4 pointer-events-none" />
-                                                                </button>
-                                                            )}
+                                                {/* Step 1 & 2: Direction & Medida (SIDE BY SIDE) */}
+                                                <div className="bg-slate-50 border border-slate-200 rounded-[2rem] p-4 shadow-inner">
+                                                    <div className="flex items-start gap-4">
+                                                        {/* Left Column: Directions */}
+                                                        <div className="w-[160px] flex-shrink-0 space-y-2">
+                                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Direções</p>
+                                                            <div className="grid grid-cols-3 gap-1.5">
+                                                                {[DIR_GRID[0], DIR_GRID[1], DIR_GRID[2]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
+                                                                <DirBtn key="left" d={DIR_GRID[3]} active={pendingDir === 'left'} onClick={() => selectDirection('left')} />
+                                                                <div className="aspect-square bg-slate-200/50 rounded-lg flex items-center justify-center text-[10px] font-black text-slate-300">CM</div>
+                                                                <DirBtn key="right" d={DIR_GRID[4]} active={pendingDir === 'right'} onClick={() => selectDirection('right')} />
+                                                                {[DIR_GRID[5], DIR_GRID[6], DIR_GRID[7]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
+                                                            </div>
                                                         </div>
 
-                                                        <DirBtn key="right" d={DIR_GRID[4]} active={pendingDir === 'right'} onClick={() => selectDirection('right')} />
-                                                        {[DIR_GRID[5], DIR_GRID[6], DIR_GRID[7]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
+                                                        {/* Right Column: Medida and Modifiers */}
+                                                        <div className="flex-1 space-y-4">
+                                                            <div className="space-y-4">
+                                                                <div className="space-y-1.5 text-right">
+                                                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mr-1">Medida da Aba (CM)</p>
+                                                                    <div className="flex gap-2">
+                                                                        <div className="relative flex-1">
+                                                                            <input ref={sizeInputRef} type="number" inputMode="decimal" step="0.5" placeholder="0.00"
+                                                                                value={pendingSize} onChange={e => setPendingSize(e.target.value)}
+                                                                                onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
+                                                                                className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-center font-black text-slate-900 placeholder-slate-200 outline-none focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all pr-10" />
+                                                                            <button onClick={handleAddRisk} className="absolute right-1 top-1 bottom-1 w-10 bg-brand-primary text-white rounded-lg flex items-center justify-center shadow-md active:scale-90 transition-all">
+                                                                                <Plus className="w-5 h-5" />
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                    {sizeError && <p className="text-rose-500 text-[9px] font-black uppercase tracking-tight pr-1 animate-pulse">{sizeError}</p>}
+                                                                </div>
+
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    <button onClick={() => setIsAngle(!isAngle)} disabled={!pendingDir}
+                                                                        className={`h-11 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 border
+                                                                    ${isAngle ? 'bg-amber-50 border-amber-500 text-amber-600 shadow-sm' : 'bg-white border-slate-200 text-slate-400'}`}>
+                                                                        <RotateCcw className="w-3.5 h-3.5" /> Ângulo
+                                                                    </button>
+                                                                    <button onClick={() => { if (isLateralSlope) { setSlopeH1(''); setSlopeH2(''); } setIsLateralSlope(!isLateralSlope); }}
+                                                                        className={`h-11 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 border
+                                                                    ${isLateralSlope ? 'bg-indigo-50 border-indigo-500 text-indigo-600 shadow-sm' : 'bg-white border-slate-200 text-slate-400'}`}>
+                                                                        <Triangle className="w-3.5 h-3.5" /> Caída
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Modifiers (Angle/Slope) */}
-                                                <div className="space-y-4">
-                                                    <div className="flex flex-wrap gap-2">
-                                                        <button onClick={() => setIsAngle(!isAngle)} disabled={!pendingDir}
-                                                            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border-2
-                                                             ${isAngle ? 'bg-amber-50 border-amber-500 text-amber-600 shadow-sm' : 'bg-white border-slate-100 text-slate-400'}`}>
-                                                            <RotateCcw className="w-4 h-4" /> Ângulo
-                                                        </button>
-                                                        <button onClick={() => { if (isLateralSlope) { setSlopeH1(''); setSlopeH2(''); } setIsLateralSlope(!isLateralSlope); }}
-                                                            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border-2
-                                                             ${isLateralSlope ? 'bg-indigo-50 border-indigo-500 text-indigo-600 shadow-sm' : 'bg-white border-slate-100 text-slate-400'}`}>
-                                                            <Triangle className="w-4 h-4" /> Caída
-                                                        </button>
-                                                    </div>
 
-                                                    <AnimatePresence>
-                                                        {(isAngle || isLateralSlope) && (
-                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                                                                className="bg-white border border-slate-100 rounded-[1.5rem] p-4 space-y-4 overflow-hidden shadow-sm">
-                                                                {isAngle && (
+                                                <AnimatePresence>
+                                                    {(isAngle || isLateralSlope) && (
+                                                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                                                            className="bg-white border border-slate-100 rounded-[1.5rem] p-4 space-y-4 overflow-hidden shadow-sm">
+                                                            {isAngle && (
+                                                                <div className="flex items-center justify-between">
+                                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ângulo (º)</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <input type="number" inputMode="decimal" placeholder="45" value={pendingAngle} onChange={e => setPendingAngle(e.target.value)}
+                                                                            className="w-16 bg-slate-50 border-none rounded-lg px-3 py-1.5 text-center font-black text-slate-900 outline-none" />
+                                                                        <span className="text-slate-300 font-bold">°</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            {isLateralSlope && (
+                                                                <div className="space-y-3">
                                                                     <div className="flex items-center justify-between">
-                                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ângulo (º)</span>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <input type="number" inputMode="decimal" placeholder="45" value={pendingAngle} onChange={e => setPendingAngle(e.target.value)}
-                                                                                className="w-16 bg-slate-50 border-none rounded-lg px-3 py-1.5 text-center font-black text-slate-900 outline-none" />
-                                                                            <span className="text-slate-300 font-bold">°</span>
+                                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lado</span>
+                                                                        <div className="flex bg-slate-100 rounded-lg p-1">
+                                                                            {(['D', 'E'] as const).map(s => (
+                                                                                <button key={s} onClick={() => setSlopeSide(s)}
+                                                                                    className={`px-3 py-1 rounded-lg text-[9px] font-black transition-all ${slopeSide === s ? 'bg-slate-900 text-white' : 'text-slate-400'}`}>{s === 'D' ? 'DIR' : 'ESQ'}</button>
+                                                                            ))}
                                                                         </div>
                                                                     </div>
-                                                                )}
-                                                                {isLateralSlope && (
-                                                                    <div className="space-y-3">
-                                                                        <div className="flex items-center justify-between">
-                                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lado</span>
-                                                                            <div className="flex bg-slate-100 rounded-lg p-1">
-                                                                                {(['D', 'E'] as const).map(s => (
-                                                                                    <button key={s} onClick={() => setSlopeSide(s)}
-                                                                                        className={`px-3 py-1 rounded-lg text-[9px] font-black transition-all ${slopeSide === s ? 'bg-slate-900 text-white' : 'text-slate-400'}`}>{s === 'D' ? 'DIR' : 'ESQ'}</button>
-                                                                                ))}
-                                                                            </div>
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <div className="space-y-1">
+                                                                            <span className="text-[8px] font-black text-slate-400 uppercase">H1</span>
+                                                                            <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH1} onChange={e => setSlopeH1(e.target.value)}
+                                                                                className="w-full bg-slate-50 border-none rounded-lg p-2 text-center font-black text-slate-900 outline-none" />
                                                                         </div>
-                                                                        <div className="grid grid-cols-2 gap-2">
-                                                                            <div className="space-y-1">
-                                                                                <span className="text-[8px] font-black text-slate-400 uppercase">H1</span>
-                                                                                <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH1} onChange={e => setSlopeH1(e.target.value)}
-                                                                                    className="w-full bg-slate-50 border-none rounded-lg p-2 text-center font-black text-slate-900 outline-none" />
-                                                                            </div>
-                                                                            <div className="space-y-1">
-                                                                                <span className="text-[8px] font-black text-slate-400 uppercase">H2</span>
-                                                                                <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH2} onChange={e => setSlopeH2(e.target.value)}
-                                                                                    className="w-full bg-slate-50 border-none rounded-lg p-2 text-center font-black text-slate-900 outline-none" />
-                                                                            </div>
+                                                                        <div className="space-y-1">
+                                                                            <span className="text-[8px] font-black text-slate-400 uppercase">H2</span>
+                                                                            <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH2} onChange={e => setSlopeH2(e.target.value)}
+                                                                                className="w-full bg-slate-50 border-none rounded-lg p-2 text-center font-black text-slate-900 outline-none" />
                                                                         </div>
                                                                     </div>
-                                                                )}
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </div>
+                                                                </div>
+                                                            )}
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
 
                                                 {/* Risks list */}
                                                 {currentRisks.length > 0 && (
@@ -3559,7 +3567,7 @@ window.onload = function() {
                                                 </button>
                                                 <button onClick={() => setStep('summary')}
                                                     className="h-16 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
-                                                    <RotateCcw className="w-5 h-5 mx-auto mb-1" /> Resumo
+                                                    <RotateCcw className="w-5 h-5 mx-auto mb-1" /> voltar
                                                 </button>
                                             </div>
 
