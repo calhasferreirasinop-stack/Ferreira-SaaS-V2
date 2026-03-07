@@ -9,27 +9,27 @@ export default function BottomNav() {
         {
             label: 'Orçamento',
             icon: Calculator,
-            path: '/orcamento',
+            path: '/app/orcamentos',
         },
         {
             label: 'Central',
             icon: LayoutGrid,
-            path: '/admin',
+            path: '/app/gestao-orcamentos',
         },
         {
             label: 'Financeiro',
             icon: ClipboardList,
-            path: '/admin?tab=revenue',
+            path: '/app/dashboard-financeiro',
         },
         {
             label: 'Receber',
             icon: DollarSign,
-            path: '/admin?tab=receivables',
+            path: '/app/contas-a-receber',
         },
         {
             label: 'Parâmetros',
             icon: UserCircle,
-            path: '/admin?tab=reports',
+            path: '/app/parametros',
         },
     ];
 

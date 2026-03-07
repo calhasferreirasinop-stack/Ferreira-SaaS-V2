@@ -109,7 +109,7 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: '📐 Orçamento', path: '/orcamento' },
+    { name: '📐 Orçamento', path: '/app/orcamentos' },
     // === MODO BETA: links públicos ocultos ===
     // { name: 'Início', path: '/' },
     // { name: 'Serviços', path: '/servicos' },
@@ -187,7 +187,7 @@ export default function Navbar() {
                 </button>
                 {showUserMenu && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <Link to="/admin" onClick={() => setShowUserMenu(false)}
+                    <Link to="/app/gestao-orcamentos" onClick={() => setShowUserMenu(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition-colors">
                       <UserIcon className="w-4 h-4" /> Central do Usuário
                     </Link>
