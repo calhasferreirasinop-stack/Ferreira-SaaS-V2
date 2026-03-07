@@ -1604,11 +1604,14 @@ tr:nth-child(even) td{background:#f8fafc}
 .ct{font-weight:900;color:#111;font-size:9px;border-top:1px solid #94a3b8;margin-top:2px;padding-top:2px;display:flex;gap:3px;align-items:center;}
 @media print{
   *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  html, body { width: 210mm; height: 297mm; margin: 0; padding: 10mm; }
-  body{padding:6px}
+  html, body { width: 210mm; margin: 0; padding: 0; }
+  body { padding: 10mm; }
   .bends-grid{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:5px !important;}
-  .bend-card{page-break-inside:avoid !important;break-inside:avoid !important;}
+  .bend-card{page-break-inside:avoid !important;break-inside:avoid !important;margin-bottom:5px;}
   .bc-img{max-height:130px !important;}
+  h1, h2, h3, p { page-break-after: avoid; }
+  table { page-break-inside: auto; }
+  tr { page-break-inside: avoid; page-break-after: auto; }
 }
 </style></head><body>
 ${settings.reportLogo || settings.reportCompanyName ? `<div class="report-header">${settings.reportLogo ? `<img src="${settings.reportLogo}" alt="Logo"/>` : ''}<div><strong style="font-size:16px">${settings.reportCompanyName || ''}</strong><div class="info">${[settings.reportPhone, settings.reportEmail].filter(Boolean).join(' | ')}${settings.reportAddress ? `<br/>${settings.reportAddress}` : ''}${settings.reportHeaderText ? `<br/>${settings.reportHeaderText}` : ''}</div></div></div>` : ''}
@@ -1774,12 +1777,12 @@ window.onload = function() {
 
     // ── Render helpers (Mobile) ──
     const DirBtn = ({ d, active, onClick }: { d: typeof DIR_GRID[0]; active: boolean; onClick: () => void }) => (
-        <button onClick={onClick} className={`relative aspect-square flex flex-col items-center justify-center p-1.5 rounded-2xl border-2 font-black transition-all active:scale-90
+        <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-1 rounded-xl border font-black transition-all active:scale-90 w-full aspect-square
             ${active
-                ? `bg-brand-primary border-brand-primary text-white shadow-xl shadow-blue-500/30`
+                ? `bg-brand-primary border-brand-primary text-white shadow-lg shadow-blue-500/20`
                 : 'bg-white border-slate-200 text-slate-400 shadow-sm'}`}>
-            <span className="text-xl leading-none mb-0.5">{active ? <Check className="w-4 h-4" /> : d.icon}</span>
-            <span className="text-[7px] uppercase tracking-tighter text-center">{d.label}</span>
+            <span className="text-lg leading-none mb-0.5">{active ? <Check className="w-4 h-4" /> : d.icon}</span>
+            <span className="text-[6px] uppercase tracking-tighter text-center leading-none">{d.label}</span>
         </button>
     );
 
@@ -2812,8 +2815,9 @@ window.onload = function() {
                                         </div>
                                         {selectedProductType === 'product' && selectedProductId && (
                                             <button onClick={() => setShowLibrary(v => !v)}
-                                                className="w-12 h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center active:scale-95 transition-all">
-                                                <List className="w-6 h-6" />
+                                                className="h-10 px-4 bg-slate-50 text-slate-500 rounded-xl flex items-center gap-2 active:scale-95 transition-all border border-slate-200">
+                                                <List className="w-5 h-5 text-slate-400" />
+                                                <span className="text-xs font-black uppercase tracking-widest">Dobras</span>
                                             </button>
                                         )}
                                     </div>
@@ -2950,6 +2954,7 @@ window.onload = function() {
                                                             <input
                                                                 ref={sizeInputRef}
                                                                 type="number"
+                                                                inputMode="decimal"
                                                                 step="0.5"
                                                                 placeholder="cm"
                                                                 value={pendingSize}
@@ -2997,7 +3002,7 @@ window.onload = function() {
                                                                         <div className="flex items-center justify-between">
                                                                             <span className="text-[10px] font-black text-slate-400 uppercase">Ângulo (º)</span>
                                                                             <div className="flex items-center gap-2">
-                                                                                <input type="number" placeholder="45" value={pendingAngle} onChange={e => setPendingAngle(e.target.value)}
+                                                                                <input type="number" inputMode="decimal" placeholder="45" value={pendingAngle} onChange={e => setPendingAngle(e.target.value)}
                                                                                     className="w-20 bg-white border-none rounded-xl px-4 py-2 text-center font-black text-slate-900 outline-none shadow-sm" />
                                                                                 <span className="text-slate-300 font-bold">°</span>
                                                                             </div>
@@ -3019,12 +3024,12 @@ window.onload = function() {
                                                                             <div className="grid grid-cols-2 gap-3">
                                                                                 <div className="space-y-2">
                                                                                     <span className="text-[8px] font-black text-slate-400 uppercase ml-1">H1</span>
-                                                                                    <input type="number" step="0.1" placeholder="0.0" value={slopeH1} onChange={e => setSlopeH1(e.target.value)}
+                                                                                    <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH1} onChange={e => setSlopeH1(e.target.value)}
                                                                                         className="w-full bg-white border-none rounded-xl px-4 py-2 text-center font-black text-slate-900 outline-none shadow-sm" />
                                                                                 </div>
                                                                                 <div className="space-y-2">
                                                                                     <span className="text-[8px] font-black text-slate-400 uppercase ml-1">H2</span>
-                                                                                    <input type="number" step="0.1" placeholder="0.0" value={slopeH2} onChange={e => setSlopeH2(e.target.value)}
+                                                                                    <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH2} onChange={e => setSlopeH2(e.target.value)}
                                                                                         className="w-full bg-white border-none rounded-xl px-4 py-2 text-center font-black text-slate-900 outline-none shadow-sm" />
                                                                                 </div>
                                                                             </div>
@@ -3038,7 +3043,7 @@ window.onload = function() {
                                                     <div className="space-y-4">
                                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Medida da Aba (cm)</p>
                                                         <div className="flex gap-2">
-                                                            <input ref={sizeInputRef} type="number" min="1" max="120" step="0.5"
+                                                            <input ref={sizeInputRef} type="number" inputMode="decimal" min="1" max="120" step="0.5"
                                                                 placeholder={isLateralSlope ? "Calculado" : "0.00"}
                                                                 value={isLateralSlope ? "" : pendingSize} onChange={e => { setPendingSize(e.target.value); setSizeError(''); }}
                                                                 onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
@@ -3061,10 +3066,10 @@ window.onload = function() {
                                                     <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Riscos — clique na seta para mudar direção, no valor para editar cm:</p>
                                                     <div className="flex flex-wrap gap-2">
                                                         {currentRisks.map((r, i) => (
-                                                            <div key={i} className="relative flex items-center gap-1 px-3 py-1.5 bg-white/10 rounded-xl border border-white/20">
+                                                            <div key={i} className="relative flex items-center gap-1 px-3 py-1.5 bg-slate-100 rounded-xl border border-slate-300 shadow-sm">
                                                                 {/* Direction edit */}
                                                                 <button onClick={() => setEditDirIdx(editDirIdx === i ? null : i)}
-                                                                    className="text-white hover:text-yellow-300 transition-colors cursor-pointer text-base" title="Editar direção">
+                                                                    className="text-slate-700 hover:text-brand-primary transition-colors cursor-pointer text-base" title="Editar direção">
                                                                     {DIRECTION_ICONS[r.direction]}
                                                                 </button>
                                                                 {editDirIdx === i && (
@@ -3161,8 +3166,8 @@ window.onload = function() {
                                                                         </div>
                                                                     ) : (
                                                                         <button onClick={() => { setEditSizeIdx(i); setEditSizeVal(String(r.sizeCm)); }}
-                                                                            className="text-white font-bold text-sm hover:text-blue-300 transition-colors cursor-pointer" title="Editar cm">
-                                                                            <PenLine className="w-3 h-3 inline mr-0.5 opacity-50" />{r.sizeCm}
+                                                                            className="text-slate-800 font-bold text-sm hover:text-brand-primary transition-colors cursor-pointer" title="Editar cm">
+                                                                            <PenLine className="w-3 h-3 inline mr-0.5 opacity-50 text-slate-400" />{r.sizeCm}
                                                                         </button>
                                                                     )
                                                                 )}

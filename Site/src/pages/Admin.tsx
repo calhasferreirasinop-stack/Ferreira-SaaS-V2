@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare, Menu, X, Factory } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -11,6 +12,7 @@ import LogTab from '../components/admin/LogTab';
 import ClientsTab from '../components/admin/ClientsTab';
 import ProductsTab from '../components/admin/ProductsTab';
 import ProductionTab from '../components/admin/ProductionTab';
+import ReportTab from '../components/admin/ReportTab';
 type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin';
 
 export default function Admin() {
