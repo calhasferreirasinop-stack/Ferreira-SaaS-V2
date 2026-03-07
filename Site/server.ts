@@ -767,6 +767,70 @@ app.delete('/api/users/:id', requireAdmin, async (req: any, res) => {
 });
 
 // =====================
+// COMPANIES Routes (Master Only)
+// =====================
+app.get('/api/companies', requireMaster, async (req: any, res) => {
+  const { data, error } = await supabase.from('companies').select('*').order('created_at', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.post('/api/companies', requireMaster, async (req: any, res) => {
+  const { name, business_type, cnpj, email, phone } = req.body;
+  if (!name) return res.status(400).json({ error: 'Nome da empresa é obrigatório' });
+  const { data, error } = await supabase.from('companies').insert({ name, business_type, cnpj, email, phone }).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+
+  // Seed default products for new company
+  await seedDefaultProducts(data.id);
+
+  res.json(data);
+});
+
+app.put('/api/companies/:id', requireMaster, async (req: any, res) => {
+  const { name, business_type, cnpj, email, phone, settings } = req.body;
+  const { data, error } = await supabase.from('companies').update({ name, business_type, cnpj, email, phone, settings }).eq('id', req.params.id).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.delete('/api/companies/:id', requireMaster, async (req: any, res) => {
+  const { error } = await supabase.from('companies').delete().eq('id', req.params.id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// =====================
+// SUBSCRIPTIONS / PLANS Routes (Master Only)
+// =====================
+app.get('/api/subscriptions', requireMaster, async (req: any, res) => {
+  const { data, error } = await supabase.from('subscriptions').select('*').order('created_at', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
+});
+
+app.post('/api/subscriptions', requireMaster, async (req: any, res) => {
+  const { company_id, plan_id, status, current_period_end } = req.body;
+  if (!company_id || !plan_id) return res.status(400).json({ error: 'Empresa e Plano são obrigatórios' });
+  const { data, error } = await supabase.from('subscriptions').insert({ company_id, plan_id, status: status || 'trial', current_period_end }).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.put('/api/subscriptions/:id', requireMaster, async (req: any, res) => {
+  const { plan_id, status, current_period_end } = req.body;
+  const { data, error } = await supabase.from('subscriptions').update({ plan_id, status, current_period_end, updated_at: new Date().toISOString() }).eq('id', req.params.id).select().single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.delete('/api/subscriptions/:id', requireMaster, async (req: any, res) => {
+  const { error } = await supabase.from('subscriptions').delete().eq('id', req.params.id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
+// =====================
 // CLIENTS Routes (SaaS V2 Map: /api/clients -> clients table)
 // =====================
 app.get('/api/clients', authenticate, async (req: any, res) => {

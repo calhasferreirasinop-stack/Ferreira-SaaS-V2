@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare, Menu, X, Factory, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import UsersTab from '../components/admin/UsersTab';
+import CompaniesTab from '../components/admin/CompaniesTab';
+import PlansTab from '../components/admin/PlansTab';
 import QuotesTab from '../components/admin/QuotesTab';
 import InventoryTab from '../components/admin/InventoryTab';
 import FinancialTab from '../components/admin/FinancialTab';
@@ -14,12 +16,12 @@ import ProductsTab from '../components/admin/ProductsTab';
 import ProductionTab from '../components/admin/ProductionTab';
 import ReportTab from '../components/admin/ReportTab';
 import { WelcomeTour } from '../components/admin/WelcomeTour';
-type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin';
+type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin' | 'companies' | 'plans' | 'site' | 'stats';
 
 export default function Admin() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState<TabId>('quotes'); // default; adjusted by useEffect once user loads
+  const [activeTab, setActiveTab] = useState<TabId>('stats'); // default; adjusted by useEffect once user loads
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [settings, setSettings] = useState<any>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -128,23 +130,37 @@ export default function Admin() {
   const showToast = (message: string, type: 'success' | 'error') => setToast({ show: true, message, type });
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tab = params.get('tab') as TabId;
-    // Map alternate names if needed
-    const tabMap: Record<string, TabId> = {
-      'revenue': 'financial',
-      'clients': 'clients',
-      'products': 'products',
-      'settings': 'settings'
+    const path = location.pathname;
+
+    // Map paths to tab IDs
+    const pathMap: Record<string, TabId> = {
+      '/app/clientes': 'clients',
+      '/app/produtos': 'products',
+      '/app/gestao-orcamentos': 'quotes',
+      '/app/producao': 'production_admin',
+      '/app/estoque': 'inventory',
+      '/app/dashboard-financeiro': 'financial',
+      '/app/contas-a-receber': 'receivables',
+      '/app/parametros': 'reports',
+      '/app/logs': 'logs',
+      '/site/geral': 'settings',
+      '/site/servicos': 'services',
+      '/site/blog': 'posts',
+      '/site/galeria': 'gallery',
+      '/site/depoimentos': 'testimonials'
     };
-    if (tab && tabMap[tab]) {
-      setActiveTab(tabMap[tab]);
-    } else if (tab && (['settings', 'services', 'posts', 'gallery', 'testimonials', 'users', 'quotes', 'inventory', 'financial', 'receivables', 'reports', 'logs', 'clients', 'products', 'production_admin'] as string[]).includes(tab)) {
-      setActiveTab(tab as TabId);
+
+    if (pathMap[path]) {
+      setActiveTab(pathMap[path]);
     } else {
-      setActiveTab('quotes');
+      // Handle admin paths
+      if (path.includes('/admin/usuarios')) setActiveTab('users');
+      else if (path.includes('/admin/site')) setActiveTab('site');
+      else if (path.includes('/admin/planos')) setActiveTab('plans');
+      else if (path.includes('/admin/empresas')) setActiveTab('companies');
+      else setActiveTab('stats'); // Default for admin if no specific path matches
     }
-  }, [location.search]);
+  }, [location.pathname]);
 
   useEffect(() => { checkAuth(); fetchPixKeys(); fetchCompanies(); }, []);
 
@@ -367,28 +383,32 @@ export default function Admin() {
 
 
   const allTabs = [
-    { id: 'settings', label: 'Geral', icon: Settings, show: isAdmin },
-    { id: 'services', label: 'Serviços', icon: Hammer, show: isAdmin },
-    { id: 'posts', label: 'Blog', icon: FileText, show: isAdmin },
-    { id: 'gallery', label: 'Galeria', icon: LayoutGrid, show: isAdmin },
-    { id: 'testimonials', label: 'Depoimentos', icon: Star, show: isAdmin },
-    { id: 'clients', label: 'Clientes', icon: Users, show: true },
-    { id: 'products', label: 'Produtos', icon: Package, show: true },
-    { id: 'users', label: 'Usuários', icon: Users, show: isAdmin },
-    { id: 'quotes', label: 'Gestão de Orçamentos', icon: ClipboardList, show: true, badge: pendingCount },
-    { id: 'production_admin', label: 'Produção', icon: Factory, show: true },
-    { id: 'inventory', label: 'Estoque', icon: Package, show: isAdmin },
-    { id: 'financial', label: 'Dashboard Financeiro', icon: TrendingUp, show: isAdmin },
-    { id: 'receivables', label: 'Contas a Receber', icon: DollarSign, show: isAdmin },
-    { id: 'reports', label: 'Parâmetros', icon: FileText, show: isAdmin },
-    { id: 'logs', label: 'Logs', icon: Crown, show: isMaster },
+    { id: 'stats', label: 'Dashboard', icon: TrendingUp, show: true, path: '/admin/dashboard' },
+    { id: 'clients', label: 'Clientes', icon: Users, show: true, path: '/app/clientes' },
+    { id: 'products', label: 'Produtos', icon: Package, show: true, path: '/app/produtos' },
+    { id: 'quotes', label: 'Gestão de Orçamentos', icon: ClipboardList, show: true, badge: pendingCount, path: '/app/gestao-orcamentos' },
+    { id: 'production_admin', label: 'Produção', icon: Factory, show: true, path: '/app/producao' },
+    { id: 'inventory', label: 'Estoque', icon: Package, show: isAdmin, path: '/app/estoque' },
+    { id: 'financial', label: 'Dashboard Financeiro', icon: TrendingUp, show: isAdmin, path: '/app/dashboard-financeiro' },
+    { id: 'receivables', label: 'Contas a Receber', icon: DollarSign, show: isAdmin, path: '/app/contas-a-receber' },
+    { id: 'reports', label: 'Parâmetros', icon: FileText, show: isAdmin, path: '/app/parametros' },
+    { id: 'users', label: 'Usuários', icon: Users, show: isAdmin, path: '/admin/usuarios' },
+    { id: 'companies', label: 'Empresas', icon: Factory, show: isMaster, path: '/admin/empresas' },
+    { id: 'plans', label: 'Planos', icon: Crown, show: isMaster, path: '/admin/planos' },
+    { id: 'site', label: 'Site', icon: LayoutGrid, show: isAdmin, path: '/admin/site' },
+    { id: 'logs', label: 'Logs', icon: Crown, show: isMaster, path: '/app/logs' },
+    { id: 'settings', label: 'Geral', icon: Settings, show: isAdmin, path: '/site/geral' },
+    { id: 'services', label: 'Serviços', icon: Hammer, show: isAdmin, path: '/site/servicos' },
+    { id: 'posts', label: 'Blog', icon: FileText, show: isAdmin, path: '/site/blog' },
+    { id: 'gallery', label: 'Galeria', icon: LayoutGrid, show: isAdmin, path: '/site/galeria' },
+    { id: 'testimonials', label: 'Depoimentos', icon: Star, show: isAdmin, path: '/site/depoimentos' },
   ].filter(t => t.show);
 
   const inputCls = 'w-full bg-slate-50 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-brand-primary transition-all outline-none text-sm';
   const btnPrimary = 'bg-brand-primary text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-brand-primary/20 cursor-pointer';
 
   return (
-    <div className="pt-20 md:pt-32 pb-24 bg-slate-50 min-h-screen">
+    <div className="bg-slate-50 min-h-screen">
       {/* Toast */}
       <AnimatePresence>
         {toast?.show && (
@@ -399,154 +419,8 @@ export default function Admin() {
         )}
       </AnimatePresence>
 
-      {/* Mobile Top Bar (Native App Feel) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-[150] bg-slate-900/95 backdrop-blur-xl border-b border-white/5 px-4 pt-[env(safe-area-inset-top)] flex items-center justify-between h-[calc(64px+env(safe-area-inset-top))]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center shadow-lg shadow-brand-primary/30">
-            <Hammer className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">CalhaFlow</p>
-            <p className="text-sm font-bold text-white truncate max-w-[150px]">{currentUser?.name || currentUser?.username}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {pendingCount > 0 && (
-            <div className="bg-orange-500 text-white text-[10px] font-black px-2 py-1 rounded-full animate-pulse">
-              {pendingCount}
-            </div>
-          )}
-          <button onClick={() => setMobileNavOpen(true)}
-            className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl border border-white/10 active:scale-95 transition-all">
-            <Menu className="w-5 h-5 text-white" />
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Nav Drawer (Premium Native Feel) */}
-      <AnimatePresence>
-        {mobileNavOpen && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[160] md:hidden"
-              onClick={() => setMobileNavOpen(false)} />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[80vw] bg-slate-900 z-[170] md:hidden flex flex-col shadow-2xl border-l border-white/5">
-              <div className="flex items-center justify-between px-6 py-8 border-b border-white/5">
-                <div>
-                  <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.2em] mb-1">MENU PRINCIPAL</p>
-                  <p className="text-lg font-bold text-white">{currentUser?.name || currentUser?.username}</p>
-                </div>
-                <button onClick={() => setMobileNavOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl border border-white/10">
-                  <X className="w-5 h-5 text-white" />
-                </button>
-              </div>
-              <nav className="flex-1 overflow-y-auto p-4 space-y-2">
-                {allTabs.map((tab: any) => (
-                  <button key={tab.id} onClick={() => { setActiveTab(tab.id as TabId); setMobileNavOpen(false); }}
-                    className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-[13px] font-bold transition-all active:scale-[0.98]
-                      ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-xl shadow-brand-primary/20' : 'text-white/60 hover:bg-white/5'}`}>
-                    <div className={clsx(
-                      "w-8 h-8 rounded-lg flex items-center justify-center",
-                      activeTab === tab.id ? "bg-white/20" : "bg-white/5 text-brand-primary"
-                    )}>
-                      <tab.icon className="w-4 h-4" />
-                    </div>
-                    <span className="flex-1 text-left">{tab.label}</span>
-                    {tab.badge > 0 && (
-                      <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-white text-brand-primary' : 'bg-brand-primary text-white'}`}>
-                        {tab.badge}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </nav>
-              <div className="p-6 border-t border-white/5">
-                <button onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-sm font-bold text-rose-400 bg-rose-400/10 border border-rose-400/20 active:scale-95 transition-all">
-                  <LogOut className="w-4 h-4" /> Sair da conta
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar — desktop only */}
-          <aside className="hidden md:block md:w-64 shrink-0">
-            <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 sticky top-32">
-              <div className="px-4 mb-4">
-                <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">
-                  Central do Usuário
-                  {isMaster && <span className="flex items-center gap-1 text-amber-500 text-xs"><Crown className="w-3 h-3" />Master</span>}
-                </h2>
-                <p className="text-xs text-slate-500 mt-1 truncate">{currentUser?.name || currentUser?.username}</p>
-              </div>
-              <nav className="space-y-1">
-                {/* SITE MENUS */}
-                <div className="mb-2">
-                  <button
-                    onClick={() => setShowSiteMenus(!showSiteMenus)}
-                    className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                  >
-                    <span>Conteúdo do Site</span>
-                    <motion.span animate={{ rotate: showSiteMenus ? 0 : -90 }}>
-                      <ChevronDown className="w-3 h-3" />
-                    </motion.span>
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {showSiteMenus && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden space-y-1"
-                      >
-                        {allTabs.filter(t => ['settings', 'services', 'posts', 'gallery', 'testimonials'].includes(t.id)).map((tab: any) => (
-                          <button key={tab.id} onClick={() => setActiveTab(tab.id as TabId)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer
-                              ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-slate-600 hover:bg-slate-50'}`}>
-                            <tab.icon className="w-4 h-4" />
-                            <span className="flex-1 text-left">{tab.label}</span>
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* MAIN MENUS */}
-                <div className="space-y-1">
-                  {allTabs.filter(t => !['settings', 'services', 'posts', 'gallery', 'testimonials'].includes(t.id)).map((tab: any) => (
-                    <button key={tab.id} onClick={() => setActiveTab(tab.id as TabId)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer
-                        ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-slate-600 hover:bg-slate-50'}`}>
-                      <tab.icon className="w-4 h-4" />
-                      <span className="flex-1 text-left">{tab.label}</span>
-                      {tab.badge > 0 && (
-                        <span className={`text-xs font-black px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-white text-brand-primary' : 'bg-orange-500 text-white'}`}>
-                          {tab.badge}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="pt-4 mt-4 border-t border-slate-100">
-                  <button onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-all cursor-pointer">
-                    <LogOut className="w-4 h-4" /> Sair
-                  </button>
-                </div>
-              </nav>
-            </div>
-          </aside>
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col gap-8">
           {/* Content */}
           <main className="flex-grow min-w-0">
             <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-4 sm:p-6 md:p-12 shadow-sm border border-slate-100">
@@ -779,6 +653,17 @@ export default function Admin() {
                 <UsersTab users={users} currentUser={currentUser} onSave={() => fetchData(true)} showToast={showToast} />
               )}
 
+              {/* ─── PLANS ─── */}
+              {activeTab === 'plans' && isMaster && (
+                <PlansTab showToast={showToast} />
+              )}
+
+              {/* ─── COMPANIES ─── */}
+              {activeTab === 'companies' && isMaster && (
+                <CompaniesTab showToast={showToast} />
+              )}
+
+
               {/* ─── CLIENTS ─── */}
               {activeTab === 'clients' && (
                 <ClientsTab showToast={showToast} />
@@ -905,10 +790,12 @@ export default function Admin() {
         )}
       </AnimatePresence>
 
-      {currentUser && currentUser.welcomeTourSeen === false && (
-        <WelcomeTour onComplete={handleCompleteTour} />
-      )}
-    </div>
+      {
+        currentUser && currentUser.welcomeTourSeen === false && (
+          <WelcomeTour onComplete={handleCompleteTour} />
+        )
+      }
+    </div >
   );
 }
 
