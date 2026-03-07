@@ -143,8 +143,60 @@ export default function ReceivablesTab({ showToast }: Props) {
                 </div>
             </div>
 
-            {/* LISTAGEM */}
-            <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+            {/* LISTAGEM - Card View (Mobile) */}
+            <div className="md:hidden space-y-4">
+                {loading ? (
+                    <div className="text-center py-8"><div className="w-6 h-6 border-4 border-brand-primary border-t-transparent flex rounded-full animate-spin mx-auto" /></div>
+                ) : filtered.length === 0 ? (
+                    <div className="text-center py-12 text-slate-400 font-medium">Nenhuma conta encontrada.</div>
+                ) : (
+                    filtered.map(r => (
+                        <div key={r.id} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="font-black text-slate-900 leading-tight">{r.client?.name || 'Cliente Removido'}</p>
+                                    <p className="text-[10px] text-slate-400 font-mono uppercase tracking-wider">#{String(r.estimate?.id).substring(0, 8)}</p>
+                                </div>
+                                {getStatusBadge(r.status)}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="bg-slate-50 p-2 rounded-lg">
+                                    <p className="text-slate-400 uppercase font-black text-[9px] mb-0.5">Total</p>
+                                    <p className="font-bold text-slate-700">{fmt(r.valor_total)}</p>
+                                </div>
+                                <div className="bg-slate-50 p-2 rounded-lg">
+                                    <p className="text-slate-400 uppercase font-black text-[9px] mb-0.5">Pago</p>
+                                    <p className="font-bold text-green-600">{fmt(r.valor_pago)}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                                <div>
+                                    <p className="text-slate-400 uppercase font-black text-[9px] mb-0.5">Restante</p>
+                                    <p className="text-lg font-black text-brand-primary">{fmt(r.valor_restante)}</p>
+                                    <p className="text-[10px] text-slate-500 font-bold flex items-center gap-1 mt-1">
+                                        <Calendar className="w-3 h-3 text-slate-300" /> Venc: {r.data_vencimento ? new Date(r.data_vencimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '—'}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setPayModalAccount(r);
+                                        setPayForm({ ...payForm, valor_pago: String(r.valor_restante) });
+                                    }}
+                                    disabled={r.status === 'pago'}
+                                    className="bg-brand-primary text-white px-6 py-3 border-none rounded-xl text-xs font-black uppercase tracking-widest hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95"
+                                >
+                                    Pagar
+                                </button>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            {/* LISTAGEM - Table View (Desktop) */}
+            <div className="hidden md:block bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-bold uppercase">

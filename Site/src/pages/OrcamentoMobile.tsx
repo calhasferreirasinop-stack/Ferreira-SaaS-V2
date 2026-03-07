@@ -1227,22 +1227,16 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(-
 .cond-label{color:var(--muted);font-weight:500}
 .cond-val{font-weight:700;color:var(--text);text-align:right;max-width:55%}
 .total-block{background:linear-gradient(135deg,var(--brand-dark) 0%,var(--brand-mid) 100%);border-radius:12px;padding:24px;color:#fff;box-shadow:0 8px 24px rgba(26,86,219,.3)}
-.total-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:13px}
-.total-row:last-child{border-bottom:none;padding-top:16px;margin-top:6px}
-.total-row .tl{color:rgba(255,255,255,.7);font-weight:500}
-.total-row .tv{font-weight:700;font-size:14px}
-.total-row.grand .tl{font-size:14px;font-weight:700;color:#fff}
-.total-row.grand .tv{font-size:28px;font-weight:900;color:#4ade80;letter-spacing:-.02em;line-height:1}
-.total-row.discount .tv{color:#fca5a5}
-.notes-block{background:#fffbeb;border:1px solid #fde68a;border-left:4px solid #f59e0b;border-radius:8px;padding:14px 18px;margin-bottom:28px}
-.notes-block .notes-label{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#92400e;margin-bottom:5px}
-.notes-block .notes-text{font-size:12.5px;color:#78350f;line-height:1.6;white-space:pre-wrap}
-.doc-footer{border-top:1.5px solid var(--border);padding-top:24px;margin-top:8px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
-.footer-left .footer-text{font-size:12px;color:var(--muted);font-style:italic;line-height:1.5;max-width:340px}
-.footer-left .company-sig{font-size:13px;font-weight:800;color:var(--brand-dark);margin-top:6px}
-.sig-area{text-align:center}
-.sig-line{width:180px;border-bottom:1.5px solid #94a3b8;margin-bottom:6px}
-.sig-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+@page { size: A4; margin: 0; }
+body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+.print-btn { position: fixed; top: 20px; right: 20px; z-index: 1000; background: #4338ca; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3); }
+.page { width: 210mm; min-height: 297mm; padding: 20mm; margin: 20px auto; background: white; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; box-sizing: border-box; overflow: hidden; }
+@media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; width: 210mm; height: 297mm; }
+    .print-btn { display: none; }
+}
+${printStylesV2}
 </style>
 </head>
 <body>
@@ -1604,9 +1598,8 @@ tr:nth-child(even) td{background:#f8fafc}
 .cv{color:#1e40af;}
 .ct{font-weight:900;color:#111;font-size:9px;border-top:1px solid #94a3b8;margin-top:2px;padding-top:2px;display:flex;gap:3px;align-items:center;}
 @media print{
-  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-  html, body { width: 210mm; margin: 0; padding: 0; }
-  body { padding: 10mm; }
+  html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; }
+  body { padding: 10mm; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
   .bends-grid{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:5px !important;}
   .bend-card{page-break-inside:avoid !important;break-inside:avoid !important;margin-bottom:5px;}
   .bc-img{max-height:130px !important;}
@@ -1614,7 +1607,7 @@ tr:nth-child(even) td{background:#f8fafc}
   table { page-break-inside: auto; }
   tr { page-break-inside: avoid; page-break-after: auto; }
 }
-</style></head><body>
+</style></head><body style="width:210mm; margin: 0 auto; min-height: 297mm; background: white; padding: 20px; box-sizing: border-box; box-shadow: 0 0 20px rgba(0,0,0,0.1);">
 ${settings.reportLogo || settings.reportCompanyName ? `<div class="report-header">${settings.reportLogo ? `<img src="${settings.reportLogo}" alt="Logo"/>` : ''}<div><strong style="font-size:16px">${settings.reportCompanyName || ''}</strong><div class="info">${[settings.reportPhone, settings.reportEmail].filter(Boolean).join(' | ')}${settings.reportAddress ? `<br/>${settings.reportAddress}` : ''}${settings.reportHeaderText ? `<br/>${settings.reportHeaderText}` : ''}</div></div></div>` : ''}
 <h1>Orçamento #${q.id} — ${settings.reportCompanyName || 'Ferreira Calhas'}</h1>
 <p>Cliente: <b>${q.clientName || ''}</b>${q.notes ? ` | Obs: ${q.notes}` : ''}</p>
@@ -1778,11 +1771,11 @@ window.onload = function() {
 
     // ── Render helpers (Mobile) ──
     const DirBtn = ({ d, active, onClick }: { d: typeof DIR_GRID[0]; active: boolean; onClick: () => void }) => (
-        <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-0.5 rounded-lg border font-black transition-all active:scale-90 w-full aspect-square
+        <button onClick={onClick} className={`relative flex flex-col items-center justify-center p-0.5 rounded-lg border font-black transition-all active:scale-90 w-full max-w-[56px] mx-auto aspect-square
             ${active
                 ? `bg-brand-primary border-brand-primary text-white shadow-lg shadow-blue-500/20`
                 : 'bg-white border-slate-200 text-slate-400 shadow-sm'}`}>
-            <span className="text-sm leading-none mb-0.5">{active ? <Check className="w-3 h-3" /> : d.icon}</span>
+            <span className="text-xs leading-none mb-0.5">{active ? <Check className="w-3 h-3" /> : d.icon}</span>
             <span className="text-[5px] uppercase tracking-tighter text-center leading-none px-0.5">{d.label}</span>
         </button>
     );
@@ -3739,18 +3732,23 @@ window.onload = function() {
                                                 className="h-16 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
                                                 <Plus className="w-5 h-5 mx-auto mb-1" /> Novo
                                             </button>
-                                            <button onClick={() => {
-                                                handleResetQuote();
-                                                setBends([]);
-                                                setCurrentRisks([]);
-                                                setEditingQuoteId(null);
-                                                setShowMyQuotes(true);
-                                                setStep('bends');
-                                            }}
-                                                className="h-16 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest active:bg-slate-50 transition-all">
-                                                <List className="w-5 h-5 mx-auto mb-1" /> Histórico
+                                            <button onClick={() => setStep('summary')}
+                                                className="h-16 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                                                <RotateCcw className="w-5 h-5 mx-auto mb-1" /> Resumo
                                             </button>
                                         </div>
+
+                                        <button onClick={() => {
+                                            handleResetQuote();
+                                            setBends([]);
+                                            setCurrentRisks([]);
+                                            setEditingQuoteId(null);
+                                            setShowMyQuotes(true);
+                                            setStep('bends');
+                                        }}
+                                            className="w-full h-16 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest active:bg-slate-50 transition-all">
+                                            <List className="w-5 h-5 mx-auto mb-1" /> Ver Histórico de Orçamentos
+                                        </button>
 
                                         <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
                                             <button onClick={() => handleViewClientReport(savedQuote, bends)}

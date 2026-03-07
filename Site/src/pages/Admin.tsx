@@ -16,6 +16,7 @@ import ReportTab from '../components/admin/ReportTab';
 type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin';
 
 export default function Admin() {
+  const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<TabId>('quotes'); // default; adjusted by useEffect once user loads
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -51,6 +52,7 @@ export default function Admin() {
   const [pixQrFile, setPixQrFile] = useState<File | null>(null);
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' } | null>(null);
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [showSiteMenus, setShowSiteMenus] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -473,19 +475,55 @@ export default function Admin() {
                 <p className="text-xs text-slate-500 mt-1 truncate">{currentUser?.name || currentUser?.username}</p>
               </div>
               <nav className="space-y-1">
-                {allTabs.map((tab: any) => (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id as TabId)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer
-                      ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-slate-600 hover:bg-slate-50'}`}>
-                    <tab.icon className="w-4 h-4" />
-                    <span className="flex-1 text-left">{tab.label}</span>
-                    {tab.badge > 0 && (
-                      <span className={`text-xs font-black px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-white text-brand-primary' : 'bg-orange-500 text-white'}`}>
-                        {tab.badge}
-                      </span>
-                    )}
+                {/* SITE MENUS */}
+                <div className="mb-2">
+                  <button
+                    onClick={() => setShowSiteMenus(!showSiteMenus)}
+                    className="w-full flex items-center justify-between px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  >
+                    <span>Conteúdo do Site</span>
+                    <motion.span animate={{ rotate: showSiteMenus ? 0 : -90 }}>
+                      <ChevronDown className="w-3 h-3" />
+                    </motion.span>
                   </button>
-                ))}
+
+                  <AnimatePresence initial={false}>
+                    {showSiteMenus && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden space-y-1"
+                      >
+                        {allTabs.filter(t => ['settings', 'services', 'posts', 'gallery', 'testimonials'].includes(t.id)).map((tab: any) => (
+                          <button key={tab.id} onClick={() => setActiveTab(tab.id as TabId)}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer
+                              ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-slate-600 hover:bg-slate-50'}`}>
+                            <tab.icon className="w-4 h-4" />
+                            <span className="flex-1 text-left">{tab.label}</span>
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* MAIN MENUS */}
+                <div className="space-y-1">
+                  {allTabs.filter(t => !['settings', 'services', 'posts', 'gallery', 'testimonials'].includes(t.id)).map((tab: any) => (
+                    <button key={tab.id} onClick={() => setActiveTab(tab.id as TabId)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer
+                        ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-slate-600 hover:bg-slate-50'}`}>
+                      <tab.icon className="w-4 h-4" />
+                      <span className="flex-1 text-left">{tab.label}</span>
+                      {tab.badge > 0 && (
+                        <span className={`text-xs font-black px-2 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-white text-brand-primary' : 'bg-orange-500 text-white'}`}>
+                          {tab.badge}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
 
                 <div className="pt-4 mt-4 border-t border-slate-100">
                   <button onClick={handleLogout}
