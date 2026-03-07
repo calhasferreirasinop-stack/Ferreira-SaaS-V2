@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare, Menu, X, Factory } from 'lucide-react';
+import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare, Menu, X, Factory, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import UsersTab from '../components/admin/UsersTab';
 import QuotesTab from '../components/admin/QuotesTab';
