@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Settings, Plus, Trash2, Save, Image as ImageIcon, FileText, Hammer, LayoutGrid, Star, LogOut, Check, Users, ClipboardList, Package, TrendingUp, Crown, DollarSign, MessageSquare, Menu, X, Factory } from 'lucide-react';
@@ -22,6 +22,14 @@ export default function Admin() {
   const [settings, setSettings] = useState<any>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [heroFile, setHeroFile] = useState<File | null>(null);
+
+  // Cropper state
+  const [cropModal, setCropModal] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropTarget, setCropTarget] = useState<'logo' | 'hero' | null>(null);
+  const [cropPreview, setCropPreview] = useState<string>('');
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [services, setServices] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
@@ -43,6 +51,72 @@ export default function Admin() {
   const [pixQrFile, setPixQrFile] = useState<File | null>(null);
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' } | null>(null);
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (cropFile) {
+      const reader = new FileReader();
+      reader.onload = (e) => setCropPreview(e.target?.result as string);
+      reader.readAsDataURL(cropFile);
+      setZoom(1);
+      setOffset({ x: 0, y: 0 });
+    } else {
+      setCropPreview('');
+    }
+  }, [cropFile]);
+
+  const handleCrop = async () => {
+    if (!imgRef.current || !containerRef.current) return;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Fixed output sizes to ensure performance and server acceptance
+    const targetW = cropTarget === 'logo' ? 400 : 1200;
+    const targetH = cropTarget === 'logo' ? 400 : 675; // 16:9 approx
+
+    canvas.width = targetW;
+    canvas.height = targetH;
+
+    const img = imgRef.current;
+    const container = containerRef.current;
+
+    // The visual crop area in the container
+    const cropSize = Math.min(container.offsetWidth, container.offsetHeight) * 0.8;
+    const cropW = cropTarget === 'logo' ? cropSize : container.offsetWidth * 0.9;
+    const cropH = cropTarget === 'logo' ? cropSize : cropW * (9 / 16);
+
+    const centerX = container.offsetWidth / 2;
+    const centerY = container.offsetHeight / 2;
+
+    const containerRect = container.getBoundingClientRect();
+    const cropLeft = containerRect.left + centerX - cropW / 2;
+    const cropTop = containerRect.top + centerY - cropH / 2;
+
+    const imgRect = img.getBoundingClientRect();
+
+    const scaleX = img.naturalWidth / imgRect.width;
+    const scaleY = img.naturalHeight / imgRect.height;
+
+    const sx = (cropLeft - imgRect.left) * scaleX;
+    const sy = (cropTop - imgRect.top) * scaleY;
+    const sw = cropW * scaleX;
+    const sh = cropH * scaleY;
+
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], cropFile?.name || 'cropped.jpg', { type: 'image/jpeg' });
+        if (cropTarget === 'logo') setLogoFile(file);
+        else setHeroFile(file);
+        setCropModal(false);
+        setCropFile(null);
+      }
+    }, 'image/jpeg', 0.9);
+  };
 
   useEffect(() => {
     if (toast?.show) { const t = setTimeout(() => setToast(null), 3000); return () => clearTimeout(t); }
@@ -439,7 +513,14 @@ export default function Admin() {
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">Logo</label>
-                        <input type="file" accept="image/*" onChange={e => setLogoFile(e.target.files?.[0] || null)}
+                        <input type="file" accept="image/*" onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setCropFile(file);
+                            setCropTarget('logo');
+                            setCropModal(true);
+                          }
+                        }}
                           className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-brand-primary file:text-white cursor-pointer" />
                       </div>
                     </div>
@@ -470,7 +551,14 @@ export default function Admin() {
                     <div className="p-6 bg-slate-50 rounded-2xl">
                       <label className="block text-sm font-bold text-slate-700 mb-3">📸 Foto Hero (Tela Inicial)</label>
                       {settings.heroImageUrl && <img src={settings.heroImageUrl} className="w-full h-40 object-cover rounded-xl mb-4" />}
-                      <input type="file" accept="image/*" onChange={e => setHeroFile(e.target.files?.[0] || null)}
+                      <input type="file" accept="image/*" onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setCropFile(file);
+                          setCropTarget('hero');
+                          setCropModal(true);
+                        }
+                      }}
                         className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-brand-primary file:text-white cursor-pointer" />
                     </div>
 
@@ -690,6 +778,82 @@ export default function Admin() {
           </main>
         </div>
       </div>
+      {/* Image Cropper Modal */}
+      <AnimatePresence>
+        {cropModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] bg-slate-950/90 backdrop-blur-xl flex items-center justify-center p-4">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              className="bg-white w-full max-w-2xl rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900">Ajustar Imagem</h3>
+                  <p className="text-xs text-slate-500 font-medium">Arraste e use o zoom para enquadrar</p>
+                </div>
+                <button onClick={() => setCropModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-all">
+                  <X className="w-6 h-6 text-slate-400" />
+                </button>
+              </div>
+
+              <div className="flex-1 relative bg-slate-200 overflow-hidden flex items-center justify-center touch-none" ref={containerRef}>
+                {cropPreview && (
+                  <motion.img
+                    ref={imgRef}
+                    src={cropPreview}
+                    drag
+                    dragMomentum={false}
+                    onDrag={(e, info) => setOffset(prev => ({ x: prev.x + info.delta.x, y: prev.y + info.delta.y }))}
+                    style={{
+                      scale: zoom,
+                      x: offset.x,
+                      y: offset.y,
+                      cursor: 'grab'
+                    }}
+                    className="max-w-none"
+                    onDragStart={() => { if (imgRef.current) imgRef.current.style.cursor = 'grabbing' }}
+                    onDragEnd={() => { if (imgRef.current) imgRef.current.style.cursor = 'grab' }}
+                  />
+                )}
+
+                {/* Crop Overlay */}
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                  <div className={clsx(
+                    "border-4 border-brand-primary/50 shadow-[0_0_0_9999px_rgba(15,23,42,0.6)]",
+                    cropTarget === 'logo' ? "w-[250px] h-[250px] rounded-full" : "w-[90%] aspect-video rounded-2xl"
+                  )}>
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-brand-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">
+                      Área de Recorte
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-8 space-y-6 bg-white shrink-0">
+                <div className="flex items-center gap-4">
+                  <ImageIcon className="w-4 h-4 text-slate-400" />
+                  <input
+                    type="range" min="0.5" max="3" step="0.1"
+                    value={zoom} onChange={e => setZoom(parseFloat(e.target.value))}
+                    className="flex-1 accent-brand-primary h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <span className="text-xs font-bold text-slate-500 w-8">{Math.round(zoom * 100)}%</span>
+                </div>
+
+                <div className="flex gap-3">
+                  <button onClick={() => setCropModal(false)}
+                    className="flex-1 py-4 px-6 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-all border border-slate-100">
+                    Cancelar
+                  </button>
+                  <button onClick={handleCrop}
+                    className="flex-1 py-4 px-6 rounded-2xl font-bold bg-brand-primary text-white shadow-xl shadow-brand-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    <Check className="w-5 h-5" /> Confirmar Recorte
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
