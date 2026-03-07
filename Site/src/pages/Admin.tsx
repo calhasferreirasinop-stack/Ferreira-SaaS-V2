@@ -163,9 +163,15 @@ export default function Admin() {
     if (heroFile) fd.append('heroImage', heroFile);
     const res = await fetch('/api/settings', { method: 'POST', body: fd, credentials: 'include' });
     if (res.status === 401) return navigate('/login');
-    showToast('Configurações salvas!', 'success');
-    setLogoFile(null); setHeroFile(null);
-    fetchData(true);
+
+    if (res.ok) {
+      showToast('Configurações salvas!', 'success');
+      setLogoFile(null); setHeroFile(null);
+      fetchData(true);
+    } else {
+      const errorData = await res.json().catch(() => ({}));
+      showToast(errorData.error || 'Erro ao salvar configurações', 'error');
+    }
   };
 
   const handleDelete = async (type: string, id: number) => {
