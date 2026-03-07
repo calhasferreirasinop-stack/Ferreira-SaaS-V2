@@ -264,32 +264,41 @@ const parseSession = async (req: any): Promise<AuthUser | null> => {
     } as AuthUser;
 
   } catch (err) {
-    console.error('[AUTH_EXCEPTION] Unexpected failure in parseSession:', err);
     return null;
   }
 };
 
-const authenticate = async (req: any, res: any, next: any) => {
-  const user = await parseSession(req);
-  if (!user) return res.status(401).json({ error: 'Sessão inválida ou perfil não encontrado' });
-  req.user = user;
-  next();
+// --- Auth Middlewares ---
+const requireAuth = (req: any, res: any, next: any) => {
+  if (req.cookies.sb_user) {
+    try {
+      req.user = JSON.parse(req.cookies.sb_user);
+      if (req.user.authenticated) return next();
+    } catch { }
+  }
+  res.status(401).json({ error: 'Não autenticado' });
 };
 
-const requireAdmin = async (req: any, res: any, next: any) => {
-  const user = await parseSession(req);
-  if (!user) return res.status(401).json({ error: 'Não autorizado' });
-  if (user.role !== 'admin' && user.role !== 'master') return res.status(403).json({ error: 'Acesso negado' });
-  req.user = user;
-  next();
+const requireSuperAdmin = (req: any, res: any, next: any) => {
+  if (req.cookies.sb_user) {
+    try {
+      const u = JSON.parse(req.cookies.sb_user);
+      if (u.authenticated && (u.role === 'SUPER_ADMIN' || u.role === 'master')) return next();
+    } catch { }
+  }
+  res.status(403).json({ error: 'Acesso negado: Requer SUPER_ADMIN' });
 };
 
-const requireMaster = async (req: any, res: any, next: any) => {
-  const user = await parseSession(req);
-  if (!user) return res.status(401).json({ error: 'Não autorizado' });
-  if (user.role !== 'master') return res.status(403).json({ error: 'Acesso Master necessário' });
-  req.user = user;
-  next();
+// Replaces existing requireMaster
+const requireAdminOrOwner = (req: any, res: any, next: any) => {
+  if (req.cookies.sb_user) {
+    try {
+      const u = JSON.parse(req.cookies.sb_user);
+      const allowed = ['SUPER_ADMIN', 'OWNER', 'ADMIN', 'master', 'admin'];
+      if (u.authenticated && allowed.includes(u.role)) return next();
+    } catch { }
+  }
+  res.status(403).json({ error: 'Acesso negado' });
 };
 
 // =====================
@@ -413,7 +422,7 @@ app.post('/api/setup', async (req: any, res) => {
 });
 
 // Route for manual cleanup of orphaned financial records
-app.post('/api/maintenance/cleanup-financial', requireAdmin, async (req: any, res) => {
+app.post('/api/maintenance/cleanup-financial', requireAdminOrOwner, async (req: any, res) => {
   try {
     const { data: listAcc } = await supabase
       .from('accounts_receivable')
@@ -707,11 +716,11 @@ app.get('/api/auth/check', async (req, res) => {
 
 });
 
-app.get('/api/auth/me', authenticate, (req: any, res) => {
+app.get('/api/auth/me', requireAuth, (req: any, res) => {
   res.json(req.user);
 });
 
-app.post('/api/auth/change-password', authenticate, async (req: any, res) => {
+app.post('/api/auth/change-password', requireAuth, async (req: any, res) => {
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 6) return res.status(400).json({ error: 'Mínimo 6 caracteres' });
   const hashed = bcrypt.hashSync(newPassword, 10);
@@ -723,7 +732,7 @@ app.post('/api/auth/change-password', authenticate, async (req: any, res) => {
 // =====================
 // USERS Routes (Multi-tenant)
 // =====================
-app.get('/api/users', requireAdmin, async (req: any, res) => {
+app.get('/api/users', requireAdminOrOwner, async (req: any, res) => {
   const { data, error } = await supabase.from('profiles').select('id,username,name,email,phone,role,active,created_at')
     .eq('company_id', req.user.companyId)
     .order('created_at', { ascending: false });
@@ -731,23 +740,34 @@ app.get('/api/users', requireAdmin, async (req: any, res) => {
   res.json(data || []);
 });
 
-app.post('/api/users', requireAdmin, async (req: any, res) => {
-  const { username, password, name, email, phone, role } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Username e senha obrigatórios' });
-  if ((role === 'admin' || role === 'master') && req.user.role !== 'master')
-    return res.status(403).json({ error: 'Apenas master pode criar admins' });
+app.post('/api/users', requireAuth, async (req, res) => {
+  const currentUser = req.user;
+  const { username, password, name, phone, role } = req.body;
 
-  const { data, error } = await supabase.from('profiles').insert({
-    username,
-    password: bcrypt.hashSync(password, 10),
-    name, email, phone, role: role || 'user', active: true, company_id: req.user.companyId
-  }).select('id,username,name,email,phone,role,active').single();
+  // RBAC for user creation
+  if (currentUser.role === 'OWNER' || currentUser.role === 'admin') {
+    if (role === 'SUPER_ADMIN' || role === 'OWNER' || role === 'master') {
+      return res.status(403).json({ error: 'Você não tem permissão para criar usuários com este nível' });
+    }
+  } else if (currentUser.role !== 'SUPER_ADMIN' && currentUser.role !== 'master') {
+    return res.status(403).json({ error: 'Você não tem permissão para criar usuários' });
+  }
 
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const companyId = (currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'master')
+      ? req.body.company_id || currentUser.company_id
+      : currentUser.company_id;
+
+    const { data, error } = await supabase.from('usuarios').insert([
+      { username, password: hashedPassword, name, phone, role, company_id: companyId }
+    ]).select();
+    if (error) throw error;
+    res.json(data[0]);
+  } catch (e: any) { res.status(400).json({ error: e.message }); }
 });
 
-app.put('/api/users/:id', requireAdmin, async (req: any, res) => {
+app.put('/api/users/:id', requireAdminOrOwner, async (req: any, res) => {
   const id = req.params.id;
   const { name, email, phone, active, role, password } = req.body;
   const updateData: any = { name, email, phone, active };
@@ -759,7 +779,7 @@ app.put('/api/users/:id', requireAdmin, async (req: any, res) => {
   res.json(data);
 });
 
-app.delete('/api/users/:id', requireAdmin, async (req: any, res) => {
+app.delete('/api/users/:id', requireAdminOrOwner, async (req: any, res) => {
   const id = req.params.id;
   if (id === req.user.id) return res.status(400).json({ error: 'Não pode excluir a si mesmo' });
   await supabase.from('profiles').delete().eq('id', id).eq('company_id', req.user.companyId);
@@ -769,13 +789,13 @@ app.delete('/api/users/:id', requireAdmin, async (req: any, res) => {
 // =====================
 // COMPANIES Routes (Master Only)
 // =====================
-app.get('/api/companies', requireMaster, async (req: any, res) => {
+app.get('/api/companies', requireSuperAdmin, async (req: any, res) => {
   const { data, error } = await supabase.from('companies').select('*').order('created_at', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json(data || []);
 });
 
-app.post('/api/companies', requireMaster, async (req: any, res) => {
+app.post('/api/companies', requireSuperAdmin, async (req: any, res) => {
   const { name, business_type, cnpj, email, phone } = req.body;
   if (!name) return res.status(400).json({ error: 'Nome da empresa é obrigatório' });
   const { data, error } = await supabase.from('companies').insert({ name, business_type, cnpj, email, phone }).select().single();
@@ -787,14 +807,14 @@ app.post('/api/companies', requireMaster, async (req: any, res) => {
   res.json(data);
 });
 
-app.put('/api/companies/:id', requireMaster, async (req: any, res) => {
+app.put('/api/companies/:id', requireSuperAdmin, async (req: any, res) => {
   const { name, business_type, cnpj, email, phone, settings } = req.body;
   const { data, error } = await supabase.from('companies').update({ name, business_type, cnpj, email, phone, settings }).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
-app.delete('/api/companies/:id', requireMaster, async (req: any, res) => {
+app.delete('/api/companies/:id', requireSuperAdmin, async (req: any, res) => {
   const { error } = await supabase.from('companies').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
@@ -803,13 +823,13 @@ app.delete('/api/companies/:id', requireMaster, async (req: any, res) => {
 // =====================
 // SUBSCRIPTIONS / PLANS Routes (Master Only)
 // =====================
-app.get('/api/subscriptions', requireMaster, async (req: any, res) => {
+app.get('/api/subscriptions', requireSuperAdmin, async (req: any, res) => {
   const { data, error } = await supabase.from('subscriptions').select('*').order('created_at', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json(data || []);
 });
 
-app.post('/api/subscriptions', requireMaster, async (req: any, res) => {
+app.post('/api/subscriptions', requireSuperAdmin, async (req: any, res) => {
   const { company_id, plan_id, status, current_period_end } = req.body;
   if (!company_id || !plan_id) return res.status(400).json({ error: 'Empresa e Plano são obrigatórios' });
   const { data, error } = await supabase.from('subscriptions').insert({ company_id, plan_id, status: status || 'trial', current_period_end }).select().single();
@@ -817,14 +837,14 @@ app.post('/api/subscriptions', requireMaster, async (req: any, res) => {
   res.json(data);
 });
 
-app.put('/api/subscriptions/:id', requireMaster, async (req: any, res) => {
+app.put('/api/subscriptions/:id', requireSuperAdmin, async (req: any, res) => {
   const { plan_id, status, current_period_end } = req.body;
   const { data, error } = await supabase.from('subscriptions').update({ plan_id, status, current_period_end, updated_at: new Date().toISOString() }).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
-app.delete('/api/subscriptions/:id', requireMaster, async (req: any, res) => {
+app.delete('/api/subscriptions/:id', requireSuperAdmin, async (req: any, res) => {
   const { error } = await supabase.from('subscriptions').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
@@ -1009,7 +1029,7 @@ app.put('/api/users/:id', requireAdmin, async (req: any, res) => {
   res.json(data);
 });
 
-app.delete('/api/users/:id', requireMaster, async (req: any, res) => {
+app.delete('/api/users/:id', requireSuperAdmin, async (req: any, res) => {
   const id = req.params.id;
   if (id === req.user.id) return res.status(400).json({ error: 'Não pode excluir a si mesmo' });
 
@@ -1410,7 +1430,7 @@ app.post('/api/testimonials/delete/:id', requireAdmin, async (req: any, res) => 
 // =====================
 
 // Temp migration endpoint (safe to call multiple times)
-app.post('/api/migrate/type-product', requireMaster, async (req: any, res) => {
+app.post('/api/migrate/type-product', requireSuperAdmin, async (req: any, res) => {
   try {
     // Add column if not exists
     await supabase.rpc('exec_ddl' as any, {
@@ -3121,7 +3141,7 @@ app.post('/api/financial/receivables/:id/pay', authenticate, async (req: any, re
   }
 });
 
-app.post('/api/quotes/:id/discount', requireMaster, async (req: any, res) => {
+app.post('/api/quotes/:id/discount', requireSuperAdmin, async (req: any, res) => {
   const id = req.params.id; // UUID
   const { discountValue, reason } = req.body;
 
@@ -3609,7 +3629,7 @@ app.delete('/api/pix-keys/:id', requireAdmin, async (req: any, res) => {
 // =====================
 // DB MIGRATION Route (run-once to fix schema)
 // =====================
-app.post('/api/admin/migrate', requireMaster, async (req: any, res) => {
+app.post('/api/admin/migrate', requireSuperAdmin, async (req: any, res) => {
   const sqlStatements = [
     `ALTER TABLE public.activity_logs ADD COLUMN IF NOT EXISTS metadata jsonb`,
     `CREATE TABLE IF NOT EXISTS public.pix_keys (

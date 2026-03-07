@@ -239,6 +239,8 @@ export default function Orcamento() {
     const pricePerM2 = isNaN(parseFloat(overridePricePerM2)) ? parseFloat(settings.pricePerM2 || '50') : parseFloat(overridePricePerM2);
     const costPerM2 = isNaN(parseFloat(overrideCostPerM2)) ? parseFloat(settings.costPerM2 || '30') : parseFloat(overrideCostPerM2);
 
+    const isProduction = user?.role === 'FUNCIONARIO_PRODUCAO' || user?.role === 'user';
+
     const totalM2 = bends.reduce((acc, b) => acc + (b.m2 || 0), 0);
     const totalValue = bends.reduce((acc, b) => {
         if (b.productType === 'service') return acc + ((b.serviceValue || 0) * (b.serviceQty || 1));
@@ -3317,9 +3319,11 @@ window.onload = function() {
                                                 className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl flex items-center gap-2 font-bold cursor-pointer disabled:opacity-50">
                                                 <Save className="w-4 h-4" /> Salvar Rascunho
                                             </button>
-                                            <button onClick={() => setStep('summary')} className="px-6 py-3 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-2xl flex items-center gap-2 transition-all cursor-pointer">
-                                                Ver Resumo <ChevronRight className="w-5 h-5" />
-                                            </button>
+                                            {!isProduction && (
+                                                <button onClick={() => setStep('summary')} className="px-6 py-3 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-2xl flex items-center gap-2 transition-all cursor-pointer">
+                                                    Ver Resumo <ChevronRight className="w-5 h-5" />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 )
@@ -3534,10 +3538,12 @@ window.onload = function() {
                                         className="px-6 py-3.5 bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl flex items-center justify-center gap-2 font-bold cursor-pointer transition-all shadow-lg shadow-indigo-500/20 flex-1 sm:flex-none">
                                         <FileDown className="w-5 h-5" /> PDF Completo (Prod)
                                     </button>
-                                    <button onClick={handleSubmit} disabled={submitting}
-                                        className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black rounded-2xl flex items-center justify-center gap-2 cursor-pointer text-lg transition-all shadow-lg shadow-blue-500/20 w-full sm:w-auto">
-                                        {submitting ? <><RefreshCw className="w-6 h-6 animate-spin" /> Enviando...</> : <><Send className="w-6 h-6" /> Enviar orçamento</>}
-                                    </button>
+                                    {!isProduction && (
+                                        <button onClick={handleSubmit} disabled={submitting}
+                                            className="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black rounded-2xl flex items-center justify-center gap-2 cursor-pointer text-lg transition-all shadow-lg shadow-blue-500/20 w-full sm:w-auto">
+                                            {submitting ? <><RefreshCw className="w-6 h-6 animate-spin" /> Enviando...</> : <><Send className="w-6 h-6" /> Enviar orçamento</>}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>

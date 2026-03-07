@@ -15,6 +15,29 @@ import TestHarness from './pages/TestHarness';
 import Production from './pages/Production';
 import Fabricacao from './pages/Fabricacao';
 
+const RoleGate = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
+  const [user, setUser] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+  const location = useLocation();
+
+  React.useEffect(() => {
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      const u = JSON.parse(stored);
+      if (u.authenticated) setUser(u);
+    }
+    setLoading(false);
+  }, []);
+
+  if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center font-bold text-slate-400">Verificando permissões...</div>;
+  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
+
+  const hasAccess = allowedRoles.includes(user.role) || user.role === 'SUPER_ADMIN' || user.role === 'master';
+  if (!hasAccess) return <Navigate to="/app/gestao-orcamentos" replace />;
+
+  return <>{children}</>;
+};
+
 function LegacyRedirects() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -95,21 +118,21 @@ function AppContent() {
             <Route path="gestao-orcamentos" element={<Admin />} />
             <Route path="producao" element={<Admin />} />
             <Route path="estoque" element={<Admin />} />
-            <Route path="dashboard-financeiro" element={<Admin />} />
-            <Route path="contas-a-receber" element={<Admin />} />
-            <Route path="parametros" element={<Admin />} />
-            <Route path="logs" element={<Admin />} />
+            <Route path="dashboard-financeiro" element={<RoleGate allowedRoles={['OWNER', 'ADMIN', 'admin']}><Admin /></RoleGate>} />
+            <Route path="contas-a-receber" element={<RoleGate allowedRoles={['OWNER', 'ADMIN', 'admin']}><Admin /></RoleGate>} />
+            <Route path="parametros" element={<RoleGate allowedRoles={['OWNER']}><Admin /></RoleGate>} />
+            <Route path="logs" element={<RoleGate allowedRoles={['SUPER_ADMIN', 'master']}><Admin /></RoleGate>} />
           </Route>
 
           {/* ADMIN Segment */}
-          <Route path="/admin" element={<DashboardLayout />}>
+          <Route path="/admin" element={<RoleGate allowedRoles={['SUPER_ADMIN', 'master', 'OWNER', 'admin']}><DashboardLayout /></RoleGate>}>
             <Route path="usuarios" element={<Admin />} />
-            <Route path="planos" element={<Admin />} />
-            <Route path="empresas" element={<Admin />} />
+            <Route path="planos" element={<RoleGate allowedRoles={['SUPER_ADMIN', 'master']}><Admin /></RoleGate>} />
+            <Route path="empresas" element={<RoleGate allowedRoles={['SUPER_ADMIN', 'master']}><Admin /></RoleGate>} />
           </Route>
 
           {/* SITE Segment */}
-          <Route path="/site" element={<DashboardLayout />}>
+          <Route path="/site" element={<RoleGate allowedRoles={['SUPER_ADMIN', 'master']}><DashboardLayout /></RoleGate>}>
             <Route path="geral" element={<Admin />} />
             <Route path="servicos" element={<Admin />} />
             <Route path="blog" element={<Admin />} />
