@@ -250,6 +250,8 @@ export default function Orcamento() {
     const pricePerM2 = isNaN(parseFloat(overridePricePerM2)) ? parseFloat(settings.pricePerM2 || '50') : parseFloat(overridePricePerM2);
     const costPerM2 = isNaN(parseFloat(overrideCostPerM2)) ? parseFloat(settings.costPerM2 || '30') : parseFloat(overrideCostPerM2);
 
+    const isProduction = user?.role === 'FUNCIONARIO_PRODUCAO' || user?.role === 'user';
+
     const totalM2 = bends.reduce((acc, b) => acc + (b.m2 || 0), 0);
     const totalValue = bends.reduce((acc, b) => {
         if (b.productType === 'service') return acc + ((b.serviceValue || 0) * (b.serviceQty || 1));
@@ -3492,9 +3494,11 @@ window.onload = function() {
                                                         className="h-16 flex items-center justify-center gap-2 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
                                                         <Save className="w-5 h-5" /> Salvar
                                                     </button>
-                                                    <button onClick={() => setStep('summary')} className="h-16 flex items-center justify-center gap-2 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-lg shadow-brand-primary/20">
-                                                        Avançar <ChevronRight className="w-5 h-5" />
-                                                    </button>
+                                                    {!isProduction && (
+                                                        <button onClick={() => setStep('summary')} className="h-16 flex items-center justify-center gap-2 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-lg shadow-brand-primary/20">
+                                                            Avançar <ChevronRight className="w-5 h-5" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -3619,11 +3623,13 @@ window.onload = function() {
                                         className="h-16 flex items-center justify-center gap-2 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200 transition-all">
                                         <ChevronLeft className="w-5 h-5" /> Voltar
                                     </button>
-                                    <button onClick={handleSubmit} disabled={submitting}
-                                        className="h-16 flex items-center justify-center gap-3 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-xl shadow-brand-primary/20">
-                                        {submitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                                        {submitting ? 'Enviando...' : 'Finalizar e Enviar'}
-                                    </button>
+                                    {!isProduction && (
+                                        <button onClick={handleSubmit} disabled={submitting}
+                                            className="h-16 flex items-center justify-center gap-3 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-xl shadow-brand-primary/20">
+                                            {submitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                            {submitting ? 'Enviando...' : 'Finalizar e Enviar'}
+                                        </button>
+                                    )}
 
                                     <div className="col-span-2 grid grid-cols-3 gap-3">
                                         <button onClick={() => handleViewClientReport({ id: 'PREVIA', clientName }, bends)}

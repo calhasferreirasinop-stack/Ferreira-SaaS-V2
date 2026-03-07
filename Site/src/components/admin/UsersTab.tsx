@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Edit2, Check, X, Shield, Crown, User } from 'lucide-react';
 
-const ROLE_CONFIG = {
-    user: { label: 'Usuário', icon: User, color: 'text-slate-400 bg-slate-100' },
-    admin: { label: 'Admin', icon: Shield, color: 'text-blue-600 bg-blue-100' },
-    master: { label: 'Master', icon: Crown, color: 'text-amber-600 bg-amber-100' },
+const ROLE_CONFIG: any = {
+    'SUPER_ADMIN': { label: 'Super Admin', icon: Crown, color: 'text-purple-600 bg-purple-100' },
+    'OWNER': { label: 'Dono (Owner)', icon: Crown, color: 'text-amber-600 bg-amber-100' },
+    'ADMIN': { label: 'Admin Empresa', icon: Shield, color: 'text-blue-600 bg-blue-100' },
+    'FUNCIONARIO_PRODUCAO': { label: 'Produção', icon: User, color: 'text-slate-400 bg-slate-100' },
+    // Legados
+    'master': { label: 'Master', icon: Crown, color: 'text-amber-600 bg-amber-100' },
+    'admin': { label: 'Admin', icon: Shield, color: 'text-blue-600 bg-blue-100' },
+    'user': { label: 'Usuário', icon: User, color: 'text-slate-400 bg-slate-100' },
 };
 
 interface Props {
@@ -14,7 +19,7 @@ interface Props {
     showToast: (msg: string, type: 'success' | 'error') => void;
 }
 
-const emptyForm = { username: '', password: '', name: '', phone: '', role: 'user', active: true };
+const emptyForm = { username: '', password: '', name: '', phone: '', role: 'FUNCIONARIO_PRODUCAO', active: true };
 
 export default function UsersTab({ users, currentUser, onSave, showToast }: Props) {
     const [editing, setEditing] = useState<any>(null);
@@ -117,17 +122,26 @@ export default function UsersTab({ users, currentUser, onSave, showToast }: Prop
                         </div>
                         <div>
                             <label className="text-xs font-bold text-slate-500 uppercase ml-1 block mb-2">Papel / Permissão *</label>
-                            <div className="flex gap-2">
-                                {(['user', 'admin', ...(currentUser?.role === 'master' ? ['master'] : [])] as string[]).map(r => {
-                                    const cfg = ROLE_CONFIG[r as keyof typeof ROLE_CONFIG];
-                                    return (
-                                        <button key={r} onClick={() => setForm({ ...form, role: r })}
-                                            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer
-                                                ${form.role === r ? 'border-brand-primary bg-brand-primary/10 text-brand-primary' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}>
-                                            {cfg.label}
-                                        </button>
-                                    );
-                                })}
+                            <div className="flex gap-2 flex-wrap">
+                                {(() => {
+                                    const isSuper = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'master';
+                                    const isOwner = currentUser?.role === 'OWNER' || currentUser?.role === 'admin' || isSuper;
+
+                                    let availableRoles: string[] = [];
+                                    if (isSuper) availableRoles = ['OWNER', 'ADMIN', 'FUNCIONARIO_PRODUCAO'];
+                                    else if (isOwner) availableRoles = ['ADMIN', 'FUNCIONARIO_PRODUCAO'];
+
+                                    return availableRoles.map(r => {
+                                        const cfg = ROLE_CONFIG[r] || ROLE_CONFIG.user;
+                                        return (
+                                            <button key={r} onClick={() => setForm({ ...form, role: r })}
+                                                className={`flex-1 py-2 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider border-2 transition-all cursor-pointer min-w-[120px]
+                                                    ${form.role === r ? 'border-brand-primary bg-brand-primary/10 text-brand-primary' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}>
+                                                {cfg.label}
+                                            </button>
+                                        );
+                                    });
+                                })()}
                             </div>
                         </div>
                     </div>

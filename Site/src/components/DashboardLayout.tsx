@@ -8,7 +8,9 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import clsx from 'clsx';
 
-type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin' | 'dashboard' | 'orcamento';
+type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin' | 'dashboard' | 'orcamento' | 'companies' | 'plans';
+
+export type UserRole = 'SUPER_ADMIN' | 'OWNER' | 'ADMIN' | 'FUNCIONARIO_PRODUCAO' | 'master' | 'admin' | 'user';
 
 export default function DashboardLayout() {
     const navigate = useNavigate();
@@ -53,31 +55,33 @@ export default function DashboardLayout() {
         navigate('/login', { replace: true });
     };
 
-    const isMaster = currentUser?.role === 'master';
-    const isAdminRole = currentUser?.role === 'admin' || isMaster;
+    const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'master';
+    const isOwner = currentUser?.role === 'OWNER' || currentUser?.role === 'admin' || isSuperAdmin;
+    const isAdmin = currentUser?.role === 'ADMIN' || isOwner;
+    const isProduction = currentUser?.role === 'FUNCIONARIO_PRODUCAO' || isAdmin;
 
     const allTabs = [
-        // SITE
-        { id: 'settings', label: 'Geral', icon: Settings, path: '/site/geral', show: isAdminRole, group: 'site' },
-        { id: 'services', label: 'Serviços', icon: Hammer, path: '/site/servicos', show: isAdminRole, group: 'site' },
-        { id: 'posts', label: 'Blog', icon: FileText, path: '/site/blog', show: isAdminRole, group: 'site' },
-        { id: 'gallery', label: 'Galeria', icon: LayoutGrid, path: '/site/galeria', show: isAdminRole, group: 'site' },
-        { id: 'testimonials', label: 'Depoimentos', icon: Star, path: '/site/depoimentos', show: isAdminRole, group: 'site' },
+        // SITE (SUPER_ADMIN Only)
+        { id: 'settings', label: 'Geral', icon: Settings, path: '/site/geral', show: isSuperAdmin, group: 'site' },
+        { id: 'services', label: 'Serviços', icon: Hammer, path: '/site/servicos', show: isSuperAdmin, group: 'site' },
+        { id: 'posts', label: 'Blog', icon: FileText, path: '/site/blog', show: isSuperAdmin, group: 'site' },
+        { id: 'gallery', label: 'Galeria', icon: LayoutGrid, path: '/site/galeria', show: isSuperAdmin, group: 'site' },
+        { id: 'testimonials', label: 'Depoimentos', icon: Star, path: '/site/depoimentos', show: isSuperAdmin, group: 'site' },
         // APP
-        { id: 'clients', label: 'Clientes', icon: Users, path: '/app/clientes', show: true, group: 'app' },
-        { id: 'products', label: 'Produtos', icon: Package, path: '/app/produtos', show: true, group: 'app' },
-        { id: 'orcamento', label: 'Calculadora de Orçamento', icon: Hammer, path: '/app/orcamentos', show: true, group: 'app' },
-        { id: 'quotes', label: 'Gestão de Orçamentos', icon: ClipboardList, path: '/app/gestao-orcamentos', show: true, badge: pendingCount, group: 'app' },
-        { id: 'production_admin', label: 'Produção', icon: Factory, path: '/app/producao', show: true, group: 'app' },
-        { id: 'inventory', label: 'Estoque', icon: Package, path: '/app/estoque', show: isAdminRole, group: 'app' },
-        { id: 'financial', label: 'Dashboard Financeiro', icon: TrendingUp, path: '/app/dashboard-financeiro', show: isAdminRole, group: 'app' },
-        { id: 'receivables', label: 'Contas a Receber', icon: DollarSign, path: '/app/contas-a-receber', show: isAdminRole, group: 'app' },
-        { id: 'reports', label: 'Parâmetros', icon: FileText, path: '/app/parametros', show: isAdminRole, group: 'app' },
-        { id: 'logs', label: 'Logs', icon: Crown, path: '/app/logs', show: isMaster, group: 'app' },
+        { id: 'clients', label: 'Clientes', icon: Users, path: '/app/clientes', show: isProduction, group: 'app' },
+        { id: 'products', label: 'Produtos', icon: Package, path: '/app/produtos', show: isProduction, group: 'app' },
+        { id: 'orcamento', label: 'Calculadora de Orçamento', icon: Hammer, path: '/app/orcamentos', show: isProduction, group: 'app' },
+        { id: 'quotes', label: 'Gestão de Orçamentos', icon: ClipboardList, path: '/app/gestao-orcamentos', show: isProduction, group: 'app' },
+        { id: 'production_admin', label: 'Produção', icon: Factory, path: '/app/producao', show: isProduction, group: 'app' },
+        { id: 'inventory', label: 'Estoque', icon: Package, path: '/app/estoque', show: isProduction, group: 'app' },
+        { id: 'financial', label: 'Dashboard Financeiro', icon: TrendingUp, path: '/app/dashboard-financeiro', show: isAdmin, group: 'app' },
+        { id: 'receivables', label: 'Contas a Receber', icon: DollarSign, path: '/app/contas-a-receber', show: isAdmin, group: 'app' },
+        { id: 'reports', label: 'Parâmetros', icon: FileText, path: '/app/parametros', show: isOwner, group: 'app' },
+        { id: 'logs', label: 'Logs', icon: Crown, path: '/app/logs', show: isSuperAdmin, group: 'app' },
         // ADMIN
-        { id: 'users', label: 'Usuários', icon: Users, path: '/admin/usuarios', show: isAdminRole, group: 'admin' },
-        { id: 'companies', label: 'Empresas', icon: Factory, path: '/admin/empresas', show: isMaster, group: 'admin' },
-        { id: 'plans', label: 'Planos', icon: Crown, path: '/admin/planos', show: isMaster, group: 'admin' },
+        { id: 'users', label: 'Usuários', icon: Users, path: '/admin/usuarios', show: isOwner, group: 'admin' },
+        { id: 'companies', label: 'Empresas', icon: Factory, path: '/admin/empresas', show: isSuperAdmin, group: 'admin' },
+        { id: 'plans', label: 'Planos', icon: Crown, path: '/admin/planos', show: isSuperAdmin, group: 'admin' },
     ].filter(t => t.show);
 
     const isActive = (path: string) => location.pathname === path;
@@ -101,7 +105,7 @@ export default function DashboardLayout() {
                         <div className="flex flex-col items-end">
                             <span className="text-sm font-bold text-slate-900">{currentUser?.name || currentUser?.username}</span>
                             <span className="text-[10px] font-bold text-amber-500 flex items-center gap-1 uppercase tracking-widest">
-                                {isMaster && <Crown className="w-3 h-3" />} {currentUser?.role}
+                                {(isSuperAdmin) && <Crown className="w-3 h-3" />} {currentUser?.role}
                             </span>
                         </div>
                         <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center border border-slate-200">
@@ -213,7 +217,7 @@ export default function DashboardLayout() {
                         <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 sticky top-24">
                             <div className="px-4 mb-4">
                                 <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center justify-between">
-                                    {isMaster ? 'Master Admin' : 'Painel Control'}
+                                    {isSuperAdmin ? 'Master Admin' : 'Painel Control'}
                                 </h2>
                                 <p className="text-xs text-slate-500 mt-1 truncate">{currentUser?.name || currentUser?.username}</p>
                             </div>
