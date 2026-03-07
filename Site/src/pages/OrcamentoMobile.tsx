@@ -54,11 +54,12 @@ const PROD_STATUS: Record<string, { label: string; color: string; next?: string;
 };
 
 // ─── Direction grid ───────────────────────────────────────────────────────────
-const DIR_GRID: { dir: RiskDirection; icon: string; label: string; grad: string }[] = [
+const DIR_GRID: { dir: RiskDirection | 'center'; icon: string; label: string; grad: string }[] = [
     { dir: 'upLeft', icon: '↖', label: 'Cima-Esq', grad: 'from-violet-500 to-violet-600' },
     { dir: 'up', icon: '↑', label: 'Cima', grad: 'from-blue-500 to-blue-600' },
     { dir: 'upRight', icon: '↗', label: 'Cima-Dir', grad: 'from-cyan-500 to-cyan-600' },
     { dir: 'left', icon: '←', label: 'Esquerda', grad: 'from-orange-500 to-orange-600' },
+    { dir: 'center', icon: 'OK', label: 'Conf', grad: 'from-slate-700 to-slate-800' },
     { dir: 'right', icon: '→', label: 'Direita', grad: 'from-green-500 to-green-600' },
     { dir: 'downLeft', icon: '↙', label: 'Baixo-Esq', grad: 'from-pink-500 to-pink-600' },
     { dir: 'down', icon: '↓', label: 'Baixo', grad: 'from-red-500 to-red-600' },
@@ -640,6 +641,7 @@ export default function Orcamento() {
 
         setCurrentRisks(next);
         setEditingSlopeIdx(null);
+        setEditSizeIdx(null); // Fix: also close the size/slope editor
         setSizeError('');
     };
 
@@ -2964,11 +2966,11 @@ window.onload = function() {
                                                                 )}
                                                             </div>
                                                             <div className="grid grid-cols-3 gap-1.5">
-                                                                {[DIR_GRID[0], DIR_GRID[1], DIR_GRID[2]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
+                                                                {[DIR_GRID[0], DIR_GRID[1], DIR_GRID[2]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir as RiskDirection)} />)}
                                                                 <DirBtn key="left" d={DIR_GRID[3]} active={pendingDir === 'left'} onClick={() => selectDirection('left')} />
                                                                 <div className="aspect-square bg-slate-200/50 rounded-lg flex items-center justify-center text-[10px] font-black text-slate-300">CM</div>
-                                                                <DirBtn key="right" d={DIR_GRID[4]} active={pendingDir === 'right'} onClick={() => selectDirection('right')} />
-                                                                {[DIR_GRID[5], DIR_GRID[6], DIR_GRID[7]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
+                                                                <DirBtn key="right" d={DIR_GRID[5]} active={pendingDir === 'right'} onClick={() => selectDirection('right')} />
+                                                                {[DIR_GRID[6], DIR_GRID[7], DIR_GRID[8]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir as RiskDirection)} />)}
                                                             </div>
                                                         </div>
 
@@ -3101,10 +3103,17 @@ window.onload = function() {
                                                                                 className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-[60] bg-white border border-slate-200 p-2 rounded-2xl shadow-2xl flex gap-1.5">
                                                                                 <div className="grid grid-cols-3 gap-1.5">
                                                                                     {DIR_GRID.map(d => (
-                                                                                        <button key={d.dir} onClick={() => commitEditDir(i, d.dir)}
-                                                                                            className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold transition-all active:scale-90 ${r.direction === d.dir ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400'}`}>
-                                                                                            {d.icon}
-                                                                                        </button>
+                                                                                        d.dir === 'center' ? (
+                                                                                            <button key="center" onClick={() => setEditDirIdx(null)}
+                                                                                                className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 text-slate-400 active:scale-90 transition-all">
+                                                                                                <Check className="w-5 h-5" />
+                                                                                            </button>
+                                                                                        ) : (
+                                                                                            <button key={d.dir} onClick={() => commitEditDir(i, d.dir)}
+                                                                                                className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold transition-all active:scale-90 ${r.direction === d.dir ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                                                                                                {d.icon}
+                                                                                            </button>
+                                                                                        )
                                                                                     ))}
                                                                                 </div>
                                                                                 <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 translate-y-px w-3 h-3 bg-white border-r border-b border-slate-200 rotate-45" />
@@ -3651,6 +3660,8 @@ window.onload = function() {
                                 }
                                 let digits = raw.replace(/\D/g, '');
                                 if (!digits) return '';
+                                // If it starts with 55 or has more than 11 digits, assume it already has a country code
+                                if (digits.startsWith('55') && digits.length >= 12) return digits;
                                 if (digits.length === 10 || digits.length === 11) return `55${digits}`;
                                 return digits;
                             })();
