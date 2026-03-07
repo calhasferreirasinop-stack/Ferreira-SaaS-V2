@@ -1236,7 +1236,7 @@ body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Inter', system-
     .page { margin: 0; box-shadow: none; width: 210mm; height: 297mm; }
     .print-btn { display: none; }
 }
-${printStylesV2}
+
 </style>
 </head>
 <body>

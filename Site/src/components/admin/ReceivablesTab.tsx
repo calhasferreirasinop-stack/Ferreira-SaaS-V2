@@ -96,42 +96,42 @@ export default function ReceivablesTab({ showToast }: Props) {
             </div>
 
             {/* DASHBOARD */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
-                        <Clock className="w-6 h-6" />
+            <div className="grid grid-cols-3 gap-2 md:gap-4">
+                <div className="bg-white border border-slate-200 rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-sm flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-4 text-center md:text-left">
+                    <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-100 text-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0">
+                        <Clock className="w-4 h-4 md:w-6 md:h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">A Receber</p>
-                        <p className="text-2xl font-black text-slate-900">{fmt(totalReceber)}</p>
+                        <p className="text-[8px] md:text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">A Receber</p>
+                        <p className="text-sm md:text-2xl font-black text-slate-900 truncate">{fmt(totalReceber)}</p>
                     </div>
                 </div>
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center">
-                        <CheckCircle2 className="w-6 h-6" />
+                <div className="bg-white border border-slate-200 rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-sm flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-4 text-center md:text-left">
+                    <div className="w-8 h-8 md:w-12 md:h-12 bg-green-100 text-green-600 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-4 h-4 md:w-6 md:h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Total Recebido</p>
-                        <p className="text-2xl font-black text-green-600">{fmt(totalRecebido)}</p>
+                        <p className="text-[8px] md:text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Recebido</p>
+                        <p className="text-sm md:text-2xl font-black text-green-600 truncate">{fmt(totalRecebido)}</p>
                     </div>
                 </div>
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center">
-                        <AlertCircle className="w-6 h-6" />
+                <div className="bg-white border border-slate-200 rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-sm flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-4 text-center md:text-left">
+                    <div className="w-8 h-8 md:w-12 md:h-12 bg-red-100 text-red-600 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0">
+                        <AlertCircle className="w-4 h-4 md:w-6 md:h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Em Atraso</p>
-                        <p className="text-2xl font-black text-red-600">{fmt(totalAtraso)}</p>
+                        <p className="text-[8px] md:text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Atraso</p>
+                        <p className="text-sm md:text-2xl font-black text-red-600 truncate">{fmt(totalAtraso)}</p>
                     </div>
                 </div>
             </div>
 
             {/* BARRA DE FILTROS */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
-                <div className="flex flex-wrap gap-2">
+            <div className="bg-white border border-slate-200 rounded-2xl p-2 md:p-4 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
+                <div className="flex flex-nowrap overflow-x-auto w-full md:w-auto gap-1 md:gap-2 pb-2 md:pb-0 no-scrollbar">
                     {['all', 'pendente', 'parcial', 'pago', 'atrasado'].map(f => (
                         <button key={f} onClick={() => setFilter(f)}
-                            className={`px-4 py-2 rounded-xl text-sm font-bold uppercase transition-all ${filter === f ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                            className={`px-3 py-2 md:px-4 md:py-2 rounded-xl text-[10px] md:text-sm font-bold uppercase transition-all whitespace-nowrap shrink-0 ${filter === f ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
                             {f === 'all' ? 'Todos' : f}
                         </button>
                     ))}
