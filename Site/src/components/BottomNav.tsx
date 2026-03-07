@@ -39,7 +39,7 @@ export default function BottomNav() {
                 {navItems.map((item) => {
                     const isActive = (item.path.includes('?')
                         ? (location.pathname + location.search) === item.path
-                        : location.pathname === item.path);
+                        : (location.pathname === item.path && location.search === ''));
                     const Icon = item.icon;
 
                     return (
