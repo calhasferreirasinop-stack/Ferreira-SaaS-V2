@@ -111,35 +111,35 @@ export default function FinancialTab({ showToast }: Props) {
                 <div className="flex justify-center py-16"><div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" /></div>
             ) : (
                 <>
-                    {/* INDICADORES CARDS */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-sm relative overflow-hidden flex items-center justify-between">
+                    {/* INDICADORES CARDS - UNICA LINHA ROLAVEL */}
+                    <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <div className="min-w-[200px] flex-1 bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-sm relative overflow-hidden flex items-center justify-between">
                             <div>
                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">A Receber</p>
-                                <p className="text-2xl font-black text-slate-800">{fmt(totalAReceber)}</p>
+                                <p className="text-xl font-black text-slate-800">{fmt(totalAReceber)}</p>
                             </div>
-                            <div className="w-12 h-12 bg-blue-100/50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0"><DollarSign className="w-6 h-6" /></div>
+                            <div className="w-10 h-10 bg-blue-100/50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0"><DollarSign className="w-5 h-5" /></div>
                         </div>
-                        <div className="bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+                        <div className="min-w-[200px] flex-1 bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
                             <div>
                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Em Atraso</p>
-                                <p className="text-2xl font-black text-red-600">{fmt(totalAtraso)}</p>
+                                <p className="text-xl font-black text-red-600">{fmt(totalAtraso)}</p>
                             </div>
-                            <div className="w-12 h-12 bg-red-100/50 text-red-600 rounded-2xl flex items-center justify-center shrink-0"><AlertCircle className="w-6 h-6" /></div>
+                            <div className="w-10 h-10 bg-red-100/50 text-red-600 rounded-2xl flex items-center justify-center shrink-0"><AlertCircle className="w-5 h-5" /></div>
                         </div>
-                        <div className="bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+                        <div className="min-w-[200px] flex-1 bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
                             <div>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Recebido no Mês</p>
-                                <p className="text-2xl font-black text-emerald-600">{fmt(recebidoNoMes)}</p>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Recebido Mes</p>
+                                <p className="text-xl font-black text-emerald-600">{fmt(recebidoNoMes)}</p>
                             </div>
-                            <div className="w-12 h-12 bg-emerald-100/50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0"><TrendingUp className="w-6 h-6" /></div>
+                            <div className="w-10 h-10 bg-emerald-100/50 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0"><TrendingUp className="w-5 h-5" /></div>
                         </div>
-                        <div className="bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
+                        <div className="min-w-[200px] flex-1 bg-white border text-left border-slate-200 rounded-3xl p-6 shadow-sm flex items-center justify-between">
                             <div>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Faturamento Mês</p>
-                                <p className="text-2xl font-black text-indigo-600">{fmt(faturamentoMes)}</p>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">Faturamento Mes</p>
+                                <p className="text-xl font-black text-indigo-600">{fmt(faturamentoMes)}</p>
                             </div>
-                            <div className="w-12 h-12 bg-indigo-100/50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0"><DollarSign className="w-6 h-6" /></div>
+                            <div className="w-10 h-10 bg-indigo-100/50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0"><DollarSign className="w-5 h-5" /></div>
                         </div>
                     </div>
 
