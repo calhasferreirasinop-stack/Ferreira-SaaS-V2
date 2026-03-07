@@ -81,16 +81,17 @@ async function parseSession(req: express.Request): Promise<any | null> {
     if (!session) return null;
     try {
         const decoded = JSON.parse(Buffer.from(session, 'base64').toString('utf8'));
-        const { data: user } = await supabase
+        const { data: profile, error: profErr } = await supabase
             .from('profiles')
-            .select('id,username,name,email,role,active,company_id')
+            .select('id,username,name,email,role,active,company_id,welcome_tour_seen')
             .eq('id', decoded.userId)
             .eq('active', true)
             .single();
-        if (user) {
+        if (profile) {
             return {
-                ...user,
-                companyId: user.company_id
+                ...profile,
+                companyId: profile.company_id,
+                welcomeTourSeen: profile.welcome_tour_seen
             };
         }
         return null;
@@ -571,8 +572,179 @@ app.post('/api/pix-keys', requireMaster as any, async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
 });
-app.delete('/api/pix-keys/:id', requireMaster as any, async (req, res) => {
-    await supabase.from('pix_keys').delete().eq('id', req.params.id).eq('company_id', (req as any).user.companyId);
+
+// ── REPORTS ─────────────────────────────────────────────────────────────────
+app.get('/api/quotes/:id/client-report', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const { data: estimate, error: estErr } = await supabase
+            .from('estimates')
+            .select('*, client:client_id(name, phone, email)')
+            .eq('id', id)
+            .single();
+
+        if (estErr || !estimate) return res.status(404).send('Orçamento não encontrado');
+
+        const { data: items, error: itemsErr } = await supabase
+            .from('estimate_items')
+            .select('*')
+            .eq('estimate_id', id);
+
+        const { data: company, error: compErr } = await supabase
+            .from('companies')
+            .select('*')
+            .eq('id', estimate.company_id)
+            .single();
+
+        const settings = company?.settings || {};
+        const clientName = estimate.client?.name || (estimate.notes?.match(/\[CLIENT: (.*?)\]/)?.[1]) || 'Cliente';
+
+        const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('pt-BR');
+
+        const html = `
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento - ${clientName}</title>
+    <style>
+        :root { --primary: #0f172a; --accent: #f97316; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; margin: 0; padding: 20px; background: #f8fafc; color: #1e293b; line-height: 1.5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 30px; }
+        .company-info img { max-width: 150px; height: auto; margin-bottom: 10px; }
+        .company-info h1 { margin: 0; font-size: 24px; color: var(--primary); }
+        .quote-meta { text-align: right; }
+        .quote-meta h2 { margin: 0; color: var(--accent); font-size: 20px; }
+        .section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; }
+        .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .item-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .item-details { flex: 1; }
+        .item-info { font-weight: 600; font-size: 16px; }
+        .item-sub { color: #64748b; font-size: 13px; }
+        .item-price { font-weight: 700; color: var(--primary); }
+        .totals { margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 8px; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .total-row.final { border-top: 2px solid #e2e8f0; margin-top: 10px; padding-top: 10px; font-size: 20px; font-weight: 800; color: var(--accent); }
+        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 20px; }
+        @media print { body { background: white; padding: 0; } .container { box-shadow: none; border: none; max-width: 100%; } .no-print { display: none; } }
+        .bend-img { max-width: 100%; height: auto; margin-top: 10px; border-radius: 4px; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="company-info">
+                ${settings.reportLogo ? `<img src="${settings.reportLogo}" alt="Logo">` : ''}
+                <h1>${settings.reportCompanyName || company.name}</h1>
+                <p style="font-size: 14px; color: #64748b; margin-top: 5px;">
+                    ${settings.reportPhone || company.phone || ''}<br>
+                    ${settings.reportEmail || company.email || ''}<br>
+                    ${settings.reportAddress || ''}
+                </p>
+            </div>
+            <div class="quote-meta">
+                <h2>Orçamento #${id.substring(0, 8).toUpperCase()}</h2>
+                <p>Data: ${formatDate(estimate.created_at)}</p>
+                <p>Validade: ${estimate.validade_dias || 7} dias</p>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div>
+                <div class="section-title">Cliente</div>
+                <strong>${clientName}</strong><br>
+                ${estimate.client?.phone || ''}
+            </div>
+        </div>
+
+        <div class="section-title">Itens do Orçamento</div>
+        ${items.map(item => {
+            const isBend = item.description.startsWith('[BEND]');
+            let displayName = item.description;
+            let subText = '';
+            let bendData = null;
+
+            if (isBend) {
+                try {
+                    bendData = JSON.parse(item.description.replace('[BEND] ', ''));
+                    displayName = bendData.group_name || 'Dobra';
+                    subText = `${bendData.roundedWidthCm}cm x ${bendData.totalLengthM}m (${bendData.m2.toFixed(2)}m²)`;
+                } catch (e) { }
+            } else if (item.description.startsWith('[SERVICE]')) {
+                displayName = item.description.replace('[SERVICE] ', '');
+            }
+
+            return `
+            <div class="item-row">
+                <div class="item-details">
+                    <div class="item-info">${displayName}</div>
+                    <div class="item-sub">${subText}</div>
+                    ${bendData?.svgDataUrl ? `<img src="${bendData.svgDataUrl}" class="bend-img" alt="Desenho">` : ''}
+                </div>
+                <div class="item-price">
+                    ${item.quantity} x ${formatter.format(item.unit_price)}<br>
+                    <span style="font-size: 18px;">${formatter.format(item.total_price)}</span>
+                </div>
+            </div>
+            `;
+        }).join('')}
+
+        <div class="totals">
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span>${formatter.format(estimate.total_amount)}</span>
+            </div>
+            ${estimate.discount_amount > 0 ? `
+            <div class="total-row" style="color: #ef4444;">
+                <span>Desconto</span>
+                <span>- ${formatter.format(estimate.discount_amount)}</span>
+            </div>
+            ` : ''}
+            <div class="total-row final">
+                <span>Total Final</span>
+                <span>${formatter.format(estimate.final_amount)}</span>
+            </div>
+        </div>
+
+        ${estimate.notes && estimate.notes.replace(/\[CLIENT:.*?\]/, '').trim() ? `
+        <div style="margin-top: 30px;">
+            <div class="section-title">Observações</div>
+            <p style="font-size: 14px; white-space: pre-wrap;">${estimate.notes.replace(/\[CLIENT:.*?\]/, '').trim()}</p>
+        </div>
+        ` : ''}
+
+        ${settings.reportPaymentTerms ? `
+        <div style="margin-top: 20px;">
+            <div class="section-title">Condições de Pagamento</div>
+            <p style="font-size: 14px;">${settings.reportPaymentTerms}</p>
+        </div>
+        ` : ''}
+
+        <div class="footer">
+            <p>${settings.reportFooterText || 'Obrigado pela preferência!'}</p>
+            <p style="margin-top: 10px;">Gerado por CalhaFlow</p>
+            <button class="no-print" onclick="window.print()" style="margin-top: 15px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">Imprimir Relatório</button>
+        </div>
+    </div>
+</body>
+</html>
+        `;
+        res.send(html);
+    } catch (err: any) {
+        console.error('[REPORT_ERROR]', err);
+        res.status(500).send('Erro ao gerar relatório');
+    }
+});
+
+app.put('/api/profile/tour-seen', authenticate as any, async (req, res) => {
+    const { error } = await supabase
+        .from('profiles')
+        .update({ welcome_tour_seen: true })
+        .eq('id', (req as any).user.id);
+    if (error) return res.status(500).json({ error: error.message });
     res.json({ success: true });
 });
 

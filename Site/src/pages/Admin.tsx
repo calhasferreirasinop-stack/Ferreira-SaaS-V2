@@ -13,6 +13,7 @@ import ClientsTab from '../components/admin/ClientsTab';
 import ProductsTab from '../components/admin/ProductsTab';
 import ProductionTab from '../components/admin/ProductionTab';
 import ReportTab from '../components/admin/ReportTab';
+import { WelcomeTour } from '../components/admin/WelcomeTour';
 type TabId = 'settings' | 'services' | 'posts' | 'gallery' | 'testimonials' | 'users' | 'quotes' | 'inventory' | 'financial' | 'receivables' | 'reports' | 'logs' | 'clients' | 'products' | 'production_admin';
 
 export default function Admin() {
@@ -247,6 +248,15 @@ export default function Admin() {
     try { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); } catch { /* ignore */ }
     localStorage.removeItem('user');
     navigate('/', { replace: true });
+  };
+
+  const handleCompleteTour = async () => {
+    try {
+      await fetch('/api/profile/tour-seen', { method: 'PUT', credentials: 'include' });
+      setCurrentUser((prev: any) => ({ ...prev, welcomeTourSeen: true }));
+    } catch (err) {
+      console.error('Failed to update tour status', err);
+    }
   };
 
   const handleSaveSettings = async () => {
@@ -894,6 +904,10 @@ export default function Admin() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {currentUser && currentUser.welcomeTourSeen === false && (
+        <WelcomeTour onComplete={handleCompleteTour} />
+      )}
     </div>
   );
 }

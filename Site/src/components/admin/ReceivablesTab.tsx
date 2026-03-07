@@ -119,32 +119,32 @@ export default function ReceivablesTab({ showToast }: Props) {
             </div>
 
             {/* DASHBOARD - SINGLE LINE SCROLLABLE */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
-                        <Clock className="w-6 h-6" />
+            <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 flex-nowrap">
+                <div className="min-w-[160px] flex-1 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-4">
+                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
+                        <Clock className="w-5 h-5" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight mb-1">A Receber</p>
-                        <p className="text-xl font-black text-slate-900">{fmt(totalReceber)}</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight mb-0.5">A Receber</p>
+                        <p className="text-lg font-black text-slate-900">{fmt(totalReceber)}</p>
                     </div>
                 </div>
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="w-6 h-6" />
+                <div className="min-w-[160px] flex-1 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-4">
+                    <div className="w-10 h-10 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-5 h-5" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight mb-1">Recebido</p>
-                        <p className="text-xl font-black text-green-600">{fmt(totalRecebido)}</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight mb-0.5">Recebido</p>
+                        <p className="text-lg font-black text-green-600">{fmt(totalRecebido)}</p>
                     </div>
                 </div>
-                <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-4">
+                <div className="min-w-[160px] flex-1 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center gap-4">
                     <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center shrink-0">
                         <AlertCircle className="w-6 h-6" />
                     </div>
                     <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight mb-1">Atraso</p>
-                        <p className="text-xl font-black text-red-600">{fmt(totalAtraso)}</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight mb-0.5">Atraso</p>
+                        <p className="text-lg font-black text-red-600">{fmt(totalAtraso)}</p>
                     </div>
                 </div>
             </div>
