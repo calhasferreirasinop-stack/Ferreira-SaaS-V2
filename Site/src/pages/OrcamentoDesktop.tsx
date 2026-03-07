@@ -3547,11 +3547,12 @@ window.onload = function() {
                 {/* ══ STEP 3: ENVIO DE ORÇAMENTO ══ */}
                 {
                     step === 'payment' && savedQuote && (() => {
-                        // Telefone do cliente: prioriza cliente vinculado, depois settings.whatsapp
                         const clientPhone: string = (() => {
                             const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
                             const raw = linked?.phone || savedQuote.clientPhone || '';
-                            // Remove tudo exceto '+' e dígitos
+                            if (raw.trim().startsWith('+')) {
+                                return raw.replace(/\D/g, '');
+                            }
                             let digits = raw.replace(/\D/g, '');
                             if (digits.length === 10 || digits.length === 11) digits = `55${digits}`;
                             return digits;
