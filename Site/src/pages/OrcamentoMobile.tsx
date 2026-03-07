@@ -3058,706 +3058,704 @@ window.onload = function() {
                                             </button>
                                         </div>
                                     )}
-                                </motion.div>                                            </div>
-                                        </>
-                                    )}
-            </motion.div>
+                                </motion.div>
 
-                                {/* Confirmed bends with meters input (Step 1) */ }
-        {
-            bends.length > 0 && (
-                <div className="space-y-4 pt-4" ref={metersRef}>
-                    <div className="flex items-center justify-between px-2">
-                        <h3 className="text-white font-black text-xs uppercase tracking-widest opacity-60">Itens do Orçamento ({bends.length})</h3>
-                    </div>
 
-                    <div className="space-y-4">
-                        {bends.map((bend, bi) => {
-                            const isService = bend.productType === 'service';
-                            const pCount = bends.filter((b, idx) => idx < bi && b.productType !== 'service').length + 1;
-                            const sCount = bends.filter((b, idx) => idx < bi && b.productType === 'service').length + 1;
-                            const label = isService ? `Serviço #${sCount}` : `Dobra #${pCount}`;
-
-                            return (
-                                <motion.div
-                                    key={bend.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="bg-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden active:scale-[0.99] transition-all"
-                                >
-                                    {/* Header Piece Info */}
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black ${isService ? 'bg-purple-500 shadow-lg shadow-purple-500/20' : 'bg-brand-primary shadow-lg shadow-brand-primary/20'}`}>
-                                                {bi + 1}
+                                {/* Confirmed bends with meters input (Step 1) */}
+                                {
+                                    bends.length > 0 && (
+                                        <div className="space-y-4 pt-4" ref={metersRef}>
+                                            <div className="flex items-center justify-between px-2">
+                                                <h3 className="text-white font-black text-xs uppercase tracking-widest opacity-60">Itens do Orçamento ({bends.length})</h3>
                                             </div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-slate-900 font-black text-base">{label}</span>
-                                                    {bend.group_name && (
-                                                        <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter border border-slate-200">
-                                                            {bend.group_name}
-                                                        </span>
-                                                    )}
+
+                                            <div className="space-y-4">
+                                                {bends.map((bend, bi) => {
+                                                    const isService = bend.productType === 'service';
+                                                    const pCount = bends.filter((b, idx) => idx < bi && b.productType !== 'service').length + 1;
+                                                    const sCount = bends.filter((b, idx) => idx < bi && b.productType === 'service').length + 1;
+                                                    const label = isService ? `Serviço #${sCount}` : `Dobra #${pCount}`;
+
+                                                    return (
+                                                        <motion.div
+                                                            key={bend.id}
+                                                            initial={{ opacity: 0, y: 20 }}
+                                                            animate={{ opacity: 1, y: 0 }}
+                                                            className="bg-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden active:scale-[0.99] transition-all"
+                                                        >
+                                                            {/* Header Piece Info */}
+                                                            <div className="flex items-start justify-between mb-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black ${isService ? 'bg-purple-500 shadow-lg shadow-purple-500/20' : 'bg-brand-primary shadow-lg shadow-brand-primary/20'}`}>
+                                                                        {bi + 1}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-slate-900 font-black text-base">{label}</span>
+                                                                            {bend.group_name && (
+                                                                                <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter border border-slate-200">
+                                                                                    {bend.group_name}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                                                                            {isService ? 'Serviço Adicional' : `${bend.totalWidthCm.toFixed(1)}cm → ${bend.roundedWidthCm}cm`}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex gap-2">
+                                                                    <button
+                                                                        onClick={() => { setChangingGroupId(bend.id); setTempGroupName(bend.group_name || ''); }}
+                                                                        className="w-10 h-10 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl active:bg-slate-100 transition-all border border-slate-100"
+                                                                    >
+                                                                        <List className="w-5 h-5" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => setBends(prev => prev.filter(b => b.id !== bend.id))}
+                                                                        className="w-10 h-10 flex items-center justify-center bg-rose-50 text-rose-500 rounded-xl active:bg-rose-500 active:text-white transition-all border border-rose-100"
+                                                                    >
+                                                                        <Trash2 className="w-5 h-5" />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Group Editor Inline (Mobile Native Feel) */}
+                                                            <AnimatePresence>
+                                                                {changingGroupId === bend.id && (
+                                                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-4">
+                                                                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+                                                                            <p className="text-[10px] font-black text-slate-400 uppercase">Mover para qual grupo?</p>
+                                                                            <div className="flex gap-2 flex-wrap">
+                                                                                {Array.from(new Set(bends.map(b => b.group_name).filter(Boolean))).map(g => (
+                                                                                    <button key={g} onClick={() => {
+                                                                                        setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: g } : b));
+                                                                                        setChangingGroupId(null);
+                                                                                    }} className="px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl text-xs font-bold active:bg-slate-100 transition-colors">
+                                                                                        {g}
+                                                                                    </button>
+                                                                                ))}
+                                                                            </div>
+                                                                            <div className="flex gap-2">
+                                                                                <input type="text" placeholder="Novo nome..." value={tempGroupName} onChange={e => setTempGroupName(e.target.value)}
+                                                                                    className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-brand-primary outline-none" />
+                                                                                <button onClick={() => {
+                                                                                    setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: tempGroupName.trim() || undefined } : b));
+                                                                                    setChangingGroupId(null);
+                                                                                }} className="px-4 py-2 bg-brand-primary text-white font-black rounded-xl text-xs uppercase">Ok</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </motion.div>
+                                                                )}
+                                                            </AnimatePresence>
+
+                                                            {/* Piece Content */}
+                                                            {isService ? (
+                                                                <div className="space-y-4">
+                                                                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                                                        <p className="text-slate-600 font-medium text-sm leading-relaxed">{bend.serviceDescription}</p>
+                                                                    </div>
+
+                                                                    <div className="flex gap-4">
+                                                                        <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center border border-slate-100">
+                                                                            <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Qtd/Unid</span>
+                                                                            <span className="text-lg font-black text-slate-900">{bend.serviceQty}x</span>
+                                                                        </div>
+                                                                        <div className="flex-[2] bg-purple-50 rounded-2xl p-3 flex flex-col items-center border border-purple-100">
+                                                                            <span className="text-[9px] font-black text-purple-400 uppercase mb-1">Valor do Serviço</span>
+                                                                            <span className="text-xl font-black text-purple-700">{fmt((bend.serviceValue || 0) * (bend.serviceQty || 1))}</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <button onClick={() => {
+                                                                        setEditingServiceId(bend.id);
+                                                                        setEditServiceDesc(bend.serviceDescription || '');
+                                                                        setEditServiceVal(String(bend.serviceValue || ''));
+                                                                        setEditServiceQtyStr(String(bend.serviceQty || 1));
+                                                                    }} className="w-full py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
+                                                                        <PenLine className="w-4 h-4" /> Editar Detalhes
+                                                                    </button>
+
+                                                                    <AnimatePresence>
+                                                                        {editingServiceId === bend.id && (
+                                                                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                                                                                <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl space-y-6">
+                                                                                    <h3 className="text-xl font-black text-slate-900">Editar Serviço</h3>
+                                                                                    <textarea rows={3} value={editServiceDesc} onChange={e => setEditServiceDesc(e.target.value)}
+                                                                                        className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm text-slate-900 focus:ring-2 focus:ring-purple-500 transition-all outline-none" placeholder="Descrição..." />
+                                                                                    <div className="grid grid-cols-2 gap-4">
+                                                                                        <div>
+                                                                                            <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Quant.</label>
+                                                                                            <input type="number" value={editServiceQtyStr} onChange={e => setEditServiceQtyStr(e.target.value)}
+                                                                                                className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Valor (R$)</label>
+                                                                                            <input type="number" step="0.01" value={editServiceVal} onChange={e => setEditServiceVal(e.target.value)}
+                                                                                                className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="flex gap-3 pt-2">
+                                                                                        <button onClick={() => setEditingServiceId(null)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200">Cancelar</button>
+                                                                                        <button onClick={() => {
+                                                                                            const newVal = parseFloat(editServiceVal) || 0;
+                                                                                            const newQty = parseFloat(editServiceQtyStr) || 1;
+                                                                                            setBends(prev => prev.map(b => b.id === bend.id ? { ...b, serviceDescription: editServiceDesc, serviceValue: newVal, serviceQty: newQty } : b));
+                                                                                            setEditingServiceId(null);
+                                                                                        }} className="flex-[2] py-4 bg-purple-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-purple-600/20 active:bg-purple-700">Salvar Alterações</button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </motion.div>
+                                                                        )}
+                                                                    </AnimatePresence>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="space-y-5">
+                                                                    {/* Visualization (Clean SVG) */}
+                                                                    <div className="relative group active:scale-95 transition-transform" onClick={() => bend.svgDataUrl && setZoomImg(bend.svgDataUrl)}>
+                                                                        <div className="w-full h-32 bg-slate-900 rounded-[2rem] overflow-hidden shadow-inner border border-white/5 relative">
+                                                                            <BendCanvas
+                                                                                risks={(bend.risks || []).map((r, ri) => ri === 0 ? { ...r, executionIdx: getBendExecutionLabels(bend.id, bend.lengths) } : r)}
+                                                                                exportMode={true}
+                                                                            />
+                                                                            <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md p-2 rounded-xl border border-white/10 opacity-60">
+                                                                                <ZoomIn className="w-4 h-4 text-white" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Dimensions Info */}
+                                                                    <div className="flex gap-3">
+                                                                        <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-slate-100">
+                                                                            <span className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Total Linear</span>
+                                                                            <span className="text-base font-black text-slate-900 leading-none">{bend.totalLengthM.toFixed(2)} <span className="text-[10px] font-bold">m</span></span>
+                                                                        </div>
+                                                                        <div className="flex-1 bg-brand-primary/5 rounded-2xl p-3 flex flex-col items-center justify-center border border-brand-primary/10">
+                                                                            <span className="text-[9px] font-black text-brand-primary uppercase leading-none mb-1">Área M²</span>
+                                                                            <span className="text-base font-black text-brand-primary leading-none">{bend.m2.toFixed(2)} <span className="text-[10px] font-bold">m²</span></span>
+                                                                        </div>
+                                                                        <div className="flex-1 bg-green-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-green-100">
+                                                                            <span className="text-[9px] font-black text-green-500 uppercase leading-none mb-1">Subtotal</span>
+                                                                            <span className="text-base font-black text-green-600 leading-none">{fmt(bend.m2 * pricePerM2)}</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* METERS INPUTS (Improved for touch) */}
+                                                                    <div className="space-y-3">
+                                                                        <div className="flex items-center justify-between">
+                                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pt-1">
+                                                                                <List className="w-3 h-3" /> Metros Corridos (Cortes)
+                                                                            </p>
+                                                                            <button onClick={() => {
+                                                                                setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: [...b.lengths, ''] } : b));
+                                                                                setTimeout(() => document.getElementById(`cut-input-${bend.id}-${bend.lengths.length}`)?.focus(), 100);
+                                                                            }} className="text-[10px] font-black text-brand-primary flex items-center gap-1 active:opacity-50">
+                                                                                <Plus className="w-3.5 h-3.5" /> NOVO CORTE
+                                                                            </button>
+                                                                        </div>
+
+                                                                        <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
+                                                                            {bend.lengths.map((l, li) => (
+                                                                                <div key={li} className="relative group">
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        id={`cut-input-${bend.id}-${li}`}
+                                                                                        min="0.01"
+                                                                                        step="0.01"
+                                                                                        placeholder="0.00"
+                                                                                        value={l}
+                                                                                        onChange={e => updateLength(bend.id, li, e.target.value)}
+                                                                                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-4 text-center text-lg font-black text-slate-900 focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
+                                                                                    />
+                                                                                    {bend.lengths.length > 1 && (
+                                                                                        <button
+                                                                                            onClick={() => { const ls = bend.lengths.filter((_, i) => i !== li); setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: ls, ...calcM2(b.roundedWidthCm, ls) } : b)); }}
+                                                                                            className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-75 transition-all z-10"
+                                                                                        >
+                                                                                            ×
+                                                                                        </button>
+                                                                                    )}
+                                                                                    {optResult.pieceToSeq && optResult.pieceToSeq[`${bend.id}-${li}`] && (
+                                                                                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none opacity-40">
+                                                                                            <span className="text-[7px] font-black text-slate-400 bg-white border border-slate-100 px-1 rounded uppercase tracking-tighter">
+                                                                                                C{optResult.pieceToSeq[`${bend.id}-${li}`][0]}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Edit piece action */}
+                                                                    <button onClick={() => {
+                                                                        setSelectedProductType(bend.productType || 'product');
+                                                                        if (bend.product_id) {
+                                                                            setSelectedProductId(bend.product_id);
+                                                                            const prod = allProducts.find(p => p.id === bend.product_id);
+                                                                            if (prod) setSelectedProductName(prod.name);
+                                                                        }
+                                                                        setEditingBendLengths([...bend.lengths]);
+                                                                        setCurrentRisks(bend.risks || []);
+                                                                        setBends(prev => prev.filter(b => b.id !== bend.id));
+                                                                        topRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                                                    }} className="w-full py-4 bg-slate-50 text-slate-400 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:bg-slate-100 transition-all">
+                                                                        <RefreshCw className="w-4 h-4" /> Modificar Geometria / Produto
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </motion.div>
+                                                    );
+                                                })}
+
+                                                <div className="flex justify-center pt-2">
+                                                    <button onClick={() => {
+                                                        if (selectedProductType === 'service') {
+                                                            serviceDescRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                                            setTimeout(() => serviceDescRef.current?.focus(), 300);
+                                                        } else {
+                                                            topRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                                        }
+                                                    }} className="px-8 py-4 bg-brand-primary text-white font-black rounded-[1.8rem] flex items-center gap-3 cursor-pointer shadow-xl shadow-brand-primary/20 active:scale-95 transition-all uppercase text-xs tracking-widest">
+                                                        <Plus className="w-5 h-5" /> Adicionar Outro Item
+                                                    </button>
                                                 </div>
-                                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                                                    {isService ? 'Serviço Adicional' : `${bend.totalWidthCm.toFixed(1)}cm → ${bend.roundedWidthCm}cm`}
-                                                </p>
                                             </div>
                                         </div>
+                                    )
+                                }
 
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => { setChangingGroupId(bend.id); setTempGroupName(bend.group_name || ''); }}
-                                                className="w-10 h-10 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl active:bg-slate-100 transition-all border border-slate-100"
-                                            >
-                                                <List className="w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => setBends(prev => prev.filter(b => b.id !== bend.id))}
-                                                className="w-10 h-10 flex items-center justify-center bg-rose-50 text-rose-500 rounded-xl active:bg-rose-500 active:text-white transition-all border border-rose-100"
-                                            >
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
+                                {/* Total sticky bar (Step 1) */}
+                                {
+                                    bends.length > 0 && (
+                                        <div className="sticky bottom-6 z-30 px-4">
+                                            <div className="bg-slate-900/90 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] p-6 flex flex-col gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                                                <div className="flex justify-between items-center w-full bg-white/5 p-4 rounded-2xl border border-white/5">
+                                                    <div>
+                                                        <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Total m²</p>
+                                                        <p className="text-white font-black text-2xl">{totalM2.toFixed(2)}</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Estimado</p>
+                                                        <p className="text-brand-primary font-black text-3xl">{fmt(totalValue)}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3 w-full">
+                                                    <button onClick={handleSaveDraft} disabled={savingDraft}
+                                                        className="h-16 flex items-center justify-center gap-2 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                                                        <Save className="w-5 h-5" /> Salvar
+                                                    </button>
+                                                    <button onClick={() => setStep('summary')} className="h-16 flex items-center justify-center gap-2 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-lg shadow-brand-primary/20">
+                                                        Avançar <ChevronRight className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                            </div >
+                        )
+                    }
+
+                    {/* ══ STEP 2: SUMMARY ══ */}
+                    {
+                        step === 'summary' && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-20">
+                                <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl space-y-8" id="quote-print">
+                                    <div className="flex items-start justify-between">
+                                        <div className="space-y-1">
+                                            <h2 className="text-2xl font-black text-slate-900 leading-tight">Resumo Geral</h2>
+                                            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                                        </div>
+                                        <div className="bg-blue-50 border border-blue-100 px-4 py-2 rounded-2xl">
+                                            <p className="text-blue-600 font-black text-[10px] uppercase tracking-tighter">Versão Final</p>
                                         </div>
                                     </div>
 
-                                    {/* Group Editor Inline (Mobile Native Feel) */}
-                                    <AnimatePresence>
-                                        {changingGroupId === bend.id && (
-                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-4">
-                                                <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase">Mover para qual grupo?</p>
-                                                    <div className="flex gap-2 flex-wrap">
-                                                        {Array.from(new Set(bends.map(b => b.group_name).filter(Boolean))).map(g => (
-                                                            <button key={g} onClick={() => {
-                                                                setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: g } : b));
-                                                                setChangingGroupId(null);
-                                                            }} className="px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl text-xs font-bold active:bg-slate-100 transition-colors">
-                                                                {g}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <input type="text" placeholder="Novo nome..." value={tempGroupName} onChange={e => setTempGroupName(e.target.value)}
-                                                            className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-brand-primary outline-none" />
-                                                        <button onClick={() => {
-                                                            setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: tempGroupName.trim() || undefined } : b));
-                                                            setChangingGroupId(null);
-                                                        }} className="px-4 py-2 bg-brand-primary text-white font-black rounded-xl text-xs uppercase">Ok</button>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
+                                    <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cliente</p>
+                                        <p className="text-xl font-black text-slate-900">{user?.name || user?.username || clientName || 'Consumidor Final'}</p>
+                                    </div>
 
-                                    {/* Piece Content */}
-                                    {isService ? (
-                                        <div className="space-y-4">
+                                    <div className="space-y-4">
+                                        {(() => {
+                                            const grouped = bends.reduce((acc, b) => {
+                                                const key = b.group_name || 'Sem Grupo';
+                                                if (!acc[key]) acc[key] = [];
+                                                acc[key].push(b);
+                                                return acc;
+                                            }, {} as Record<string, Bend[]>);
+
+                                            return Object.entries(grouped).map(([groupName, groupBends]) => (
+                                                <div key={groupName} className="space-y-4">
+                                                    {Object.keys(grouped).length > 1 && (
+                                                        <div className="flex items-center gap-3 pt-4">
+                                                            <div className="w-2 h-2 bg-brand-primary rounded-full" />
+                                                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">{groupName}</h3>
+                                                        </div>
+                                                    )}
+                                                    {groupBends.map((b) => {
+                                                        const globalIdx = bends.findIndex(x => x.id === b.id);
+                                                        const isService = b.productType === 'service';
+
+                                                        return (
+                                                            <div key={b.id} className="bg-slate-50 border border-slate-100 rounded-3xl p-5 flex items-center justify-between gap-4">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs ${isService ? 'bg-purple-500' : 'bg-slate-900'}`}>{globalIdx + 1}</div>
+                                                                    <div>
+                                                                        <p className="text-slate-900 font-black text-sm">
+                                                                            {isService ? 'Serviço' : 'Peça Industrial'} — {b.product_id ? allProducts.find(p => p.id === b.product_id)?.name : 'Geral'}
+                                                                        </p>
+                                                                        <p className="text-slate-500 text-[10px] font-medium leading-tight line-clamp-1">
+                                                                            {isService ? b.serviceDescription : (b.risks || []).map(r => `${r.sizeCm}cm`).join(' · ')}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-right shrink-0">
+                                                                    <p className="text-slate-900 font-black text-sm">{isService ? `x${b.serviceQty}` : `${b.m2.toFixed(2)}m²`}</p>
+                                                                    <p className={`text-[10px] font-black ${isService ? 'text-purple-600' : 'text-brand-primary'}`}>
+                                                                        {fmt(isService ? (b.serviceValue || 0) * (b.serviceQty || 1) : b.m2 * pricePerM2)}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ));
+                                        })()}
+                                    </div>
+
+                                    <div className="space-y-4 pt-4 border-t border-slate-100">
+                                        <div className="grid grid-cols-2 gap-4">
                                             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                                                <p className="text-slate-600 font-medium text-sm leading-relaxed">{bend.serviceDescription}</p>
+                                                <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Venda (m²)</label>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-slate-300 font-black">R$</span>
+                                                    <input type="number" value={overridePricePerM2} onChange={e => setOverridePricePerM2(e.target.value)}
+                                                        className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
+                                                </div>
                                             </div>
+                                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Custo (m²)</label>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-slate-300 font-black">R$</span>
+                                                    <input type="number" value={overrideCostPerM2} onChange={e => setOverrideCostPerM2(e.target.value)}
+                                                        className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                            <div className="flex gap-4">
-                                                <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center border border-slate-100">
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Qtd/Unid</span>
-                                                    <span className="text-lg font-black text-slate-900">{bend.serviceQty}x</span>
+                                        <div className="flex items-center justify-between bg-brand-primary rounded-[2.5rem] p-8 text-white shadow-xl shadow-brand-primary/20">
+                                            <div>
+                                                <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Total Geral</p>
+                                                <div className="flex items-center gap-2">
+                                                    <h2 className="text-4xl font-black tracking-tighter">{fmt(finalWithDiscount)}</h2>
                                                 </div>
-                                                <div className="flex-[2] bg-purple-50 rounded-2xl p-3 flex flex-col items-center border border-purple-100">
-                                                    <span className="text-[9px] font-black text-purple-400 uppercase mb-1">Valor do Serviço</span>
-                                                    <span className="text-xl font-black text-purple-700">{fmt((bend.serviceValue || 0) * (bend.serviceQty || 1))}</span>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Lucro Est.</p>
+                                                <p className="text-2xl font-black">{fmt(profit)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Notas / Observações</label>
+                                            <textarea rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Endereço, cor, material..."
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all outline-none text-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Summary Actions Footer */}
+                                <div className="grid grid-cols-2 gap-3 pb-8">
+                                    <button onClick={() => setStep('bends')}
+                                        className="h-16 flex items-center justify-center gap-2 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200 transition-all">
+                                        <ChevronLeft className="w-5 h-5" /> Voltar
+                                    </button>
+                                    <button onClick={handleSubmit} disabled={submitting}
+                                        className="h-16 flex items-center justify-center gap-3 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-xl shadow-brand-primary/20">
+                                        {submitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                        {submitting ? 'Enviando...' : 'Finalizar e Enviar'}
+                                    </button>
+
+                                    <div className="col-span-2 grid grid-cols-3 gap-3">
+                                        <button onClick={() => handleViewClientReport({ id: 'PREVIA', clientName }, bends)}
+                                            className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
+                                            <Printer className="w-5 h-5 text-slate-400" />
+                                            <span className="text-[8px] font-black uppercase">Preview</span>
+                                        </button>
+                                        <button onClick={() => {
+                                            const w2 = window.open('', '_blank');
+                                            handleDownloadQuoteCompactPDF({ id: 'PREVIA', totalM2: totalM2, totalValue: totalM2 * pricePerM2, clientName }, bends, w2);
+                                        }} className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
+                                            <FileDown className="w-5 h-5 text-slate-400" />
+                                            <span className="text-[8px] font-black uppercase">Obra</span>
+                                        </button>
+                                        <button onClick={handleDownloadPDF}
+                                            className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
+                                            <FileDown className="w-5 h-5 text-slate-400" />
+                                            <span className="text-[8px] font-black uppercase">Prod.</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )
+                    }
+
+                    {/* ══ STEP 3: SUCCESS & SHARING ══ */}
+                    {
+                        (step === 'success' || step === 'payment') && savedQuote && (() => {
+                            const clientPhone = (() => {
+                                const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
+                                const raw = linked?.phone || savedQuote.clientPhone || '';
+                                return raw.replace(/[^+\d]/g, '');
+                            })();
+
+                            const quoteNum = String(savedQuote.id).substring(0, 8).toUpperCase();
+                            const reportUrl = `${window.location.origin}/api/quotes/${savedQuote.id}/client-report`;
+                            const waMsg = encodeURIComponent(
+                                `Olá ${savedQuote.clientName || clientName || ''}! 😊\n\nSegue seu orçamento Nº ${quoteNum} no valor de *${fmt(finalWithDiscount)}*.\n\n📄 Visualize e imprima seu orçamento:\n${reportUrl}\n\nQualquer dúvida estou à disposição!`
+                            );
+                            const waLink = clientPhone ? `https://wa.me/${clientPhone}?text=${waMsg}` : null;
+
+                            return (
+                                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-8 pb-32">
+                                    <div className="bg-white rounded-[3rem] p-10 shadow-2xl border border-slate-100 flex flex-col items-center text-center space-y-8 w-full max-w-sm">
+                                        <div className="w-24 h-24 bg-green-500 rounded-[2rem] flex items-center justify-center shadow-xl shadow-green-500/20 rotate-3 animate-bounce">
+                                            <Check className="w-12 h-12 text-white" />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <h2 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{quoteNum}</h2>
+                                            <p className="text-slate-500 font-medium px-4">Pronto para ser compartilhado com seu cliente.</p>
+                                        </div>
+
+                                        <div className="bg-slate-50 rounded-3xl p-6 w-full border border-slate-100 space-y-1">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Valor Final</p>
+                                            <p className="text-3xl font-black text-brand-primary">{fmt(finalWithDiscount)}</p>
+                                            <div className="pt-3 mt-3 border-t border-slate-200/50">
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente</p>
+                                                <p className="text-lg font-black text-slate-900 truncate">{savedQuote.clientName || clientName || 'Consumidor Final'}</p>
+                                                <p className="text-slate-400 text-xs font-mono">{clientPhone || 'Sem telefone'}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="w-full space-y-4 pt-4">
+                                            {waLink ? (
+                                                <a href={waLink} target="_blank" rel="noopener noreferrer"
+                                                    className="h-20 w-full bg-[#25D366] text-white rounded-[1.8rem] flex items-center justify-center gap-4 font-black text-lg shadow-xl shadow-green-500/20 active:scale-95 transition-all">
+                                                    <Send className="w-6 h-6" /> WhatsApp
+                                                </a>
+                                            ) : (
+                                                <div className="p-4 bg-amber-50 text-amber-700 rounded-2xl text-xs font-bold border border-amber-100">
+                                                    ⚠️ Cadastre um telefone para habilitar o envio por WhatsApp
                                                 </div>
+                                            )}
+
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button onClick={() => { handleResetQuote(); setStep('bends'); }}
+                                                    className="h-16 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                                                    <Plus className="w-5 h-5 mx-auto mb-1" /> Novo
+                                                </button>
+                                                <button onClick={() => setStep('summary')}
+                                                    className="h-16 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                                                    <RotateCcw className="w-5 h-5 mx-auto mb-1" /> Resumo
+                                                </button>
                                             </div>
 
                                             <button onClick={() => {
-                                                setEditingServiceId(bend.id);
-                                                setEditServiceDesc(bend.serviceDescription || '');
-                                                setEditServiceVal(String(bend.serviceValue || ''));
-                                                setEditServiceQtyStr(String(bend.serviceQty || 1));
-                                            }} className="w-full py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
-                                                <PenLine className="w-4 h-4" /> Editar Detalhes
+                                                handleResetQuote();
+                                                setBends([]);
+                                                setCurrentRisks([]);
+                                                setEditingQuoteId(null);
+                                                setShowMyQuotes(true);
+                                                setStep('bends');
+                                            }}
+                                                className="w-full h-16 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest active:bg-slate-50 transition-all">
+                                                <List className="w-5 h-5 mx-auto mb-1" /> Ver Histórico de Orçamentos
                                             </button>
 
-                                            <AnimatePresence>
-                                                {editingServiceId === bend.id && (
-                                                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-                                                        <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl space-y-6">
-                                                            <h3 className="text-xl font-black text-slate-900">Editar Serviço</h3>
-                                                            <textarea rows={3} value={editServiceDesc} onChange={e => setEditServiceDesc(e.target.value)}
-                                                                className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm text-slate-900 focus:ring-2 focus:ring-purple-500 transition-all outline-none" placeholder="Descrição..." />
-                                                            <div className="grid grid-cols-2 gap-4">
-                                                                <div>
-                                                                    <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Quant.</label>
-                                                                    <input type="number" value={editServiceQtyStr} onChange={e => setEditServiceQtyStr(e.target.value)}
-                                                                        className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Valor (R$)</label>
-                                                                    <input type="number" step="0.01" value={editServiceVal} onChange={e => setEditServiceVal(e.target.value)}
-                                                                        className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex gap-3 pt-2">
-                                                                <button onClick={() => setEditingServiceId(null)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200">Cancelar</button>
-                                                                <button onClick={() => {
-                                                                    const newVal = parseFloat(editServiceVal) || 0;
-                                                                    const newQty = parseFloat(editServiceQtyStr) || 1;
-                                                                    setBends(prev => prev.map(b => b.id === bend.id ? { ...b, serviceDescription: editServiceDesc, serviceValue: newVal, serviceQty: newQty } : b));
-                                                                    setEditingServiceId(null);
-                                                                }} className="flex-[2] py-4 bg-purple-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-purple-600/20 active:bg-purple-700">Salvar Alterações</button>
-                                                            </div>
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
+                                            <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
+                                                <button onClick={() => handleViewClientReport(savedQuote, bends)}
+                                                    className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
+                                                    <Printer className="w-5 h-5" />
+                                                    <span className="text-[8px] font-black uppercase tracking-tighter">Preview</span>
+                                                </button>
+                                                <button onClick={() => {
+                                                    const w2 = window.open('', '_blank');
+                                                    handleDownloadQuoteCompactPDF(savedQuote, bends, w2);
+                                                }} className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
+                                                    <Printer className="w-5 h-5" />
+                                                    <span className="text-[8px] font-black uppercase tracking-tighter">Obra</span>
+                                                </button>
+                                                <button onClick={handleDownloadPDF}
+                                                    className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
+                                                    <FileDown className="w-5 h-5" />
+                                                    <span className="text-[8px] font-black uppercase tracking-tighter">Produção</span>
+                                                </button>
+                                            </div>
                                         </div>
-                                    ) : (
-                                        <div className="space-y-5">
-                                            {/* Visualization (Clean SVG) */}
-                                            <div className="relative group active:scale-95 transition-transform" onClick={() => bend.svgDataUrl && setZoomImg(bend.svgDataUrl)}>
-                                                <div className="w-full h-32 bg-slate-900 rounded-[2rem] overflow-hidden shadow-inner border border-white/5 relative">
-                                                    <BendCanvas
-                                                        risks={(bend.risks || []).map((r, ri) => ri === 0 ? { ...r, executionIdx: getBendExecutionLabels(bend.id, bend.lengths) } : r)}
-                                                        exportMode={true}
-                                                    />
-                                                    <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md p-2 rounded-xl border border-white/10 opacity-60">
-                                                        <ZoomIn className="w-4 h-4 text-white" />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Dimensions Info */}
-                                            <div className="flex gap-3">
-                                                <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-slate-100">
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Total Linear</span>
-                                                    <span className="text-base font-black text-slate-900 leading-none">{bend.totalLengthM.toFixed(2)} <span className="text-[10px] font-bold">m</span></span>
-                                                </div>
-                                                <div className="flex-1 bg-brand-primary/5 rounded-2xl p-3 flex flex-col items-center justify-center border border-brand-primary/10">
-                                                    <span className="text-[9px] font-black text-brand-primary uppercase leading-none mb-1">Área M²</span>
-                                                    <span className="text-base font-black text-brand-primary leading-none">{bend.m2.toFixed(2)} <span className="text-[10px] font-bold">m²</span></span>
-                                                </div>
-                                                <div className="flex-1 bg-green-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-green-100">
-                                                    <span className="text-[9px] font-black text-green-500 uppercase leading-none mb-1">Subtotal</span>
-                                                    <span className="text-base font-black text-green-600 leading-none">{fmt(bend.m2 * pricePerM2)}</span>
-                                                </div>
-                                            </div>
-
-                                            {/* METERS INPUTS (Improved for touch) */}
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pt-1">
-                                                        <List className="w-3 h-3" /> Metros Corridos (Cortes)
-                                                    </p>
-                                                    <button onClick={() => {
-                                                        setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: [...b.lengths, ''] } : b));
-                                                        setTimeout(() => document.getElementById(`cut-input-${bend.id}-${bend.lengths.length}`)?.focus(), 100);
-                                                    }} className="text-[10px] font-black text-brand-primary flex items-center gap-1 active:opacity-50">
-                                                        <Plus className="w-3.5 h-3.5" /> NOVO CORTE
-                                                    </button>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
-                                                    {bend.lengths.map((l, li) => (
-                                                        <div key={li} className="relative group">
-                                                            <input
-                                                                type="number"
-                                                                id={`cut-input-${bend.id}-${li}`}
-                                                                min="0.01"
-                                                                step="0.01"
-                                                                placeholder="0.00"
-                                                                value={l}
-                                                                onChange={e => updateLength(bend.id, li, e.target.value)}
-                                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-4 text-center text-lg font-black text-slate-900 focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
-                                                            />
-                                                            {bend.lengths.length > 1 && (
-                                                                <button
-                                                                    onClick={() => { const ls = bend.lengths.filter((_, i) => i !== li); setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: ls, ...calcM2(b.roundedWidthCm, ls) } : b)); }}
-                                                                    className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-75 transition-all z-10"
-                                                                >
-                                                                    ×
-                                                                </button>
-                                                            )}
-                                                            {optResult.pieceToSeq && optResult.pieceToSeq[`${bend.id}-${li}`] && (
-                                                                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none opacity-40">
-                                                                    <span className="text-[7px] font-black text-slate-400 bg-white border border-slate-100 px-1 rounded uppercase tracking-tighter">
-                                                                        C{optResult.pieceToSeq[`${bend.id}-${li}`][0]}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            {/* Edit piece action */}
-                                            <button onClick={() => {
-                                                setSelectedProductType(bend.productType || 'product');
-                                                if (bend.product_id) {
-                                                    setSelectedProductId(bend.product_id);
-                                                    const prod = allProducts.find(p => p.id === bend.product_id);
-                                                    if (prod) setSelectedProductName(prod.name);
-                                                }
-                                                setEditingBendLengths([...bend.lengths]);
-                                                setCurrentRisks(bend.risks || []);
-                                                setBends(prev => prev.filter(b => b.id !== bend.id));
-                                                topRef.current?.scrollIntoView({ behavior: 'smooth' });
-                                            }} className="w-full py-4 bg-slate-50 text-slate-400 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:bg-slate-100 transition-all">
-                                                <RefreshCw className="w-4 h-4" /> Modificar Geometria / Produto
-                                            </button>
-                                        </div>
-                                    )}
+                                    </div>
                                 </motion.div>
                             );
-                        })}
-
-                        <div className="flex justify-center pt-2">
-                            <button onClick={() => {
-                                if (selectedProductType === 'service') {
-                                    serviceDescRef.current?.scrollIntoView({ behavior: 'smooth' });
-                                    setTimeout(() => serviceDescRef.current?.focus(), 300);
-                                } else {
-                                    topRef.current?.scrollIntoView({ behavior: 'smooth' });
-                                }
-                            }} className="px-8 py-4 bg-brand-primary text-white font-black rounded-[1.8rem] flex items-center gap-3 cursor-pointer shadow-xl shadow-brand-primary/20 active:scale-95 transition-all uppercase text-xs tracking-widest">
-                                <Plus className="w-5 h-5" /> Adicionar Outro Item
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-
-        {/* Total sticky bar (Step 1) */ }
-        {
-            bends.length > 0 && (
-                <div className="sticky bottom-6 z-30 px-4">
-                    <div className="bg-slate-900/90 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] p-6 flex flex-col gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                        <div className="flex justify-between items-center w-full bg-white/5 p-4 rounded-2xl border border-white/5">
-                            <div>
-                                <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Total m²</p>
-                                <p className="text-white font-black text-2xl">{totalM2.toFixed(2)}</p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Estimado</p>
-                                <p className="text-brand-primary font-black text-3xl">{fmt(totalValue)}</p>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 w-full">
-                            <button onClick={handleSaveDraft} disabled={savingDraft}
-                                className="h-16 flex items-center justify-center gap-2 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
-                                <Save className="w-5 h-5" /> Salvar
-                            </button>
-                            <button onClick={() => setStep('summary')} className="h-16 flex items-center justify-center gap-2 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-lg shadow-brand-primary/20">
-                                Avançar <ChevronRight className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-                            </div >
-                        )
-    }
-
-    {/* ══ STEP 2: SUMMARY ══ */ }
-    {
-        step === 'summary' && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-20">
-                <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl space-y-8" id="quote-print">
-                    <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                            <h2 className="text-2xl font-black text-slate-900 leading-tight">Resumo Geral</h2>
-                            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                        </div>
-                        <div className="bg-blue-50 border border-blue-100 px-4 py-2 rounded-2xl">
-                            <p className="text-blue-600 font-black text-[10px] uppercase tracking-tighter">Versão Final</p>
-                        </div>
-                    </div>
-
-                    <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cliente</p>
-                        <p className="text-xl font-black text-slate-900">{user?.name || user?.username || clientName || 'Consumidor Final'}</p>
-                    </div>
-
-                    <div className="space-y-4">
-                        {(() => {
-                            const grouped = bends.reduce((acc, b) => {
-                                const key = b.group_name || 'Sem Grupo';
-                                if (!acc[key]) acc[key] = [];
-                                acc[key].push(b);
-                                return acc;
-                            }, {} as Record<string, Bend[]>);
-
-                            return Object.entries(grouped).map(([groupName, groupBends]) => (
-                                <div key={groupName} className="space-y-4">
-                                    {Object.keys(grouped).length > 1 && (
-                                        <div className="flex items-center gap-3 pt-4">
-                                            <div className="w-2 h-2 bg-brand-primary rounded-full" />
-                                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">{groupName}</h3>
-                                        </div>
-                                    )}
-                                    {groupBends.map((b) => {
-                                        const globalIdx = bends.findIndex(x => x.id === b.id);
-                                        const isService = b.productType === 'service';
-
-                                        return (
-                                            <div key={b.id} className="bg-slate-50 border border-slate-100 rounded-3xl p-5 flex items-center justify-between gap-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs ${isService ? 'bg-purple-500' : 'bg-slate-900'}`}>{globalIdx + 1}</div>
-                                                    <div>
-                                                        <p className="text-slate-900 font-black text-sm">
-                                                            {isService ? 'Serviço' : 'Peça Industrial'} — {b.product_id ? allProducts.find(p => p.id === b.product_id)?.name : 'Geral'}
-                                                        </p>
-                                                        <p className="text-slate-500 text-[10px] font-medium leading-tight line-clamp-1">
-                                                            {isService ? b.serviceDescription : (b.risks || []).map(r => `${r.sizeCm}cm`).join(' · ')}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="text-right shrink-0">
-                                                    <p className="text-slate-900 font-black text-sm">{isService ? `x${b.serviceQty}` : `${b.m2.toFixed(2)}m²`}</p>
-                                                    <p className={`text-[10px] font-black ${isService ? 'text-purple-600' : 'text-brand-primary'}`}>
-                                                        {fmt(isService ? (b.serviceValue || 0) * (b.serviceQty || 1) : b.m2 * pricePerM2)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ));
-                        })()}
-                    </div>
-
-                    <div className="space-y-4 pt-4 border-t border-slate-100">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                                <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Venda (m²)</label>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-slate-300 font-black">R$</span>
-                                    <input type="number" value={overridePricePerM2} onChange={e => setOverridePricePerM2(e.target.value)}
-                                        className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
-                                </div>
-                            </div>
-                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                                <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Custo (m²)</label>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-slate-300 font-black">R$</span>
-                                    <input type="number" value={overrideCostPerM2} onChange={e => setOverrideCostPerM2(e.target.value)}
-                                        className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between bg-brand-primary rounded-[2.5rem] p-8 text-white shadow-xl shadow-brand-primary/20">
-                            <div>
-                                <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Total Geral</p>
-                                <div className="flex items-center gap-2">
-                                    <h2 className="text-4xl font-black tracking-tighter">{fmt(finalWithDiscount)}</h2>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Lucro Est.</p>
-                                <p className="text-2xl font-black">{fmt(profit)}</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Notas / Observações</label>
-                            <textarea rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Endereço, cor, material..."
-                                className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all outline-none text-sm" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Summary Actions Footer */}
-                <div className="grid grid-cols-2 gap-3 pb-8">
-                    <button onClick={() => setStep('bends')}
-                        className="h-16 flex items-center justify-center gap-2 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200 transition-all">
-                        <ChevronLeft className="w-5 h-5" /> Voltar
-                    </button>
-                    <button onClick={handleSubmit} disabled={submitting}
-                        className="h-16 flex items-center justify-center gap-3 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-xl shadow-brand-primary/20">
-                        {submitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                        {submitting ? 'Enviando...' : 'Finalizar e Enviar'}
-                    </button>
-
-                    <div className="col-span-2 grid grid-cols-3 gap-3">
-                        <button onClick={() => handleViewClientReport({ id: 'PREVIA', clientName }, bends)}
-                            className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
-                            <Printer className="w-5 h-5 text-slate-400" />
-                            <span className="text-[8px] font-black uppercase">Preview</span>
-                        </button>
-                        <button onClick={() => {
-                            const w2 = window.open('', '_blank');
-                            handleDownloadQuoteCompactPDF({ id: 'PREVIA', totalM2: totalM2, totalValue: totalM2 * pricePerM2, clientName }, bends, w2);
-                        }} className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
-                            <FileDown className="w-5 h-5 text-slate-400" />
-                            <span className="text-[8px] font-black uppercase">Obra</span>
-                        </button>
-                        <button onClick={handleDownloadPDF}
-                            className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
-                            <FileDown className="w-5 h-5 text-slate-400" />
-                            <span className="text-[8px] font-black uppercase">Prod.</span>
-                        </button>
-                    </div>
-                </div>
-            </motion.div>
-        )
-    }
-
-    {/* ══ STEP 3: SUCCESS & SHARING ══ */ }
-    {
-        (step === 'success' || step === 'payment') && savedQuote && (() => {
-            const clientPhone = (() => {
-                const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
-                const raw = linked?.phone || savedQuote.clientPhone || '';
-                return raw.replace(/[^+\d]/g, '');
-            })();
-
-            const quoteNum = String(savedQuote.id).substring(0, 8).toUpperCase();
-            const reportUrl = `${window.location.origin}/api/quotes/${savedQuote.id}/client-report`;
-            const waMsg = encodeURIComponent(
-                `Olá ${savedQuote.clientName || clientName || ''}! 😊\n\nSegue seu orçamento Nº ${quoteNum} no valor de *${fmt(finalWithDiscount)}*.\n\n📄 Visualize e imprima seu orçamento:\n${reportUrl}\n\nQualquer dúvida estou à disposição!`
-            );
-            const waLink = clientPhone ? `https://wa.me/${clientPhone}?text=${waMsg}` : null;
-
-            return (
-                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-8 pb-32">
-                    <div className="bg-white rounded-[3rem] p-10 shadow-2xl border border-slate-100 flex flex-col items-center text-center space-y-8 w-full max-w-sm">
-                        <div className="w-24 h-24 bg-green-500 rounded-[2rem] flex items-center justify-center shadow-xl shadow-green-500/20 rotate-3 animate-bounce">
-                            <Check className="w-12 h-12 text-white" />
-                        </div>
-
-                        <div className="space-y-2">
-                            <h2 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{quoteNum}</h2>
-                            <p className="text-slate-500 font-medium px-4">Pronto para ser compartilhado com seu cliente.</p>
-                        </div>
-
-                        <div className="bg-slate-50 rounded-3xl p-6 w-full border border-slate-100 space-y-1">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Valor Final</p>
-                            <p className="text-3xl font-black text-brand-primary">{fmt(finalWithDiscount)}</p>
-                            <div className="pt-3 mt-3 border-t border-slate-200/50">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente</p>
-                                <p className="text-lg font-black text-slate-900 truncate">{savedQuote.clientName || clientName || 'Consumidor Final'}</p>
-                                <p className="text-slate-400 text-xs font-mono">{clientPhone || 'Sem telefone'}</p>
-                            </div>
-                        </div>
-
-                        <div className="w-full space-y-4 pt-4">
-                            {waLink ? (
-                                <a href={waLink} target="_blank" rel="noopener noreferrer"
-                                    className="h-20 w-full bg-[#25D366] text-white rounded-[1.8rem] flex items-center justify-center gap-4 font-black text-lg shadow-xl shadow-green-500/20 active:scale-95 transition-all">
-                                    <Send className="w-6 h-6" /> WhatsApp
-                                </a>
-                            ) : (
-                                <div className="p-4 bg-amber-50 text-amber-700 rounded-2xl text-xs font-bold border border-amber-100">
-                                    ⚠️ Cadastre um telefone para habilitar o envio por WhatsApp
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <button onClick={() => { handleResetQuote(); setStep('bends'); }}
-                                    className="h-16 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
-                                    <Plus className="w-5 h-5 mx-auto mb-1" /> Novo
-                                </button>
-                                <button onClick={() => setStep('summary')}
-                                    className="h-16 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
-                                    <RotateCcw className="w-5 h-5 mx-auto mb-1" /> Resumo
-                                </button>
-                            </div>
-
-                            <button onClick={() => {
-                                handleResetQuote();
-                                setBends([]);
-                                setCurrentRisks([]);
-                                setEditingQuoteId(null);
-                                setShowMyQuotes(true);
-                                setStep('bends');
-                            }}
-                                className="w-full h-16 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest active:bg-slate-50 transition-all">
-                                <List className="w-5 h-5 mx-auto mb-1" /> Ver Histórico de Orçamentos
-                            </button>
-
-                            <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
-                                <button onClick={() => handleViewClientReport(savedQuote, bends)}
-                                    className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
-                                    <Printer className="w-5 h-5" />
-                                    <span className="text-[8px] font-black uppercase tracking-tighter">Preview</span>
-                                </button>
-                                <button onClick={() => {
-                                    const w2 = window.open('', '_blank');
-                                    handleDownloadQuoteCompactPDF(savedQuote, bends, w2);
-                                }} className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
-                                    <Printer className="w-5 h-5" />
-                                    <span className="text-[8px] font-black uppercase tracking-tighter">Obra</span>
-                                </button>
-                                <button onClick={handleDownloadPDF}
-                                    className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
-                                    <FileDown className="w-5 h-5" />
-                                    <span className="text-[8px] font-black uppercase tracking-tighter">Produção</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </motion.div>
-            );
-        })()
-    }
+                        })()
+                    }
                 </div >
             </div >
         );
-}
+    }
 
-function renderDesktopUI() {
-    // Calculate totals for desktop
-    const totalM2 = bends.reduce((acc, b) => acc + (b.m2 || 0), 0);
-    const totalPrice = totalM2 * pricePerM2;
-    const totalWeight = bends.reduce((acc, b) => {
-        const prod = allProducts.find(p => p.id === b.product_id);
-        if (!prod || !prod.weight) return acc;
-        return acc + (parseFloat(prod.weight) * b.totalLengthM);
-    }, 0);
+    function renderDesktopUI() {
+        // Calculate totals for desktop
+        const totalM2 = bends.reduce((acc, b) => acc + (b.m2 || 0), 0);
+        const totalPrice = totalM2 * pricePerM2;
+        const totalWeight = bends.reduce((acc, b) => {
+            const prod = allProducts.find(p => p.id === b.product_id);
+            if (!prod || !prod.weight) return acc;
+            return acc + (parseFloat(prod.weight) * b.totalLengthM);
+        }, 0);
 
-    return (
-        <div className="flex min-h-screen bg-slate-50 pt-20">
-            {/* Desktop Sidebar: Controls */}
-            <div className="w-96 bg-slate-900 border-r border-white/10 p-6 overflow-y-auto max-h-[calc(100vh-80px)] sticky top-20 flex flex-col gap-6">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Plus className="w-5 h-5 text-blue-400" />
-                        <h2 className="text-white font-black uppercase tracking-widest text-sm">Novo Item</h2>
-                    </div>
-
-                    {/* Client Search */}
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cliente</label>
-                        <input type="text" value={clientSearch} onChange={e => { setClientSearch(e.target.value); setShowClientDropdown(true); }}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
-                            placeholder="Pesquisar cliente..." />
-                    </div>
-
-                    {/* Product Selector */}
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Material</label>
-                        <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50">
-                            <option value="">Selecione o Material</option>
-                            {allProducts.filter(p => p.type === 'product').map(p => <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>)}
-                        </select>
-                    </div>
-                </div>
-
-                {/* Bend Builder Controls */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
-                    <BendCanvas risks={currentRisks} svgRef={svgRef} />
-
-                    <div className="grid grid-cols-3 gap-2">
-                        {DIR_GRID.map(d => (
-                            <DirBtnDesktop key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />
-                        ))}
-                    </div>
-
+        return (
+            <div className="flex min-h-screen bg-slate-50 pt-20">
+                {/* Desktop Sidebar: Controls */}
+                <div className="w-96 bg-slate-900 border-r border-white/10 p-6 overflow-y-auto max-h-[calc(100vh-80px)] sticky top-20 flex flex-col gap-6">
                     <div className="space-y-4">
-                        <div className="flex gap-2">
-                            <input ref={sizeInputRef} type="number" step="0.5" placeholder="Medida (cm)" value={pendingSize}
-                                onChange={e => setPendingSize(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
-                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-center outline-none focus:ring-2 focus:ring-blue-500/50" />
-                            <button onClick={handleAddRisk} className="w-14 bg-blue-500 hover:bg-blue-400 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-blue-500/20">
-                                <Plus className="w-6 h-6" />
+                        <div className="flex items-center gap-2 mb-2">
+                            <Plus className="w-5 h-5 text-blue-400" />
+                            <h2 className="text-white font-black uppercase tracking-widest text-sm">Novo Item</h2>
+                        </div>
+
+                        {/* Client Search */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cliente</label>
+                            <input type="text" value={clientSearch} onChange={e => { setClientSearch(e.target.value); setShowClientDropdown(true); }}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
+                                placeholder="Pesquisar cliente..." />
+                        </div>
+
+                        {/* Product Selector */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Material</label>
+                            <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50">
+                                <option value="">Selecione o Material</option>
+                                {allProducts.filter(p => p.type === 'product').map(p => <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Bend Builder Controls */}
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
+                        <BendCanvas risks={currentRisks} svgRef={svgRef} />
+
+                        <div className="grid grid-cols-3 gap-2">
+                            {DIR_GRID.map(d => (
+                                <DirBtnDesktop key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />
+                            ))}
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex gap-2">
+                                <input ref={sizeInputRef} type="number" step="0.5" placeholder="Medida (cm)" value={pendingSize}
+                                    onChange={e => setPendingSize(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
+                                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-center outline-none focus:ring-2 focus:ring-blue-500/50" />
+                                <button onClick={handleAddRisk} className="w-14 bg-blue-500 hover:bg-blue-400 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                                    <Plus className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
+                                className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black rounded-xl shadow-lg shadow-green-600/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-30">
+                                Adicionar Dobra
                             </button>
                         </div>
-                        <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
-                            className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black rounded-xl shadow-lg shadow-green-600/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-30">
-                            Adicionar Dobra
+                    </div>
+
+                    <div className="mt-auto pt-6 border-t border-white/5">
+                        <button onClick={handleSaveDraft} className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                            <Save className="w-4 h-4" /> Salvar Rascunho
                         </button>
                     </div>
                 </div>
 
-                <div className="mt-auto pt-6 border-t border-white/5">
-                    <button onClick={handleSaveDraft} className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
-                        <Save className="w-4 h-4" /> Salvar Rascunho
-                    </button>
+                {/* Main Content: Table and Totals */}
+                <div className="flex-1 p-8 space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
+                    <div className="flex justify-between items-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                        <div>
+                            <h1 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{uid().toUpperCase()}</h1>
+                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Status: {STATUS_LABELS.draft.label}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Valor Total</p>
+                            <p className="text-4xl font-black text-blue-600 leading-none">R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                        </div>
+                    </div>
+
+                    {/* Desktop Table */}
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                        <table className="w-full border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-widest text-left">
+                                    <th className="px-6 py-4">#</th>
+                                    <th className="px-6 py-4">Representação</th>
+                                    <th className="px-6 py-4">Desenvolvimento</th>
+                                    <th className="px-6 py-4">Metros</th>
+                                    <th className="px-6 py-4">Área (m²)</th>
+                                    <th className="px-6 py-4 text-right">Subtotal</th>
+                                    <th className="px-6 py-4 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {bends.map((b, i) => (
+                                    <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="px-6 py-6 font-bold text-slate-400">{i + 1}</td>
+                                        <td className="px-6 py-6">
+                                            <div className="w-24 h-12 bg-slate-900 rounded-lg overflow-hidden border border-slate-200">
+                                                <BendCanvas risks={b.risks} exportMode={true} />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-6">
+                                            <div className="flex flex-wrap gap-1">
+                                                {b.risks.map((r, ri) => (
+                                                    <span key={ri} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">
+                                                        {DIRECTION_ICONS[r.direction]}{r.sizeCm}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <p className="text-[10px] font-black text-blue-500 mt-1 uppercase tracking-tighter">Total: {b.roundedWidthCm}cm</p>
+                                        </td>
+                                        <td className="px-6 py-6 font-bold text-slate-700">{b.totalLengthM.toFixed(2)}m</td>
+                                        <td className="px-6 py-6 font-bold text-slate-700">{b.m2.toFixed(2)}m²</td>
+                                        <td className="px-6 py-6 text-right font-black text-slate-900">R$ {(b.m2 * pricePerM2).toFixed(2)}</td>
+                                        <td className="px-6 py-6 text-center">
+                                            <button onClick={() => setBends(prev => prev.filter(item => item.id !== b.id))}
+                                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer">
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {bends.length === 0 && (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-20 text-center">
+                                            <ShoppingCart className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                                            <p className="text-slate-400 font-medium">Nenhuma dobra adicionada ao orçamento.</p>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4 pb-20">
+                        <button onClick={handleResetQuote} className="px-8 py-4 bg-white border border-slate-200 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
+                            Reiniciar Orçamento
+                        </button>
+                        <button onClick={handleSubmit} className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2">
+                            <Send className="w-5 h-5" /> Finalizar e Gerar PDF
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            {/* Main Content: Table and Totals */}
-            <div className="flex-1 p-8 space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
-                <div className="flex justify-between items-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                    <div>
-                        <h1 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{uid().toUpperCase()}</h1>
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Status: {STATUS_LABELS.draft.label}</p>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Valor Total</p>
-                        <p className="text-4xl font-black text-blue-600 leading-none">R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                    </div>
-                </div>
-
-                {/* Desktop Table */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                    <table className="w-full border-collapse">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-widest text-left">
-                                <th className="px-6 py-4">#</th>
-                                <th className="px-6 py-4">Representação</th>
-                                <th className="px-6 py-4">Desenvolvimento</th>
-                                <th className="px-6 py-4">Metros</th>
-                                <th className="px-6 py-4">Área (m²)</th>
-                                <th className="px-6 py-4 text-right">Subtotal</th>
-                                <th className="px-6 py-4 text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {bends.map((b, i) => (
-                                <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
-                                    <td className="px-6 py-6 font-bold text-slate-400">{i + 1}</td>
-                                    <td className="px-6 py-6">
-                                        <div className="w-24 h-12 bg-slate-900 rounded-lg overflow-hidden border border-slate-200">
-                                            <BendCanvas risks={b.risks} exportMode={true} />
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-6">
-                                        <div className="flex flex-wrap gap-1">
-                                            {b.risks.map((r, ri) => (
-                                                <span key={ri} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">
-                                                    {DIRECTION_ICONS[r.direction]}{r.sizeCm}
-                                                </span>
-                                            ))}
-                                        </div>
-                                        <p className="text-[10px] font-black text-blue-500 mt-1 uppercase tracking-tighter">Total: {b.roundedWidthCm}cm</p>
-                                    </td>
-                                    <td className="px-6 py-6 font-bold text-slate-700">{b.totalLengthM.toFixed(2)}m</td>
-                                    <td className="px-6 py-6 font-bold text-slate-700">{b.m2.toFixed(2)}m²</td>
-                                    <td className="px-6 py-6 text-right font-black text-slate-900">R$ {(b.m2 * pricePerM2).toFixed(2)}</td>
-                                    <td className="px-6 py-6 text-center">
-                                        <button onClick={() => setBends(prev => prev.filter(item => item.id !== b.id))}
-                                            className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer">
-                                            <Trash2 className="w-5 h-5" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {bends.length === 0 && (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-20 text-center">
-                                        <ShoppingCart className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                                        <p className="text-slate-400 font-medium">Nenhuma dobra adicionada ao orçamento.</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 pb-20">
-                    <button onClick={handleResetQuote} className="px-8 py-4 bg-white border border-slate-200 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
-                        Reiniciar Orçamento
-                    </button>
-                    <button onClick={handleSubmit} className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2">
-                        <Send className="w-5 h-5" /> Finalizar e Gerar PDF
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
+        );
+    }
 }
