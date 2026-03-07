@@ -1111,7 +1111,8 @@ export default function Orcamento() {
                 const p = item.product || {};
                 const name = p.name || (desc.startsWith('[SERVICE]') ? desc.replace('[SERVICE] ', '') : 'Fabricação de Calha/Rufo');
                 const unit = p.unit || (desc.startsWith('[BEND]') ? 'm²' : 'un');
-                const key = `${item.product_id || 'manual'}-${name}-${item.unit_price}`;
+                const pid = item.product_id ? String(item.product_id) : 'manual';
+                const key = `${pid}-${name}-${parseFloat(item.unit_price || 0).toFixed(2)}`;
 
                 if (!groupedMap[key]) {
                     groupedMap[key] = {
@@ -3551,7 +3552,9 @@ window.onload = function() {
                             const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
                             const raw = linked?.phone || savedQuote.clientPhone || '';
                             // Remove tudo exceto '+' e dígitos
-                            return raw.replace(/[^+\d]/g, '');
+                            let digits = raw.replace(/\D/g, '');
+                            if (digits.length === 10 || digits.length === 11) digits = `55${digits}`;
+                            return digits;
                         })();
 
                         const quoteNum = String(savedQuote.id).substring(0, 8).toUpperCase();

@@ -535,7 +535,14 @@ export default function Orcamento() {
 
     const selectDirection = (dir: RiskDirection) => {
         setPendingDir(dir);
-        setTimeout(() => sizeInputRef.current?.focus(), 150);
+        // Small delay to ensure input is enabled if it was disabled by "Caída"
+        setTimeout(() => {
+            if (sizeInputRef.current) {
+                sizeInputRef.current.focus();
+                // Select text for easier replacement
+                sizeInputRef.current.select();
+            }
+        }, 150);
     };
 
     const handleAddRisk = () => {
@@ -1121,7 +1128,8 @@ export default function Orcamento() {
                 const p = item.product || {};
                 const name = p.name || (desc.startsWith('[SERVICE]') ? desc.replace('[SERVICE] ', '') : 'Fabricação de Calha/Rufo');
                 const unit = p.unit || (desc.startsWith('[BEND]') ? 'm²' : 'un');
-                const key = `${item.product_id || 'manual'}-${name}-${item.unit_price}`;
+                const pid = item.product_id ? String(item.product_id) : 'manual';
+                const key = `${pid}-${name}-${parseFloat(item.unit_price || 0).toFixed(2)}`;
 
                 if (!groupedMap[key]) {
                     groupedMap[key] = {
@@ -1235,12 +1243,13 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(-
 @page { size: A4; margin: 0; }
 body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
 .print-btn { position: fixed; bottom: 30px; right: 30px; z-index: 1000; background: #4338ca; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; shadow: 0 10px 25px rgba(67, 56, 202, 0.4); font-size: 14px; }
-.page { width: 210mm; min-height: 297mm; padding: 12mm; margin: 15px auto; background: white; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; box-sizing: border-box; overflow: hidden; transform: scale(0.95); transform-origin: top center; }
-@media print {
-    body { background: white; margin: 0; padding: 0; }
-    .page { margin: 0 auto; box-shadow: none; width: 210mm; height: 297mm; transform: scale(0.9); transform-origin: top center; }
-    .print-btn { display: none !important; }
+@media print{
+    body{ background:white; margin:0; padding:0; }
+    .page{ margin:0 auto; box-shadow:none; width:210mm; min-height:297mm; transform:scale(0.92); transform-origin:top center; padding:8mm !important; }
+    .print-btn{ display:none!important; }
+    .no-print{ display:none!important; }
 }
+.page{ width:210mm; min-height:297mm; padding:12mm; margin:15px auto; background:white; box-shadow:0 0 40px rgba(0,0,0,0.1); position:relative; box-sizing:border-box; overflow:hidden; transform:scale(0.98); transform-origin:top center; }
 
 </style>
 </head>
@@ -2228,14 +2237,16 @@ window.onload = function() {
                                 {myQuotes
                                     .filter(q => {
                                         if (!quoteSearch.trim()) return true;
-                                        const search = quoteSearch.toLowerCase();
-                                        const quoteNum = String(q.id).substring(0, 8).toLowerCase();
+                                        const search = quoteSearch.toLowerCase().trim();
+                                        const quoteNum = String(q.id).toLowerCase();
                                         const name = (q.clientName || '').toLowerCase();
                                         const phone = (q.clientPhone || '').replace(/\D/g, '');
                                         const searchPhone = search.replace(/\D/g, '');
+                                        const notes = (q.notes || '').toLowerCase();
 
                                         return quoteNum.includes(search) ||
                                             name.includes(search) ||
+                                            notes.includes(search) ||
                                             (searchPhone && phone.includes(searchPhone));
                                     })
                                     .map(q => {
@@ -2943,7 +2954,15 @@ window.onload = function() {
                                                     <div className="flex items-start gap-4">
                                                         {/* Left Column: Directions */}
                                                         <div className="w-[160px] flex-shrink-0 space-y-2">
-                                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Direções</p>
+                                                            <div className="flex justify-between items-center px-1">
+                                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Direções</p>
+                                                                {isLateralSlope && (
+                                                                    <button onClick={handleAddRisk} disabled={!pendingDir}
+                                                                        className="bg-indigo-600 text-white px-2 py-1 rounded-md text-[8px] font-black uppercase animate-pulse shadow-sm active:scale-95">
+                                                                        Confirmar
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                             <div className="grid grid-cols-3 gap-1.5">
                                                                 {[DIR_GRID[0], DIR_GRID[1], DIR_GRID[2]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
                                                                 <DirBtn key="left" d={DIR_GRID[3]} active={pendingDir === 'left'} onClick={() => selectDirection('left')} />
@@ -2961,12 +2980,15 @@ window.onload = function() {
                                                                     <div className="flex gap-2">
                                                                         <div className="relative flex-1">
                                                                             <input ref={sizeInputRef} type="number" inputMode="decimal" step="0.5" placeholder="0.00"
+                                                                                disabled={isLateralSlope}
                                                                                 value={pendingSize} onChange={e => setPendingSize(e.target.value)}
-                                                                                onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
-                                                                                className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-center font-black text-slate-900 placeholder-slate-200 outline-none focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all pr-10" />
-                                                                            <button onClick={handleAddRisk} className="absolute right-1 top-1 bottom-1 w-10 bg-brand-primary text-white rounded-lg flex items-center justify-center shadow-md active:scale-90 transition-all">
-                                                                                <Plus className="w-5 h-5" />
-                                                                            </button>
+                                                                                onKeyDown={e => e.key === 'Enter' && !isLateralSlope && handleAddRisk()}
+                                                                                className={`w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-center font-black text-slate-900 placeholder-slate-200 outline-none focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all pr-10 ${isLateralSlope ? 'opacity-50 grayscale cursor-not-allowed' : ''}`} />
+                                                                            {!isLateralSlope && (
+                                                                                <button onClick={handleAddRisk} className="absolute right-1 top-1 bottom-1 w-10 bg-brand-primary text-white rounded-lg flex items-center justify-center shadow-md active:scale-90 transition-all">
+                                                                                    <Plus className="w-5 h-5" />
+                                                                                </button>
+                                                                            )}
                                                                         </div>
                                                                     </div>
                                                                     {sizeError && <p className="text-rose-500 text-[9px] font-black uppercase tracking-tight pr-1 animate-pulse">{sizeError}</p>}
@@ -3033,17 +3055,59 @@ window.onload = function() {
                                                     )}
                                                 </AnimatePresence>
 
-                                                {/* Risks list */}
+                                                {/* Risks list with Inline Editors */}
                                                 {currentRisks.length > 0 && (
                                                     <div className="pt-2">
                                                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1 ml-1">Riscos Adicionados</p>
                                                         <div className="flex flex-wrap gap-2">
                                                             {currentRisks.map((r, i) => (
-                                                                <div key={i} className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-xl border border-slate-200">
-                                                                    <button onClick={() => setEditDirIdx(editDirIdx === i ? null : i)} className="text-slate-900 text-sm font-bold">{DIRECTION_ICONS[r.direction]}</button>
-                                                                    <span className="w-[1px] h-3 bg-slate-200" />
-                                                                    <button onClick={() => { setEditSizeIdx(i); setEditSizeVal(String(r.sizeCm)); }} className="text-slate-900 text-sm font-black">{r.sizeCm}</button>
-                                                                    <button onClick={() => setCurrentRisks(prev => prev.filter((_, idx) => idx !== i))} className="text-slate-300 ml-1"><X className="w-3 h-3" /></button>
+                                                                <div key={i} className="relative">
+                                                                    <div className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all ${editDirIdx === i || editSizeIdx === i ? 'bg-brand-primary/5 border-brand-primary shadow-sm' : 'bg-slate-50 border-slate-200'}`}>
+                                                                        <button onClick={() => { setEditDirIdx(editDirIdx === i ? null : i); setEditSizeIdx(null); }}
+                                                                            className={`text-sm font-bold transition-transform active:scale-90 ${editDirIdx === i ? 'text-brand-primary scale-125' : 'text-slate-900'}`}>
+                                                                            {DIRECTION_ICONS[r.direction]}
+                                                                        </button>
+                                                                        <span className="w-[1px] h-3 bg-slate-200" />
+                                                                        <button onClick={() => { setEditSizeIdx(editSizeIdx === i ? null : i); setEditSizeVal(String(r.sizeCm)); setEditDirIdx(null); }}
+                                                                            className={`text-sm font-black transition-transform active:scale-90 ${editSizeIdx === i ? 'text-brand-primary scale-110' : 'text-slate-900'}`}>
+                                                                            {r.sizeCm}
+                                                                        </button>
+                                                                        <button onClick={() => setCurrentRisks(prev => prev.filter((_, idx) => idx !== i))} className="text-slate-300 ml-1 active:text-rose-500"><X className="w-3 h-3" /></button>
+                                                                    </div>
+
+                                                                    {/* Inline Direction Editor */}
+                                                                    <AnimatePresence>
+                                                                        {editDirIdx === i && (
+                                                                            <motion.div initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                                                                                className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-[60] bg-white border border-slate-200 p-2 rounded-2xl shadow-2xl flex gap-1.5">
+                                                                                {DIR_GRID.map(d => (
+                                                                                    <button key={d.dir} onClick={() => commitEditDir(i, d.dir)}
+                                                                                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold transition-all active:scale-90 ${r.direction === d.dir ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                                                                                        {d.icon}
+                                                                                    </button>
+                                                                                ))}
+                                                                                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 translate-y-px w-3 h-3 bg-white border-r border-b border-slate-200 rotate-45" />
+                                                                            </motion.div>
+                                                                        )}
+                                                                    </AnimatePresence>
+
+                                                                    {/* Inline Size Editor */}
+                                                                    <AnimatePresence>
+                                                                        {editSizeIdx === i && (
+                                                                            <motion.div initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                                                                                className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-[60] bg-white border border-slate-200 p-3 rounded-2xl shadow-2xl flex flex-col gap-2 min-w-[120px]">
+                                                                                <p className="text-[8px] font-black text-slate-400 uppercase text-center">Nova Medida</p>
+                                                                                <div className="flex gap-2">
+                                                                                    <input autoFocus type="number" inputMode="decimal" step="0.1" value={editSizeVal}
+                                                                                        onChange={e => setEditSizeVal(e.target.value)}
+                                                                                        onKeyDown={e => e.key === 'Enter' && commitEditSize(i)}
+                                                                                        className="w-full bg-slate-50 border-none rounded-xl px-3 py-2 text-center font-black text-slate-900 outline-none focus:ring-2 focus:ring-brand-primary" />
+                                                                                    <button onClick={() => commitEditSize(i)} className="bg-brand-primary text-white p-2 rounded-xl active:scale-90"><Check className="w-4 h-4" /></button>
+                                                                                </div>
+                                                                                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 translate-y-px w-3 h-3 bg-white border-r border-b border-slate-200 rotate-45" />
+                                                                            </motion.div>
+                                                                        )}
+                                                                    </AnimatePresence>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -3516,7 +3580,10 @@ window.onload = function() {
                             const clientPhone = (() => {
                                 const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
                                 const raw = linked?.phone || savedQuote.clientPhone || '';
-                                return raw.replace(/[^+\d]/g, '');
+                                let digits = raw.replace(/\D/g, '');
+                                if (!digits) return '';
+                                if (digits.length === 10 || digits.length === 11) return `55${digits}`;
+                                return digits;
                             })();
 
                             const quoteNum = String(savedQuote.id).substring(0, 8).toUpperCase();

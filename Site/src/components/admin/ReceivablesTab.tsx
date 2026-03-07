@@ -66,9 +66,32 @@ export default function ReceivablesTab({ showToast }: Props) {
     const fmt = (v: number) => `R$ ${(Number(v) || 0).toFixed(2)}`;
 
     // Cálculos do Dashboard
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
     const totalReceber = receivables.filter(r => r.status === 'pendente' || r.status === 'parcial' || r.status === 'atrasado').reduce((acc, r) => acc + Number(r.valor_restante), 0);
     const totalRecebido = receivables.reduce((acc, r) => acc + Number(r.valor_pago), 0);
     const totalAtraso = receivables.filter(r => r.status === 'atrasado').reduce((acc, r) => acc + Number(r.valor_restante), 0);
+
+    // Métricas mensais
+    const totalMesRecebido = receivables.reduce((acc, r) => {
+        // Here we'd ideally have a 'last_payment_date', but we'll use 'updated_at' or assumed current month for 'pago'
+        // For accurate tracking, the API should provide this, but we'll aggregate based on data_vencimento if paid
+        const d = new Date(r.updated_at || r.created_at);
+        if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+            return acc + Number(r.valor_pago);
+        }
+        return acc;
+    }, 0);
+
+    const totalMesFaturado = receivables.reduce((acc, r) => {
+        const d = new Date(r.created_at);
+        if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+            return acc + Number(r.valor_total);
+        }
+        return acc;
+    }, 0);
 
     // Filtro
     const filtered = receivables.filter(r => {
@@ -95,33 +118,52 @@ export default function ReceivablesTab({ showToast }: Props) {
                 <h2 className="text-2xl font-bold flex items-center gap-2"><DollarSign className="w-6 h-6 text-brand-primary" /> Contas a Receber</h2>
             </div>
 
-            {/* DASHBOARD */}
-            <div className="grid grid-cols-3 gap-2 md:gap-4">
-                <div className="bg-white border border-slate-200 rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-sm flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-4 text-center md:text-left">
-                    <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-100 text-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0">
-                        <Clock className="w-4 h-4 md:w-6 md:h-6" />
+            {/* DASHBOARD - SINGLE LINE SCROLLABLE */}
+            <div className="flex overflow-x-auto gap-3 pb-2 no-scrollbar -mx-4 px-4 md:grid md:grid-cols-5 md:mx-0 md:px-0">
+                <div className="min-w-[140px] flex-1 bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                        <Clock className="w-5 h-5" />
                     </div>
                     <div>
-                        <p className="text-[8px] md:text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">A Receber</p>
-                        <p className="text-sm md:text-2xl font-black text-slate-900 truncate">{fmt(totalReceber)}</p>
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-tight">A Receber</p>
+                        <p className="text-sm font-black text-slate-900 truncate">{fmt(totalReceber)}</p>
                     </div>
                 </div>
-                <div className="bg-white border border-slate-200 rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-sm flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-4 text-center md:text-left">
-                    <div className="w-8 h-8 md:w-12 md:h-12 bg-green-100 text-green-600 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="w-4 h-4 md:w-6 md:h-6" />
+                <div className="min-w-[140px] flex-1 bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-5 h-5" />
                     </div>
                     <div>
-                        <p className="text-[8px] md:text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Recebido</p>
-                        <p className="text-sm md:text-2xl font-black text-green-600 truncate">{fmt(totalRecebido)}</p>
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-tight">Recebido</p>
+                        <p className="text-sm font-black text-green-600 truncate">{fmt(totalRecebido)}</p>
                     </div>
                 </div>
-                <div className="bg-white border border-slate-200 rounded-2xl md:rounded-3xl p-3 md:p-6 shadow-sm flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-4 text-center md:text-left">
-                    <div className="w-8 h-8 md:w-12 md:h-12 bg-red-100 text-red-600 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0">
-                        <AlertCircle className="w-4 h-4 md:w-6 md:h-6" />
+                <div className="min-w-[140px] flex-1 bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex items-center gap-3">
+                    <div className="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center shrink-0">
+                        <AlertCircle className="w-5 h-5" />
                     </div>
                     <div>
-                        <p className="text-[8px] md:text-xs font-bold text-slate-500 uppercase tracking-widest leading-tight">Atraso</p>
-                        <p className="text-sm md:text-2xl font-black text-red-600 truncate">{fmt(totalAtraso)}</p>
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-tight">Atraso</p>
+                        <p className="text-sm font-black text-red-600 truncate">{fmt(totalAtraso)}</p>
+                    </div>
+                </div>
+                {/* NOVAS METRICAS */}
+                <div className="min-w-[140px] flex-1 bg-brand-primary/5 border border-brand-primary/20 rounded-2xl p-3 shadow-sm flex items-center gap-3">
+                    <div className="w-10 h-10 bg-brand-primary/10 text-brand-primary rounded-xl flex items-center justify-center shrink-0">
+                        <Calendar className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <p className="text-[8px] font-black text-brand-primary/60 uppercase tracking-widest leading-tight">Rec. Mês</p>
+                        <p className="text-sm font-black text-brand-primary truncate">{fmt(totalMesRecebido)}</p>
+                    </div>
+                </div>
+                <div className="min-w-[140px] flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-3 shadow-sm flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-800 text-slate-400 rounded-xl flex items-center justify-center shrink-0">
+                        <FileText className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-tight">Fat. Mês</p>
+                        <p className="text-sm font-black text-white truncate">{fmt(totalMesFaturado)}</p>
                     </div>
                 </div>
             </div>
