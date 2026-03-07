@@ -1180,61 +1180,66 @@ body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(-
 .print-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(26,86,219,.5)}
 .page{max-width:860px;margin:36px auto;background:var(--white);border-radius:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,.07),0 20px 40px -8px rgba(0,0,0,.08);overflow:hidden}
 .accent-bar{height:6px;background:linear-gradient(90deg,var(--brand-dark) 0%,var(--brand-mid) 50%,var(--accent) 100%)}
-.inner{padding:40px 48px}
-.doc-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:28px;border-bottom:2px solid var(--border);margin-bottom:28px;gap:24px}
-.logo-area{display:flex;align-items:flex-start;gap:20px}
-.logo-area img{height:64px;width:auto;object-fit:contain;border-radius:8px}
-.logo-placeholder{width:64px;height:64px;border-radius:8px;background:linear-gradient(135deg,var(--brand-soft),#dbeafe);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.logo-placeholder svg{width:28px;height:28px;stroke:var(--brand);fill:none}
-.company-block h1{font-size:20px;font-weight:800;color:var(--brand-dark);letter-spacing:-.02em;text-transform:uppercase;line-height:1.2;margin-bottom:6px}
-.company-block .meta{font-size:12px;color:var(--muted);line-height:1.9}
-.company-block .meta span{margin-right:16px;white-space:nowrap}
+.inner{padding:25px 35px}
+.doc-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:15px;border-bottom:2px solid var(--border);margin-bottom:15px;gap:20px}
+.logo-area{display:flex;align-items:flex-start;gap:15px}
+.logo-area img{height:48px;width:auto;object-fit:contain;border-radius:8px}
+.logo-placeholder{width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,var(--brand-soft),#dbeafe);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-placeholder svg{width:22px;height:22px;stroke:var(--brand);fill:none}
+.company-block h1{font-size:18px;font-weight:800;color:var(--brand-dark);letter-spacing:-.02em;text-transform:uppercase;line-height:1.2;margin-bottom:4px}
+.company-block .meta{font-size:11px;color:var(--muted);line-height:1.6}
+.company-block .meta span{margin-right:12px;white-space:nowrap}
 .doc-id-block{text-align:right;flex-shrink:0}
-.doc-badge{display:inline-block;background:var(--brand-dark);color:#fff;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;padding:5px 12px;border-radius:6px;margin-bottom:8px}
-.doc-number{font-size:26px;font-weight:900;color:var(--brand);letter-spacing:-.03em;line-height:1}
-.doc-meta{margin-top:8px;font-size:11.5px;color:var(--muted);line-height:1.8}
+.doc-badge{display:inline-block;background:var(--brand-dark);color:#fff;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;padding:4px 10px;border-radius:6px;margin-bottom:6px}
+.doc-number{font-size:22px;font-weight:900;color:var(--brand);letter-spacing:-.03em;line-height:1}
+.doc-meta{margin-top:6px;font-size:11px;color:var(--muted);line-height:1.6}
 .doc-meta strong{color:var(--text);font-weight:600}
-.client-card{background:var(--brand-soft);border:1px solid #bfdbfe;border-radius:12px;padding:18px 24px;margin-bottom:28px;display:grid;grid-template-columns:auto 1fr;gap:0 20px;align-items:start}
-.client-card .cc-icon{width:42px;height:42px;border-radius:10px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:center}
-.client-card .cc-icon svg{width:20px;height:20px;stroke:#fff;fill:none}
-.client-card .cc-label{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--brand-mid);margin-bottom:4px}
-.client-card .cc-name{font-size:17px;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:3px}
-.client-card .cc-sub{font-size:12px;color:var(--muted)}
-.section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--brand);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.client-card{background:var(--brand-soft);border:1px solid #bfdbfe;border-radius:12px;padding:12px 18px;margin-bottom:18px;display:grid;grid-template-columns:auto 1fr;gap:0 15px;align-items:start}
+.client-card .cc-icon{width:36px;height:36px;border-radius:8px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;align-self:center}
+.client-card .cc-icon svg{width:18px;height:18px;stroke:#fff;fill:none}
+.client-card .cc-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--brand-mid);margin-bottom:2px}
+.client-card .cc-name{font-size:15px;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:2px}
+.client-card .cc-sub{font-size:11px;color:var(--muted)}
+.section-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--brand);margin-bottom:8px;display:flex;align-items:center;gap:8px}
 .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-.items-table{width:100%;border-collapse:collapse;margin-bottom:32px}
+.items-table{width:100%;border-collapse:collapse;margin-bottom:20px}
 .items-table thead tr{background:var(--brand-dark)}
-.items-table thead th{padding:12px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.9);white-space:nowrap}
+.items-table thead th{padding:8px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.9);white-space:nowrap}
 .items-table thead th:not(:first-child){text-align:right}
-.items-table thead th:first-child{border-radius:8px 0 0 8px}
-.items-table thead th:last-child{border-radius:0 8px 8px 0}
+.items-table thead th:first-child{border-radius:6px 0 0 6px}
+.items-table thead th:last-child{border-radius:0 6px 6px 0}
 .items-table tbody tr:nth-child(even) td{background:#f9fafb}
 .items-table tbody tr:last-child td{border-bottom:none}
-.items-table tbody td{padding:14px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.items-table tbody td{padding:10px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 .items-table tbody td:not(:first-child){text-align:right}
-.item-name{font-weight:600;font-size:13.5px;color:var(--text);display:block}
-.item-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+.item-name{font-weight:600;font-size:12.5px;color:var(--text);display:block}
+.item-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
 .badge-product{background:#dcfce7;color:#15803d}
 .badge-service{background:#f3e8ff;color:#7e22ce}
-.qty-val{font-weight:600;font-size:13px}
-.qty-unit{font-size:11px;color:var(--muted);font-weight:400;margin-left:2px}
-.price-unit{font-size:13px;color:var(--muted)}
-.price-total{font-size:14px;font-weight:700;color:var(--text)}
-.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px}
-.conditions-block{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px 22px}
-.cond-row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.qty-val{font-weight:600;font-size:12px}
+.qty-unit{font-size:10px;color:var(--muted);font-weight:400;margin-left:2px}
+.price-unit{font-size:12px;color:var(--muted)}
+.price-total{font-size:13px;font-weight:700;color:var(--text)}
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:15px}
+.conditions-block{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:15px 18px}
+.cond-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--border);font-size:11.5px}
 .cond-row:last-child{border-bottom:none}
 .cond-label{color:var(--muted);font-weight:500}
 .cond-val{font-weight:700;color:var(--text);text-align:right;max-width:55%}
-.total-block{background:linear-gradient(135deg,var(--brand-dark) 0%,var(--brand-mid) 100%);border-radius:12px;padding:24px;color:#fff;box-shadow:0 8px 24px rgba(26,86,219,.3)}
+.total-block{background:linear-gradient(135deg,var(--brand-dark) 0%,var(--brand-mid) 100%);border-radius:12px;padding:18px;color:#fff;box-shadow:0 8px 16px rgba(26,86,219,.2)}
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.total-row:last-child{border-bottom:none}
+.total-row.grand{padding-top:10px;margin-top:5px;border-top:2px solid rgba(255,255,255,.3)}
+.total-row.grand .tl{font-size:11px;font-weight:900}
+.total-row.grand .tv{font-size:18px;font-weight:900}
 @page { size: A4; margin: 0; }
 body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-.print-btn { position: fixed; top: 20px; right: 20px; z-index: 1000; background: #4338ca; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3); }
-.page { width: 210mm; min-height: 297mm; padding: 20mm; margin: 20px auto; background: white; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; box-sizing: border-box; overflow: hidden; }
+.print-btn { position: fixed; top: 15px; right: 15px; z-index: 1000; background: #4338ca; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3); font-size: 13px; }
+.page { width: 210mm; min-height: 297mm; padding: 12mm; margin: 15px auto; background: white; box-shadow: 0 0 40px rgba(0,0,0,0.1); position: relative; box-sizing: border-box; overflow: hidden; }
 @media print {
     body { background: white; }
     .page { margin: 0; box-shadow: none; width: 210mm; height: 297mm; }
-    .print-btn { display: none; }
+    .print-btn { display: none !important; }
 }
 
 </style>
@@ -1317,9 +1322,9 @@ body { margin: 0; padding: 0; background: #f1f5f9; font-family: 'Inter', system-
         <div class="cond-row"><span class="cond-label">Validade do orçamento</span><span class="cond-val">${validityDays} dias (até ${validityStr})</span></div>
       </div>
       <div class="total-block">
-        <div class="total-row"><span class="tl">Subtotal</span><span class="tv">R\$ ${totalAmt.toFixed(2)}</span></div>
+        <div class="total-row"><span class="tl">Subtotal</span><span class="tv">R$ ${totalAmt.toFixed(2)}</span></div>
         ${discountAmt > 0 ? '<div class="total-row discount"><span class="tl">Desconto</span><span class="tv">− R$ ' + discountAmt.toFixed(2) + '</span></div>' : ''}
-        <div class="total-row grand"><span class="tl">TOTAL GERAL</span><span class="tv">R\$ ${finalAmt.toFixed(2)}</span></div>
+        <div class="total-row grand"><span class="tl">TOTAL GERAL</span><span class="tv">R$ ${finalAmt.toFixed(2)}</span></div>
       </div>
     </div>
     <footer class="doc-footer">
@@ -2828,172 +2833,129 @@ window.onload = function() {
                                 )}
 
                                 {/* Builder / Service Form (Redesigned) */}
+                                {/* Builder / Service Form (Redesigned Split View) */}
                                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                                    className={`bg-white rounded-[3rem] p-8 space-y-8 shadow-2xl border border-slate-100 transition-colors ${selectedProductType === 'service' ? 'ring-4 ring-purple-100' : ''}`}>
+                                    className={`bg-white rounded-[2rem] shadow-2xl border border-slate-100 flex flex-col overflow-hidden max-h-[85vh] ${selectedProductType === 'service' ? 'ring-4 ring-purple-100' : ''}`}>
 
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-1">
-                                            <h2 className="text-2xl font-black text-slate-900 leading-tight">
-                                                {selectedProductType === 'service' ? 'Detalhes do Serviço' : `Dobra #${bends.length + 1}`}
-                                            </h2>
-                                            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest leading-none">
-                                                {selectedProductType === 'service' ? 'Execução e Mão de Obra' : 'Configuração de Corte'}
-                                            </p>
-                                        </div>
-                                        {selectedProductType === 'product' && selectedProductId && (
-                                            <button onClick={() => setShowLibrary(v => !v)}
-                                                className="h-10 px-4 bg-slate-50 text-slate-500 rounded-xl flex items-center gap-2 active:scale-95 transition-all border border-slate-200">
-                                                <List className="w-5 h-5 text-slate-400" />
-                                                <span className="text-xs font-black uppercase tracking-widest">Dobras</span>
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {selectedProductType === 'service' ? (
-                                        <div className="space-y-6 pt-2">
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Descrição</label>
-                                                <textarea
-                                                    ref={serviceDescRef}
-                                                    className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 font-bold placeholder-slate-300 outline-none focus:ring-4 focus:ring-purple-100 transition-all min-h-[120px]"
-                                                    placeholder="Descreva o serviço..."
-                                                    value={serviceDescription}
-                                                    onChange={e => setServiceDescription(e.target.value)}
-                                                />
+                                    {/* Sticky Header with Drawing and Info */}
+                                    {selectedProductType === 'product' && (
+                                        <div className="sticky top-0 z-40 bg-white border-b border-slate-100 p-6 flex flex-col gap-4 shadow-sm">
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <h2 className="text-xl font-black text-slate-900 leading-tight">
+                                                        Dobra #{bends.length + 1}
+                                                    </h2>
+                                                </div>
+                                                <button onClick={() => setShowLibrary(v => !v)}
+                                                    className="h-8 px-3 bg-slate-50 text-slate-500 rounded-lg flex items-center gap-2 active:scale-95 transition-all border border-slate-200">
+                                                    <List className="w-4 h-4 text-slate-400" />
+                                                    <span className="text-[9px] font-black uppercase tracking-widest">Biblioteca</span>
+                                                </button>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Valor Unitário</label>
-                                                    <div className="relative">
-                                                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 font-black">R$</span>
-                                                        <input
-                                                            type="number"
-                                                            className="w-full bg-slate-50 border-none rounded-2xl pl-12 pr-6 py-4 text-slate-900 font-black focus:ring-4 focus:ring-purple-100 outline-none"
-                                                            placeholder="0,00"
-                                                            value={serviceValue}
-                                                            onChange={e => setServiceValue(e.target.value)}
-                                                        />
+
+                                            <div className="h-40 bg-slate-50 rounded-2xl overflow-hidden relative">
+                                                <BendCanvas risks={currentRisks} svgRef={svgRef} />
+                                                {/* Width info absolute over canvas for space efficiency */}
+                                                <div className="absolute bottom-2 left-2 flex gap-1.5 flex-wrap">
+                                                    <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${isOver ? 'bg-red-500 text-white' : 'bg-slate-900 text-white shadow-lg'}`}>
+                                                        {isOver ? 'LIMITE EXCEDIDO!' : `Total: ${curWidth.toFixed(1)} cm`}
+                                                    </div>
+                                                    {!isOver && curWidth > 0 && (
+                                                        <div className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-blue-600 text-white shadow-lg">
+                                                            Ref: {curRounded.toFixed(1)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Scrollable Content (Inputs) */}
+                                    <div className="flex-1 overflow-y-auto p-6 space-y-6 pb-24">
+                                        {selectedProductType === 'service' ? (
+                                            <div className="space-y-6 pt-2">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="space-y-1">
+                                                        <h2 className="text-2xl font-black text-slate-900 leading-tight">Detalhes do Serviço</h2>
+                                                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest leading-none">Execução e Mão de Obra</p>
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Qtd</label>
-                                                    <input
-                                                        type="number"
-                                                        className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 font-black focus:ring-4 focus:ring-purple-100 outline-none"
-                                                        value={serviceQty}
-                                                        onChange={e => setServiceQty(e.target.value)}
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Descrição</label>
+                                                    <textarea
+                                                        ref={serviceDescRef}
+                                                        className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 font-bold placeholder-slate-300 outline-none focus:ring-4 focus:ring-purple-100 transition-all min-h-[120px]"
+                                                        placeholder="Descreva o serviço..."
+                                                        value={serviceDescription}
+                                                        onChange={e => setServiceDescription(e.target.value)}
                                                     />
                                                 </div>
-                                            </div>
-
-                                            <div className="bg-purple-50 rounded-[2rem] p-6 flex items-center justify-between">
-                                                <div>
-                                                    <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Subtotal</p>
-                                                    <h3 className="text-2xl font-black text-purple-600">
-                                                        {fmt(((parseFloat(serviceValue) || 0) * (parseFloat(serviceQty) || 0)))}
-                                                    </h3>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Valor Unitário</label>
+                                                        <div className="relative">
+                                                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 font-black">R$</span>
+                                                            <input type="number" inputMode="decimal"
+                                                                className="w-full bg-slate-50 border-none rounded-2xl pl-12 pr-6 py-4 text-slate-900 font-black focus:ring-4 focus:ring-purple-100 outline-none"
+                                                                placeholder="0,00" value={serviceValue} onChange={e => setServiceValue(e.target.value)} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Qtd</label>
+                                                        <input type="number" inputMode="numeric"
+                                                            className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 text-slate-900 font-black focus:ring-4 focus:ring-purple-100 outline-none"
+                                                            value={serviceQty} onChange={e => setServiceQty(e.target.value)} />
+                                                    </div>
                                                 </div>
-                                                <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600">
-                                                    <Save className="w-6 h-6" />
+                                                <div className="bg-purple-50 rounded-[2rem] p-6 flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Subtotal</p>
+                                                        <h3 className="text-2xl font-black text-purple-600">{fmt(((parseFloat(serviceValue) || 0) * (parseFloat(serviceQty) || 0)))}</h3>
+                                                    </div>
+                                                    <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600"><Save className="w-6 h-6" /></div>
                                                 </div>
+                                                <button onClick={handleConfirmService} disabled={!serviceDescription || !serviceValue}
+                                                    className="w-full py-5 bg-purple-600 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all uppercase tracking-widest text-xs">Confirmar Serviço</button>
                                             </div>
-
-                                            <button onClick={handleConfirmService} disabled={!serviceDescription || !serviceValue}
-                                                className="w-full py-5 bg-purple-600 text-white font-black rounded-2xl shadow-xl shadow-purple-200 active:scale-95 transition-all uppercase tracking-widest text-xs">
-                                                Confirmar Serviço
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            {/* Bend library suggestions */}
-                                            <AnimatePresence>
-                                                {showLibrary && (
-                                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                                                        className="bg-white/5 rounded-2xl p-4 space-y-2 overflow-hidden">
-                                                        <p className="text-xs text-slate-400 uppercase tracking-wider">
-                                                            Dobras salvas para este produto — clique para carregar:
-                                                        </p>
-                                                        {bendLibraryLoading ? (
-                                                            <p className="text-slate-400 text-sm py-2 flex items-center gap-2"><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Carregando dobras...</p>
-                                                        ) : bendLibrary.length === 0 ? (
-                                                            <p className="text-slate-500 text-sm py-2">Nenhuma dobra salva para este produto ainda. Crie uma dobra e ela aparecerá aqui.</p>
-                                                        ) : (
-                                                            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 pr-2" style={{ maxHeight: '30vh', overflowY: 'auto' }}>
+                                        ) : (
+                                            <>
+                                                {/* Library Overlay (Compact) */}
+                                                <AnimatePresence>
+                                                    {showLibrary && (
+                                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                                                            className="bg-slate-50 rounded-2xl p-4 space-y-2 overflow-hidden border border-slate-200">
+                                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Biblioteca</p>
+                                                            <div className="grid grid-cols-2 gap-2" style={{ maxHeight: '20vh', overflowY: 'auto' }}>
                                                                 {bendLibrary.map((b, i) => (
-                                                                    <div key={i} className="flex">
-                                                                        <button onClick={() => { setCurrentRisks(b.risks); setShowLibrary(false); }}
-                                                                            className="flex-1 flex flex-col items-center gap-1.5 p-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all cursor-pointer border border-white/10 text-center w-full">
-                                                                            {b.svgDataUrl && <img src={b.svgDataUrl} alt="" className="w-full h-12 rounded object-contain" style={{ background: '#1e293b' }} />}
-                                                                            <div className="text-[10px] sm:text-xs">
-                                                                                <span className="block truncate w-full">{b.risks.map(r => `${DIRECTION_ICONS[r.direction]}${r.sizeCm}`).join(' ')}</span>
-                                                                                <span className="text-blue-400 font-bold ml-1">{b.roundedWidthCm}</span>
-                                                                                {b.useCount > 1 && <span className="ml-1 text-white/40">×{b.useCount}</span>}
-                                                                            </div>
-                                                                        </button>
-                                                                        {b.svgDataUrl && (
-                                                                            <button onClick={() => setLibraryZoom(b)}
-                                                                                className="p-1.5 text-white/40 hover:text-white hover:bg-white/10 rounded-lg transition-all cursor-pointer" title="Ampliar">
-                                                                                <ZoomIn className="w-3.5 h-3.5" />
-                                                                            </button>
-                                                                        )}
-                                                                    </div>
+                                                                    <button key={i} onClick={() => { setCurrentRisks(b.risks); setShowLibrary(false); }}
+                                                                        className="flex-col items-center gap-1.5 p-2 bg-white text-slate-900 rounded-xl transition-all active:scale-95 border border-slate-200 flex">
+                                                                        {b.svgDataUrl && <img src={b.svgDataUrl} alt="" className="w-full h-10 rounded object-contain bg-slate-900" />}
+                                                                        <span className="text-[9px] font-bold truncate w-full px-1">{b.risks.map(r => `${DIRECTION_ICONS[r.direction]}${r.sizeCm}`).join(' ')}</span>
+                                                                    </button>
                                                                 ))}
                                                             </div>
-                                                        )}
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
 
-                                            {/* Canvas */}
-                                            <BendCanvas
-                                                risks={currentRisks}
-                                                svgRef={svgRef}
-                                            />
-
-                                            {/* Width info */}
-                                            <div className="flex gap-3 flex-wrap text-sm">
-                                                <div className={`px-4 py-2 rounded-xl font-bold ${isOver ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-white/10 text-white'}`}>
-                                                    Soma: <strong>{curWidth.toFixed(2)}</strong>
-                                                </div>
-                                                {!isOver && curWidth > 0 && (
-                                                    <div className="px-4 py-2 rounded-xl font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                                                        Arredondado: <strong>{curRounded.toFixed(2)}</strong>
-                                                    </div>
-                                                )}
-                                                {isOver && <div className="flex items-center gap-2 text-red-400 font-bold"><AlertTriangle className="w-4 h-4" /> Excede 120 cm!</div>}
-                                            </div>
-
-                                            {/* DIRECTION & MODIFIERS COMPACT LAYOUT */}
-                                            <div className="flex flex-col gap-6 mt-4">
-                                                {/* Step 1 & 2 Together for Mobile */}
-                                                <div className="bg-slate-50 border border-slate-200 rounded-[2.5rem] p-5 space-y-4 shadow-inner">
+                                                {/* Step 1 & 2: Direction & Medida */}
+                                                <div className="bg-slate-50 border border-slate-200 rounded-[2rem] p-4 space-y-4 shadow-inner">
                                                     <div className="flex items-center justify-between px-1">
-                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Passo 1 & 2 — Direção e Medida</p>
+                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Direção e Medida</p>
                                                         {sizeError && <p className="text-rose-500 text-[10px] font-black uppercase tracking-tight animate-bounce">{sizeError}</p>}
                                                     </div>
 
-                                                    <div className="grid grid-cols-3 gap-3 w-full">
+                                                    <div className="grid grid-cols-3 gap-2 w-full max-w-[240px] mx-auto">
                                                         {[DIR_GRID[0], DIR_GRID[1], DIR_GRID[2]].map(d => <DirBtn key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />)}
                                                         <DirBtn key="left" d={DIR_GRID[3]} active={pendingDir === 'left'} onClick={() => selectDirection('left')} />
 
-                                                        {/* Integrated Size Input */}
                                                         <div className="relative group flex items-center justify-center">
-                                                            <input
-                                                                ref={sizeInputRef}
-                                                                type="number"
-                                                                inputMode="decimal"
-                                                                step="0.5"
-                                                                placeholder="cm"
-                                                                value={pendingSize}
-                                                                onChange={e => setPendingSize(e.target.value)}
+                                                            <input ref={sizeInputRef} type="number" inputMode="decimal" step="0.5" placeholder="cm"
+                                                                value={pendingSize} onChange={e => setPendingSize(e.target.value)}
                                                                 onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
-                                                                className="w-full aspect-square bg-white border-2 border-brand-primary/30 rounded-2xl text-center text-lg font-black text-slate-900 placeholder-slate-200 outline-none focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all p-0"
-                                                            />
+                                                                className="w-full aspect-square bg-white border-2 border-brand-primary/30 rounded-2xl text-center text-lg font-black text-slate-900 placeholder-slate-200 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all p-0" />
                                                             {pendingSize && (
-                                                                <button
-                                                                    onClick={handleAddRisk}
-                                                                    className="absolute -bottom-1 -right-1 w-7 h-7 bg-brand-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-75 transition-all"
-                                                                >
+                                                                <button onClick={handleAddRisk} className="absolute -bottom-1 -right-1 w-7 h-7 bg-brand-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-75 transition-all">
                                                                     <Plus className="w-4 h-4 pointer-events-none" />
                                                                 </button>
                                                             )}
@@ -3004,932 +2966,798 @@ window.onload = function() {
                                                     </div>
                                                 </div>
 
-                                                {/* Modifiers & Size Input (Redesigned) */}
-                                                <div className="flex-1 space-y-8">
-                                                    <div className="space-y-4">
-                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Modificadores</p>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            <button onClick={() => setIsAngle(!isAngle)} disabled={!pendingDir}
-                                                                className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border-2
-                                                            ${isAngle ? 'bg-amber-50 border-amber-500 text-amber-600 shadow-lg shadow-amber-500/10' : 'bg-white border-slate-100 text-slate-400'}`}>
-                                                                <RotateCcw className="w-4 h-4" /> Ângulo
-                                                            </button>
-                                                            <button onClick={() => { if (isLateralSlope) { setSlopeH1(''); setSlopeH2(''); } setIsLateralSlope(!isLateralSlope); }}
-                                                                className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border-2
-                                                            ${isLateralSlope ? 'bg-indigo-50 border-indigo-500 text-indigo-600 shadow-lg shadow-indigo-500/10' : 'bg-white border-slate-100 text-slate-400'}`}>
-                                                                <Triangle className="w-4 h-4" /> Caída
-                                                            </button>
-                                                        </div>
-
-                                                        <AnimatePresence>
-                                                            {(isAngle || isLateralSlope) && (
-                                                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                                                                    className="bg-slate-50 border border-slate-100 rounded-[2rem] p-5 space-y-4 overflow-hidden">
-                                                                    {isAngle && (
-                                                                        <div className="flex items-center justify-between">
-                                                                            <span className="text-[10px] font-black text-slate-400 uppercase">Ângulo (º)</span>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <input type="number" inputMode="decimal" placeholder="45" value={pendingAngle} onChange={e => setPendingAngle(e.target.value)}
-                                                                                    className="w-20 bg-white border-none rounded-xl px-4 py-2 text-center font-black text-slate-900 outline-none shadow-sm" />
-                                                                                <span className="text-slate-300 font-bold">°</span>
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                    {isLateralSlope && (
-                                                                        <div className="space-y-4">
-                                                                            <div className="flex items-center justify-between">
-                                                                                <span className="text-[10px] font-black text-slate-400 uppercase">Lado</span>
-                                                                                <div className="flex bg-white rounded-xl p-1 shadow-sm">
-                                                                                    {(['D', 'E'] as const).map(s => (
-                                                                                        <button key={s} onClick={() => setSlopeSide(s)}
-                                                                                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${slopeSide === s ? 'bg-slate-900 text-white' : 'text-slate-400'}`}>
-                                                                                            {s === 'D' ? 'DIR' : 'ESQ'}
-                                                                                        </button>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="grid grid-cols-2 gap-3">
-                                                                                <div className="space-y-2">
-                                                                                    <span className="text-[8px] font-black text-slate-400 uppercase ml-1">H1</span>
-                                                                                    <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH1} onChange={e => setSlopeH1(e.target.value)}
-                                                                                        className="w-full bg-white border-none rounded-xl px-4 py-2 text-center font-black text-slate-900 outline-none shadow-sm" />
-                                                                                </div>
-                                                                                <div className="space-y-2">
-                                                                                    <span className="text-[8px] font-black text-slate-400 uppercase ml-1">H2</span>
-                                                                                    <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH2} onChange={e => setSlopeH2(e.target.value)}
-                                                                                        className="w-full bg-white border-none rounded-xl px-4 py-2 text-center font-black text-slate-900 outline-none shadow-sm" />
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                </motion.div>
-                                                            )}
-                                                        </AnimatePresence>
-                                                    </div>
-
-                                                    <div className="space-y-4">
-                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Medida da Aba (cm)</p>
-                                                        <div className="flex gap-2">
-                                                            <input ref={sizeInputRef} type="number" inputMode="decimal" min="1" max="120" step="0.5"
-                                                                placeholder={isLateralSlope ? "Calculado" : "0.00"}
-                                                                value={isLateralSlope ? "" : pendingSize} onChange={e => { setPendingSize(e.target.value); setSizeError(''); }}
-                                                                onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
-                                                                disabled={!pendingDir || isLateralSlope}
-                                                                className="flex-1 bg-slate-50 border-none rounded-[1.5rem] px-6 py-5 text-2xl font-black text-slate-900 placeholder-slate-200 outline-none focus:ring-4 focus:ring-brand-primary/5 transition-all text-center" />
-
-                                                            <button onClick={handleAddRisk} disabled={!pendingDir || (!pendingSize && !isLateralSlope)}
-                                                                className="w-20 bg-brand-primary text-white rounded-[1.5rem] shadow-xl shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center disabled:opacity-30">
-                                                                <Plus className="w-8 h-8" />
-                                                            </button>
-                                                        </div>
-                                                        {sizeError && <p className="text-rose-500 text-[10px] font-black uppercase tracking-tight text-center animate-bounce">{sizeError}</p>}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Risks list */}
-                                            {currentRisks.length > 0 && (
-                                                <div className="mt-6 border-t border-white/5 pt-5">
-                                                    <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Riscos — clique na seta para mudar direção, no valor para editar cm:</p>
+                                                {/* Modifiers (Angle/Slope) */}
+                                                <div className="space-y-4">
                                                     <div className="flex flex-wrap gap-2">
-                                                        {currentRisks.map((r, i) => (
-                                                            <div key={i} className="relative flex items-center gap-1 px-3 py-1.5 bg-slate-100 rounded-xl border border-slate-300 shadow-sm">
-                                                                {/* Direction edit */}
-                                                                <button onClick={() => setEditDirIdx(editDirIdx === i ? null : i)}
-                                                                    className="text-slate-700 hover:text-brand-primary transition-colors cursor-pointer text-base" title="Editar direção">
-                                                                    {DIRECTION_ICONS[r.direction]}
-                                                                </button>
-                                                                {editDirIdx === i && (
-                                                                    <div className="absolute top-9 left-0 z-50 bg-slate-800 border border-white/20 rounded-xl p-2 grid grid-cols-3 gap-1 shadow-xl w-32">
-                                                                        {DIR_GRID.map(d => (
-                                                                            <button key={d.dir} onClick={() => commitEditDir(i, d.dir)}
-                                                                                className={`text-lg p-1.5 rounded-lg transition-all cursor-pointer ${r.direction === d.dir ? 'bg-blue-500' : 'hover:bg-white/10'}`}>
-                                                                                {d.icon}
-                                                                            </button>
-                                                                        ))}
+                                                        <button onClick={() => setIsAngle(!isAngle)} disabled={!pendingDir}
+                                                            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border-2
+                                                             ${isAngle ? 'bg-amber-50 border-amber-500 text-amber-600 shadow-sm' : 'bg-white border-slate-100 text-slate-400'}`}>
+                                                            <RotateCcw className="w-4 h-4" /> Ângulo
+                                                        </button>
+                                                        <button onClick={() => { if (isLateralSlope) { setSlopeH1(''); setSlopeH2(''); } setIsLateralSlope(!isLateralSlope); }}
+                                                            className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 border-2
+                                                             ${isLateralSlope ? 'bg-indigo-50 border-indigo-500 text-indigo-600 shadow-sm' : 'bg-white border-slate-100 text-slate-400'}`}>
+                                                            <Triangle className="w-4 h-4" /> Caída
+                                                        </button>
+                                                    </div>
+
+                                                    <AnimatePresence>
+                                                        {(isAngle || isLateralSlope) && (
+                                                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                                                                className="bg-white border border-slate-100 rounded-[1.5rem] p-4 space-y-4 overflow-hidden shadow-sm">
+                                                                {isAngle && (
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ângulo (º)</span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <input type="number" inputMode="decimal" placeholder="45" value={pendingAngle} onChange={e => setPendingAngle(e.target.value)}
+                                                                                className="w-16 bg-slate-50 border-none rounded-lg px-3 py-1.5 text-center font-black text-slate-900 outline-none" />
+                                                                            <span className="text-slate-300 font-bold">°</span>
+                                                                        </div>
                                                                     </div>
                                                                 )}
-                                                                {/* Size edit */}
-                                                                {r.slopeData ? (
-                                                                    editingSlopeIdx === i ? (
-                                                                        <div className="flex items-center gap-2 bg-slate-900/80 rounded-xl p-2 border border-amber-500/50 shadow-inner">
-                                                                            <div className="flex bg-slate-800 rounded-lg overflow-hidden border border-white/10">
+                                                                {isLateralSlope && (
+                                                                    <div className="space-y-3">
+                                                                        <div className="flex items-center justify-between">
+                                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lado</span>
+                                                                            <div className="flex bg-slate-100 rounded-lg p-1">
                                                                                 {(['D', 'E'] as const).map(s => (
-                                                                                    <button key={s} onClick={(e) => { e.stopPropagation(); setEditSlopeSide(s); }}
-                                                                                        className={`px-2 py-1 text-[10px] font-black transition-all cursor-pointer ${editSlopeSide === s ? 'bg-amber-500 text-white' : 'text-white/40 hover:text-white'}`}>
-                                                                                        {s}
-                                                                                    </button>
+                                                                                    <button key={s} onClick={() => setSlopeSide(s)}
+                                                                                        className={`px-3 py-1 rounded-lg text-[9px] font-black transition-all ${slopeSide === s ? 'bg-slate-900 text-white' : 'text-slate-400'}`}>{s === 'D' ? 'DIR' : 'ESQ'}</button>
                                                                                 ))}
                                                                             </div>
-                                                                            <div className="flex items-center gap-1">
-                                                                                <div className="flex flex-col">
-                                                                                    <span className="text-[8px] text-amber-500/70 font-bold uppercase ml-1">H1</span>
-                                                                                    <input type="number" autoFocus step="0.1" value={editSlopeH1}
-                                                                                        onChange={e => setEditSlopeH1(e.target.value)}
-                                                                                        className="w-12 bg-white/10 text-white text-xs font-bold px-2 py-1 rounded-lg outline-none border border-white/10 focus:border-amber-500/50" />
-                                                                                </div>
-                                                                                <div className="flex flex-col">
-                                                                                    <span className="text-[8px] text-amber-500/70 font-bold uppercase ml-1">H2</span>
-                                                                                    <input type="number" step="0.1" value={editSlopeH2}
-                                                                                        onChange={e => setEditSlopeH2(e.target.value)}
-                                                                                        onBlur={() => commitEditSlope(i)}
-                                                                                        onKeyDown={e => { if (e.key === 'Enter') commitEditSlope(i); if (e.key === 'Escape') setEditingSlopeIdx(null); }}
-                                                                                        className="w-12 bg-white/10 text-white text-xs font-bold px-2 py-1 rounded-lg outline-none border border-white/10 focus:border-amber-500/50" />
-                                                                                </div>
-                                                                                <button onMouseDown={(e) => {
-                                                                                    e.preventDefault();
-                                                                                    ignoreSizeBlurRef.current = true;
-                                                                                    const h1 = parseFloat(editSlopeH1) || r.sizeCm;
-                                                                                    const h2 = parseFloat(editSlopeH2) || r.sizeCm;
-                                                                                    const newSize = Math.max(h1, h2);
-
-                                                                                    setCurrentRisks(prev => {
-                                                                                        const next = [...prev];
-                                                                                        next[i] = { ...next[i], slopeData: undefined, sizeCm: newSize };
-                                                                                        return next;
-                                                                                    });
-                                                                                    setEditingSlopeIdx(null);
-                                                                                    setEditSizeIdx(i);
-                                                                                    setEditSizeVal(String(newSize));
-                                                                                }}
-                                                                                    className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-[10px] font-bold transition-all border border-slate-600 flex items-center gap-1 cursor-pointer" title="Converter para Linha Normal">
-                                                                                    <Undo2 className="w-3 h-3" /> Normal
-                                                                                </button>
+                                                                        </div>
+                                                                        <div className="grid grid-cols-2 gap-2">
+                                                                            <div className="space-y-1">
+                                                                                <span className="text-[8px] font-black text-slate-400 uppercase">H1</span>
+                                                                                <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH1} onChange={e => setSlopeH1(e.target.value)}
+                                                                                    className="w-full bg-slate-50 border-none rounded-lg p-2 text-center font-black text-slate-900 outline-none" />
+                                                                            </div>
+                                                                            <div className="space-y-1">
+                                                                                <span className="text-[8px] font-black text-slate-400 uppercase">H2</span>
+                                                                                <input type="number" inputMode="decimal" step="0.1" placeholder="0.0" value={slopeH2} onChange={e => setSlopeH2(e.target.value)}
+                                                                                    className="w-full bg-slate-50 border-none rounded-lg p-2 text-center font-black text-slate-900 outline-none" />
                                                                             </div>
                                                                         </div>
-                                                                    ) : (
-                                                                        <button onClick={(e) => { e.stopPropagation(); setEditingSlopeIdx(i); setEditSlopeH1(String(r.slopeData!.h1)); setEditSlopeH2(String(r.slopeData!.h2)); setEditSlopeSide(r.slopeData!.side); }}
-                                                                            className="text-amber-400 font-black text-sm hover:text-amber-300 transition-colors cursor-pointer flex items-center gap-1" title="Editar caída">
-                                                                            <PenLine className="w-3 h-3 opacity-50" />
-                                                                            <span className="bg-amber-500/20 px-1.5 py-0.5 rounded border border-amber-500/30">
-                                                                                {r.slopeData!.side} {r.slopeData!.h1}/{r.slopeData!.h2}
-                                                                            </span>
-                                                                        </button>
-                                                                    )
-                                                                ) : (
-                                                                    editSizeIdx === i ? (
-                                                                        <div className="flex items-center gap-1">
-                                                                            <input type="number" autoFocus value={editSizeVal}
-                                                                                onChange={e => setEditSizeVal(e.target.value)}
-                                                                                onBlur={() => commitEditSize(i)}
-                                                                                onKeyDown={e => { if (e.key === 'Enter') commitEditSize(i); if (e.key === 'Escape') setEditSizeIdx(null); }}
-                                                                                className="w-16 bg-white/20 text-white text-sm font-bold rounded px-2 py-0.5 outline-none border border-blue-400" />
-                                                                            <button onMouseDown={(e) => {
-                                                                                e.preventDefault();
-                                                                                ignoreSizeBlurRef.current = true;
-                                                                                const h = String(r.sizeCm);
-                                                                                setCurrentRisks(prev => {
-                                                                                    const next = [...prev];
-                                                                                    next[i] = { ...next[i], slopeData: { h1: r.sizeCm, h2: r.sizeCm, side: 'D' } };
-                                                                                    return next;
-                                                                                });
-                                                                                setEditSizeIdx(null);
-                                                                                setEditingSlopeIdx(i);
-                                                                                setEditSlopeH1(h);
-                                                                                setEditSlopeH2(h);
-                                                                                setEditSlopeSide('D');
-                                                                                setTimeout(() => ignoreSizeBlurRef.current = false, 200);
-                                                                            }} className="px-2 py-0.5 bg-amber-500/20 hover:bg-amber-500 text-amber-500 hover:text-white text-[10px] rounded flex gap-1 items-center font-bold transition-all border border-amber-500/30" title="Mudar para Caída Lateral"><Triangle className="w-3 h-3" /> Caída</button>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <button onClick={() => { setEditSizeIdx(i); setEditSizeVal(String(r.sizeCm)); }}
-                                                                            className="text-slate-800 font-bold text-sm hover:text-brand-primary transition-colors cursor-pointer" title="Editar cm">
-                                                                            <PenLine className="w-3 h-3 inline mr-0.5 opacity-50 text-slate-400" />{r.sizeCm}
-                                                                        </button>
-                                                                    )
-                                                                )}
-
-                                                                {/* Angle Edit */}
-                                                                {editingAngleIdx === i ? (
-                                                                    <div className="flex items-center ml-2 border border-amber-500 rounded px-1 max-w-[80px]">
-                                                                        <span className="text-amber-500 text-xs">∠</span>
-                                                                        <input type="number" autoFocus value={editAngleVal}
-                                                                            onChange={e => setEditAngleVal(e.target.value)}
-                                                                            onBlur={() => commitEditAngle(i)}
-                                                                            onKeyDown={e => { if (e.key === 'Enter') commitEditAngle(i); if (e.key === 'Escape') setEditingAngleIdx(null); }}
-                                                                            className="w-10 bg-transparent text-amber-300 text-xs font-bold px-1 outline-none" />
                                                                     </div>
-                                                                ) : (
-                                                                    <button onClick={() => { setEditingAngleIdx(i); setEditAngleVal(r.angle != null ? String(r.angle) : ''); }}
-                                                                        className="text-amber-500/80 font-bold text-xs hover:text-amber-300 transition-colors cursor-pointer flex items-center ml-2" title="Editar ângulo">
-                                                                        {r.angle != null ? `∠ ${r.angle}°` : `∠ +`}
-                                                                    </button>
                                                                 )}
-
-                                                                <button onClick={() => setCurrentRisks(prev => prev.filter((_, idx) => idx !== i))}
-                                                                    className="text-red-400/60 hover:text-red-400 transition-colors cursor-pointer ml-1">
-                                                                    <X className="w-3 h-3" />
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
                                                 </div>
-                                            )}
 
-                                            {/* Action: Add to Quote (Redesigned) */}
-                                            <div className="flex flex-col gap-3">
+                                                {/* Risks list */}
                                                 {currentRisks.length > 0 && (
-                                                    <button onClick={() => setCurrentRisks(prev => prev.slice(0, -1))}
-                                                        className="w-full py-4 border-2 border-rose-50 rounded-2xl text-rose-400 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 active:bg-rose-50 transition-all">
-                                                        <RotateCcw className="w-4 h-4" /> Apagar Último Risco
-                                                    </button>
+                                                    <div className="pt-2">
+                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1 ml-1">Riscos Adicionados</p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {currentRisks.map((r, i) => (
+                                                                <div key={i} className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 rounded-xl border border-slate-200">
+                                                                    <button onClick={() => setEditDirIdx(editDirIdx === i ? null : i)} className="text-slate-900 text-sm font-bold">{DIRECTION_ICONS[r.direction]}</button>
+                                                                    <span className="w-[1px] h-3 bg-slate-200" />
+                                                                    <button onClick={() => { setEditSizeIdx(i); setEditSizeVal(String(r.sizeCm)); }} className="text-slate-900 text-sm font-black">{r.sizeCm}</button>
+                                                                    <button onClick={() => setCurrentRisks(prev => prev.filter((_, idx) => idx !== i))} className="text-slate-300 ml-1"><X className="w-3 h-3" /></button>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
                                                 )}
-                                                <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
-                                                    className="w-full py-5 bg-slate-900 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-30">
-                                                    <Check className="w-5 h-5" /> Adicionar ao Orçamento
-                                                </button>
-                                            </div>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {/* Final Action Bar (Fixed Bottom inside container) */}
+                                    {selectedProductType === 'product' && (
+                                        <div className="p-6 bg-white border-t border-slate-100 flex gap-3 z-40">
+                                            {currentRisks.length > 0 && (
+                                                <button onClick={() => setCurrentRisks(prev => prev.slice(0, -1))}
+                                                    className="w-16 h-14 border-2 border-rose-100 rounded-2xl flex items-center justify-center text-rose-500 active:bg-rose-50 transition-all"><RotateCcw className="w-5 h-5" /></button>
+                                            )}
+                                            <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
+                                                className="flex-1 h-14 bg-slate-900 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-30">
+                                                <Check className="w-5 h-5" /> Adicionar ao Orçamento
+                                            </button>
+                                        </div>
+                                    )}
+                                </motion.div>                                            </div>
                                         </>
                                     )}
-                                </motion.div>
+            </motion.div>
 
-                                {/* Confirmed bends with meters input (Step 1) */}
-                                {bends.length > 0 && (
-                                    <div className="space-y-4 pt-4" ref={metersRef}>
-                                        <div className="flex items-center justify-between px-2">
-                                            <h3 className="text-white font-black text-xs uppercase tracking-widest opacity-60">Itens do Orçamento ({bends.length})</h3>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            {bends.map((bend, bi) => {
-                                                const isService = bend.productType === 'service';
-                                                const pCount = bends.filter((b, idx) => idx < bi && b.productType !== 'service').length + 1;
-                                                const sCount = bends.filter((b, idx) => idx < bi && b.productType === 'service').length + 1;
-                                                const label = isService ? `Serviço #${sCount}` : `Dobra #${pCount}`;
-
-                                                return (
-                                                    <motion.div
-                                                        key={bend.id}
-                                                        initial={{ opacity: 0, y: 20 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        className="bg-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden active:scale-[0.99] transition-all"
-                                                    >
-                                                        {/* Header Piece Info */}
-                                                        <div className="flex items-start justify-between mb-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black ${isService ? 'bg-purple-500 shadow-lg shadow-purple-500/20' : 'bg-brand-primary shadow-lg shadow-brand-primary/20'}`}>
-                                                                    {bi + 1}
-                                                                </div>
-                                                                <div>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="text-slate-900 font-black text-base">{label}</span>
-                                                                        {bend.group_name && (
-                                                                            <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter border border-slate-200">
-                                                                                {bend.group_name}
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                                                                        {isService ? 'Serviço Adicional' : `${bend.totalWidthCm.toFixed(1)}cm → ${bend.roundedWidthCm}cm`}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="flex gap-2">
-                                                                <button
-                                                                    onClick={() => { setChangingGroupId(bend.id); setTempGroupName(bend.group_name || ''); }}
-                                                                    className="w-10 h-10 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl active:bg-slate-100 transition-all border border-slate-100"
-                                                                >
-                                                                    <List className="w-5 h-5" />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setBends(prev => prev.filter(b => b.id !== bend.id))}
-                                                                    className="w-10 h-10 flex items-center justify-center bg-rose-50 text-rose-500 rounded-xl active:bg-rose-500 active:text-white transition-all border border-rose-100"
-                                                                >
-                                                                    <Trash2 className="w-5 h-5" />
-                                                                </button>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Group Editor Inline (Mobile Native Feel) */}
-                                                        <AnimatePresence>
-                                                            {changingGroupId === bend.id && (
-                                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-4">
-                                                                    <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
-                                                                        <p className="text-[10px] font-black text-slate-400 uppercase">Mover para qual grupo?</p>
-                                                                        <div className="flex gap-2 flex-wrap">
-                                                                            {Array.from(new Set(bends.map(b => b.group_name).filter(Boolean))).map(g => (
-                                                                                <button key={g} onClick={() => {
-                                                                                    setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: g } : b));
-                                                                                    setChangingGroupId(null);
-                                                                                }} className="px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl text-xs font-bold active:bg-slate-100 transition-colors">
-                                                                                    {g}
-                                                                                </button>
-                                                                            ))}
-                                                                        </div>
-                                                                        <div className="flex gap-2">
-                                                                            <input type="text" placeholder="Novo nome..." value={tempGroupName} onChange={e => setTempGroupName(e.target.value)}
-                                                                                className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-brand-primary outline-none" />
-                                                                            <button onClick={() => {
-                                                                                setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: tempGroupName.trim() || undefined } : b));
-                                                                                setChangingGroupId(null);
-                                                                            }} className="px-4 py-2 bg-brand-primary text-white font-black rounded-xl text-xs uppercase">Ok</button>
-                                                                        </div>
-                                                                    </div>
-                                                                </motion.div>
-                                                            )}
-                                                        </AnimatePresence>
-
-                                                        {/* Piece Content */}
-                                                        {isService ? (
-                                                            <div className="space-y-4">
-                                                                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                                                                    <p className="text-slate-600 font-medium text-sm leading-relaxed">{bend.serviceDescription}</p>
-                                                                </div>
-
-                                                                <div className="flex gap-4">
-                                                                    <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center border border-slate-100">
-                                                                        <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Qtd/Unid</span>
-                                                                        <span className="text-lg font-black text-slate-900">{bend.serviceQty}x</span>
-                                                                    </div>
-                                                                    <div className="flex-[2] bg-purple-50 rounded-2xl p-3 flex flex-col items-center border border-purple-100">
-                                                                        <span className="text-[9px] font-black text-purple-400 uppercase mb-1">Valor do Serviço</span>
-                                                                        <span className="text-xl font-black text-purple-700">{fmt((bend.serviceValue || 0) * (bend.serviceQty || 1))}</span>
-                                                                    </div>
-                                                                </div>
-
-                                                                <button onClick={() => {
-                                                                    setEditingServiceId(bend.id);
-                                                                    setEditServiceDesc(bend.serviceDescription || '');
-                                                                    setEditServiceVal(String(bend.serviceValue || ''));
-                                                                    setEditServiceQtyStr(String(bend.serviceQty || 1));
-                                                                }} className="w-full py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
-                                                                    <PenLine className="w-4 h-4" /> Editar Detalhes
-                                                                </button>
-
-                                                                <AnimatePresence>
-                                                                    {editingServiceId === bend.id && (
-                                                                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-                                                                            <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl space-y-6">
-                                                                                <h3 className="text-xl font-black text-slate-900">Editar Serviço</h3>
-                                                                                <textarea rows={3} value={editServiceDesc} onChange={e => setEditServiceDesc(e.target.value)}
-                                                                                    className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm text-slate-900 focus:ring-2 focus:ring-purple-500 transition-all outline-none" placeholder="Descrição..." />
-                                                                                <div className="grid grid-cols-2 gap-4">
-                                                                                    <div>
-                                                                                        <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Quant.</label>
-                                                                                        <input type="number" value={editServiceQtyStr} onChange={e => setEditServiceQtyStr(e.target.value)}
-                                                                                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Valor (R$)</label>
-                                                                                        <input type="number" step="0.01" value={editServiceVal} onChange={e => setEditServiceVal(e.target.value)}
-                                                                                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div className="flex gap-3 pt-2">
-                                                                                    <button onClick={() => setEditingServiceId(null)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200">Cancelar</button>
-                                                                                    <button onClick={() => {
-                                                                                        const newVal = parseFloat(editServiceVal) || 0;
-                                                                                        const newQty = parseFloat(editServiceQtyStr) || 1;
-                                                                                        setBends(prev => prev.map(b => b.id === bend.id ? { ...b, serviceDescription: editServiceDesc, serviceValue: newVal, serviceQty: newQty } : b));
-                                                                                        setEditingServiceId(null);
-                                                                                    }} className="flex-[2] py-4 bg-purple-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-purple-600/20 active:bg-purple-700">Salvar Alterações</button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </motion.div>
-                                                                    )}
-                                                                </AnimatePresence>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="space-y-5">
-                                                                {/* Visualization (Clean SVG) */}
-                                                                <div className="relative group active:scale-95 transition-transform" onClick={() => bend.svgDataUrl && setZoomImg(bend.svgDataUrl)}>
-                                                                    <div className="w-full h-32 bg-slate-900 rounded-[2rem] overflow-hidden shadow-inner border border-white/5 relative">
-                                                                        <BendCanvas
-                                                                            risks={(bend.risks || []).map((r, ri) => ri === 0 ? { ...r, executionIdx: getBendExecutionLabels(bend.id, bend.lengths) } : r)}
-                                                                            exportMode={true}
-                                                                        />
-                                                                        <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md p-2 rounded-xl border border-white/10 opacity-60">
-                                                                            <ZoomIn className="w-4 h-4 text-white" />
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Dimensions Info */}
-                                                                <div className="flex gap-3">
-                                                                    <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-slate-100">
-                                                                        <span className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Total Linear</span>
-                                                                        <span className="text-base font-black text-slate-900 leading-none">{bend.totalLengthM.toFixed(2)} <span className="text-[10px] font-bold">m</span></span>
-                                                                    </div>
-                                                                    <div className="flex-1 bg-brand-primary/5 rounded-2xl p-3 flex flex-col items-center justify-center border border-brand-primary/10">
-                                                                        <span className="text-[9px] font-black text-brand-primary uppercase leading-none mb-1">Área M²</span>
-                                                                        <span className="text-base font-black text-brand-primary leading-none">{bend.m2.toFixed(2)} <span className="text-[10px] font-bold">m²</span></span>
-                                                                    </div>
-                                                                    <div className="flex-1 bg-green-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-green-100">
-                                                                        <span className="text-[9px] font-black text-green-500 uppercase leading-none mb-1">Subtotal</span>
-                                                                        <span className="text-base font-black text-green-600 leading-none">{fmt(bend.m2 * pricePerM2)}</span>
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* METERS INPUTS (Improved for touch) */}
-                                                                <div className="space-y-3">
-                                                                    <div className="flex items-center justify-between">
-                                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pt-1">
-                                                                            <List className="w-3 h-3" /> Metros Corridos (Cortes)
-                                                                        </p>
-                                                                        <button onClick={() => {
-                                                                            setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: [...b.lengths, ''] } : b));
-                                                                            setTimeout(() => document.getElementById(`cut-input-${bend.id}-${bend.lengths.length}`)?.focus(), 100);
-                                                                        }} className="text-[10px] font-black text-brand-primary flex items-center gap-1 active:opacity-50">
-                                                                            <Plus className="w-3.5 h-3.5" /> NOVO CORTE
-                                                                        </button>
-                                                                    </div>
-
-                                                                    <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
-                                                                        {bend.lengths.map((l, li) => (
-                                                                            <div key={li} className="relative group">
-                                                                                <input
-                                                                                    type="number"
-                                                                                    id={`cut-input-${bend.id}-${li}`}
-                                                                                    min="0.01"
-                                                                                    step="0.01"
-                                                                                    placeholder="0.00"
-                                                                                    value={l}
-                                                                                    onChange={e => updateLength(bend.id, li, e.target.value)}
-                                                                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-4 text-center text-lg font-black text-slate-900 focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
-                                                                                />
-                                                                                {bend.lengths.length > 1 && (
-                                                                                    <button
-                                                                                        onClick={() => { const ls = bend.lengths.filter((_, i) => i !== li); setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: ls, ...calcM2(b.roundedWidthCm, ls) } : b)); }}
-                                                                                        className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-75 transition-all z-10"
-                                                                                    >
-                                                                                        ×
-                                                                                    </button>
-                                                                                )}
-                                                                                {optResult.pieceToSeq && optResult.pieceToSeq[`${bend.id}-${li}`] && (
-                                                                                    <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none opacity-40">
-                                                                                        <span className="text-[7px] font-black text-slate-400 bg-white border border-slate-100 px-1 rounded uppercase tracking-tighter">
-                                                                                            C{optResult.pieceToSeq[`${bend.id}-${li}`][0]}
-                                                                                        </span>
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Edit piece action */}
-                                                                <button onClick={() => {
-                                                                    setSelectedProductType(bend.productType || 'product');
-                                                                    if (bend.product_id) {
-                                                                        setSelectedProductId(bend.product_id);
-                                                                        const prod = allProducts.find(p => p.id === bend.product_id);
-                                                                        if (prod) setSelectedProductName(prod.name);
-                                                                    }
-                                                                    setEditingBendLengths([...bend.lengths]);
-                                                                    setCurrentRisks(bend.risks || []);
-                                                                    setBends(prev => prev.filter(b => b.id !== bend.id));
-                                                                    topRef.current?.scrollIntoView({ behavior: 'smooth' });
-                                                                }} className="w-full py-4 bg-slate-50 text-slate-400 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:bg-slate-100 transition-all">
-                                                                    <RefreshCw className="w-4 h-4" /> Modificar Geometria / Produto
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                    </motion.div>
-                                                );
-                                            })}
-
-                                            <div className="flex justify-center pt-2">
-                                                <button onClick={() => {
-                                                    if (selectedProductType === 'service') {
-                                                        serviceDescRef.current?.scrollIntoView({ behavior: 'smooth' });
-                                                        setTimeout(() => serviceDescRef.current?.focus(), 300);
-                                                    } else {
-                                                        topRef.current?.scrollIntoView({ behavior: 'smooth' });
-                                                    }
-                                                }} className="px-8 py-4 bg-brand-primary text-white font-black rounded-[1.8rem] flex items-center gap-3 cursor-pointer shadow-xl shadow-brand-primary/20 active:scale-95 transition-all uppercase text-xs tracking-widest">
-                                                    <Plus className="w-5 h-5" /> Adicionar Outro Item
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Total sticky bar (Step 1) */}
-                                {bends.length > 0 && (
-                                    <div className="sticky bottom-6 z-30 px-4">
-                                        <div className="bg-slate-900/90 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] p-6 flex flex-col gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-                                            <div className="flex justify-between items-center w-full bg-white/5 p-4 rounded-2xl border border-white/5">
-                                                <div>
-                                                    <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Total m²</p>
-                                                    <p className="text-white font-black text-2xl">{totalM2.toFixed(2)}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Estimado</p>
-                                                    <p className="text-brand-primary font-black text-3xl">{fmt(totalValue)}</p>
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3 w-full">
-                                                <button onClick={handleSaveDraft} disabled={savingDraft}
-                                                    className="h-16 flex items-center justify-center gap-2 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
-                                                    <Save className="w-5 h-5" /> Salvar
-                                                </button>
-                                                <button onClick={() => setStep('summary')} className="h-16 flex items-center justify-center gap-2 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-lg shadow-brand-primary/20">
-                                                    Avançar <ChevronRight className="w-5 h-5" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )
-                    }
-
-                    {/* ══ STEP 2: SUMMARY ══ */}
-                    {step === 'summary' && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-20">
-                            <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl space-y-8" id="quote-print">
-                                <div className="flex items-start justify-between">
-                                    <div className="space-y-1">
-                                        <h2 className="text-2xl font-black text-slate-900 leading-tight">Resumo Geral</h2>
-                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                                    </div>
-                                    <div className="bg-blue-50 border border-blue-100 px-4 py-2 rounded-2xl">
-                                        <p className="text-blue-600 font-black text-[10px] uppercase tracking-tighter">Versão Final</p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cliente</p>
-                                    <p className="text-xl font-black text-slate-900">{user?.name || user?.username || clientName || 'Consumidor Final'}</p>
-                                </div>
-
-                                <div className="space-y-4">
-                                    {(() => {
-                                        const grouped = bends.reduce((acc, b) => {
-                                            const key = b.group_name || 'Sem Grupo';
-                                            if (!acc[key]) acc[key] = [];
-                                            acc[key].push(b);
-                                            return acc;
-                                        }, {} as Record<string, Bend[]>);
-
-                                        return Object.entries(grouped).map(([groupName, groupBends]) => (
-                                            <div key={groupName} className="space-y-4">
-                                                {Object.keys(grouped).length > 1 && (
-                                                    <div className="flex items-center gap-3 pt-4">
-                                                        <div className="w-2 h-2 bg-brand-primary rounded-full" />
-                                                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">{groupName}</h3>
-                                                    </div>
-                                                )}
-                                                {groupBends.map((b) => {
-                                                    const globalIdx = bends.findIndex(x => x.id === b.id);
-                                                    const isService = b.productType === 'service';
-
-                                                    return (
-                                                        <div key={b.id} className="bg-slate-50 border border-slate-100 rounded-3xl p-5 flex items-center justify-between gap-4">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs ${isService ? 'bg-purple-500' : 'bg-slate-900'}`}>{globalIdx + 1}</div>
-                                                                <div>
-                                                                    <p className="text-slate-900 font-black text-sm">
-                                                                        {isService ? 'Serviço' : 'Peça Industrial'} — {b.product_id ? allProducts.find(p => p.id === b.product_id)?.name : 'Geral'}
-                                                                    </p>
-                                                                    <p className="text-slate-500 text-[10px] font-medium leading-tight line-clamp-1">
-                                                                        {isService ? b.serviceDescription : (b.risks || []).map(r => `${r.sizeCm}cm`).join(' · ')}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="text-right shrink-0">
-                                                                <p className="text-slate-900 font-black text-sm">{isService ? `x${b.serviceQty}` : `${b.m2.toFixed(2)}m²`}</p>
-                                                                <p className={`text-[10px] font-black ${isService ? 'text-purple-600' : 'text-brand-primary'}`}>
-                                                                    {fmt(isService ? (b.serviceValue || 0) * (b.serviceQty || 1) : b.m2 * pricePerM2)}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        ));
-                                    })()}
-                                </div>
-
-                                <div className="space-y-4 pt-4 border-t border-slate-100">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Venda (m²)</label>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-slate-300 font-black">R$</span>
-                                                <input type="number" value={overridePricePerM2} onChange={e => setOverridePricePerM2(e.target.value)}
-                                                    className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
-                                            </div>
-                                        </div>
-                                        <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Custo (m²)</label>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-slate-300 font-black">R$</span>
-                                                <input type="number" value={overrideCostPerM2} onChange={e => setOverrideCostPerM2(e.target.value)}
-                                                    className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center justify-between bg-brand-primary rounded-[2.5rem] p-8 text-white shadow-xl shadow-brand-primary/20">
-                                        <div>
-                                            <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Total Geral</p>
-                                            <div className="flex items-center gap-2">
-                                                <h2 className="text-4xl font-black tracking-tighter">{fmt(finalWithDiscount)}</h2>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Lucro Est.</p>
-                                            <p className="text-2xl font-black">{fmt(profit)}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Notas / Observações</label>
-                                        <textarea rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Endereço, cor, material..."
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all outline-none text-sm" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Summary Actions Footer */}
-                            <div className="grid grid-cols-2 gap-3 pb-8">
-                                <button onClick={() => setStep('bends')}
-                                    className="h-16 flex items-center justify-center gap-2 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200 transition-all">
-                                    <ChevronLeft className="w-5 h-5" /> Voltar
-                                </button>
-                                <button onClick={handleSubmit} disabled={submitting}
-                                    className="h-16 flex items-center justify-center gap-3 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-xl shadow-brand-primary/20">
-                                    {submitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                                    {submitting ? 'Enviando...' : 'Finalizar e Enviar'}
-                                </button>
-
-                                <div className="col-span-2 grid grid-cols-3 gap-3">
-                                    <button onClick={() => handleViewClientReport({ id: 'PREVIA', clientName }, bends)}
-                                        className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
-                                        <Printer className="w-5 h-5 text-slate-400" />
-                                        <span className="text-[8px] font-black uppercase">Preview</span>
-                                    </button>
-                                    <button onClick={() => {
-                                        const w2 = window.open('', '_blank');
-                                        handleDownloadQuoteCompactPDF({ id: 'PREVIA', totalM2: totalM2, totalValue: totalM2 * pricePerM2, clientName }, bends, w2);
-                                    }} className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
-                                        <FileDown className="w-5 h-5 text-slate-400" />
-                                        <span className="text-[8px] font-black uppercase">Obra</span>
-                                    </button>
-                                    <button onClick={handleDownloadPDF}
-                                        className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
-                                        <FileDown className="w-5 h-5 text-slate-400" />
-                                        <span className="text-[8px] font-black uppercase">Prod.</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* ══ STEP 3: SUCCESS & SHARING ══ */}
-                    {(step === 'success' || step === 'payment') && savedQuote && (() => {
-                        const clientPhone = (() => {
-                            const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
-                            const raw = linked?.phone || savedQuote.clientPhone || '';
-                            return raw.replace(/[^+\d]/g, '');
-                        })();
-
-                        const quoteNum = String(savedQuote.id).substring(0, 8).toUpperCase();
-                        const reportUrl = `${window.location.origin}/api/quotes/${savedQuote.id}/client-report`;
-                        const waMsg = encodeURIComponent(
-                            `Olá ${savedQuote.clientName || clientName || ''}! 😊\n\nSegue seu orçamento Nº ${quoteNum} no valor de *${fmt(finalWithDiscount)}*.\n\n📄 Visualize e imprima seu orçamento:\n${reportUrl}\n\nQualquer dúvida estou à disposição!`
-                        );
-                        const waLink = clientPhone ? `https://wa.me/${clientPhone}?text=${waMsg}` : null;
-
-                        return (
-                            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-8 pb-32">
-                                <div className="bg-white rounded-[3rem] p-10 shadow-2xl border border-slate-100 flex flex-col items-center text-center space-y-8 w-full max-w-sm">
-                                    <div className="w-24 h-24 bg-green-500 rounded-[2rem] flex items-center justify-center shadow-xl shadow-green-500/20 rotate-3 animate-bounce">
-                                        <Check className="w-12 h-12 text-white" />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <h2 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{quoteNum}</h2>
-                                        <p className="text-slate-500 font-medium px-4">Pronto para ser compartilhado com seu cliente.</p>
-                                    </div>
-
-                                    <div className="bg-slate-50 rounded-3xl p-6 w-full border border-slate-100 space-y-1">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Valor Final</p>
-                                        <p className="text-3xl font-black text-brand-primary">{fmt(finalWithDiscount)}</p>
-                                        <div className="pt-3 mt-3 border-t border-slate-200/50">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente</p>
-                                            <p className="text-lg font-black text-slate-900 truncate">{savedQuote.clientName || clientName || 'Consumidor Final'}</p>
-                                            <p className="text-slate-400 text-xs font-mono">{clientPhone || 'Sem telefone'}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="w-full space-y-4 pt-4">
-                                        {waLink ? (
-                                            <a href={waLink} target="_blank" rel="noopener noreferrer"
-                                                className="h-20 w-full bg-[#25D366] text-white rounded-[1.8rem] flex items-center justify-center gap-4 font-black text-lg shadow-xl shadow-green-500/20 active:scale-95 transition-all">
-                                                <Send className="w-6 h-6" /> WhatsApp
-                                            </a>
-                                        ) : (
-                                            <div className="p-4 bg-amber-50 text-amber-700 rounded-2xl text-xs font-bold border border-amber-100">
-                                                ⚠️ Cadastre um telefone para habilitar o envio por WhatsApp
-                                            </div>
-                                        )}
-
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <button onClick={() => { handleResetQuote(); setStep('bends'); }}
-                                                className="h-16 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
-                                                <Plus className="w-5 h-5 mx-auto mb-1" /> Novo
-                                            </button>
-                                            <button onClick={() => setStep('summary')}
-                                                className="h-16 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
-                                                <RotateCcw className="w-5 h-5 mx-auto mb-1" /> Resumo
-                                            </button>
-                                        </div>
-
-                                        <button onClick={() => {
-                                            handleResetQuote();
-                                            setBends([]);
-                                            setCurrentRisks([]);
-                                            setEditingQuoteId(null);
-                                            setShowMyQuotes(true);
-                                            setStep('bends');
-                                        }}
-                                            className="w-full h-16 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest active:bg-slate-50 transition-all">
-                                            <List className="w-5 h-5 mx-auto mb-1" /> Ver Histórico de Orçamentos
-                                        </button>
-
-                                        <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
-                                            <button onClick={() => handleViewClientReport(savedQuote, bends)}
-                                                className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
-                                                <Printer className="w-5 h-5" />
-                                                <span className="text-[8px] font-black uppercase tracking-tighter">Preview</span>
-                                            </button>
-                                            <button onClick={() => {
-                                                const w2 = window.open('', '_blank');
-                                                handleDownloadQuoteCompactPDF(savedQuote, bends, w2);
-                                            }} className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
-                                                <Printer className="w-5 h-5" />
-                                                <span className="text-[8px] font-black uppercase tracking-tighter">Obra</span>
-                                            </button>
-                                            <button onClick={handleDownloadPDF}
-                                                className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
-                                                <FileDown className="w-5 h-5" />
-                                                <span className="text-[8px] font-black uppercase tracking-tighter">Produção</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        );
-                    })()}
-                </div>
-            </div>
-        );
-    }
-
-    function renderDesktopUI() {
-        // Calculate totals for desktop
-        const totalM2 = bends.reduce((acc, b) => acc + (b.m2 || 0), 0);
-        const totalPrice = totalM2 * pricePerM2;
-        const totalWeight = bends.reduce((acc, b) => {
-            const prod = allProducts.find(p => p.id === b.product_id);
-            if (!prod || !prod.weight) return acc;
-            return acc + (parseFloat(prod.weight) * b.totalLengthM);
-        }, 0);
-
-        return (
-            <div className="flex min-h-screen bg-slate-50 pt-20">
-                {/* Desktop Sidebar: Controls */}
-                <div className="w-96 bg-slate-900 border-r border-white/10 p-6 overflow-y-auto max-h-[calc(100vh-80px)] sticky top-20 flex flex-col gap-6">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Plus className="w-5 h-5 text-blue-400" />
-                            <h2 className="text-white font-black uppercase tracking-widest text-sm">Novo Item</h2>
-                        </div>
-
-                        {/* Client Search */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cliente</label>
-                            <input type="text" value={clientSearch} onChange={e => { setClientSearch(e.target.value); setShowClientDropdown(true); }}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
-                                placeholder="Pesquisar cliente..." />
-                        </div>
-
-                        {/* Product Selector */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Material</label>
-                            <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50">
-                                <option value="">Selecione o Material</option>
-                                {allProducts.filter(p => p.type === 'product').map(p => <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>)}
-                            </select>
-                        </div>
+                                {/* Confirmed bends with meters input (Step 1) */ }
+        {
+            bends.length > 0 && (
+                <div className="space-y-4 pt-4" ref={metersRef}>
+                    <div className="flex items-center justify-between px-2">
+                        <h3 className="text-white font-black text-xs uppercase tracking-widest opacity-60">Itens do Orçamento ({bends.length})</h3>
                     </div>
 
-                    {/* Bend Builder Controls */}
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
-                        <BendCanvas risks={currentRisks} svgRef={svgRef} />
+                    <div className="space-y-4">
+                        {bends.map((bend, bi) => {
+                            const isService = bend.productType === 'service';
+                            const pCount = bends.filter((b, idx) => idx < bi && b.productType !== 'service').length + 1;
+                            const sCount = bends.filter((b, idx) => idx < bi && b.productType === 'service').length + 1;
+                            const label = isService ? `Serviço #${sCount}` : `Dobra #${pCount}`;
 
-                        <div className="grid grid-cols-3 gap-2">
-                            {DIR_GRID.map(d => (
-                                <DirBtnDesktop key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />
-                            ))}
-                        </div>
+                            return (
+                                <motion.div
+                                    key={bend.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden active:scale-[0.99] transition-all"
+                                >
+                                    {/* Header Piece Info */}
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black ${isService ? 'bg-purple-500 shadow-lg shadow-purple-500/20' : 'bg-brand-primary shadow-lg shadow-brand-primary/20'}`}>
+                                                {bi + 1}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-slate-900 font-black text-base">{label}</span>
+                                                    {bend.group_name && (
+                                                        <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter border border-slate-200">
+                                                            {bend.group_name}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                                                    {isService ? 'Serviço Adicional' : `${bend.totalWidthCm.toFixed(1)}cm → ${bend.roundedWidthCm}cm`}
+                                                </p>
+                                            </div>
+                                        </div>
 
-                        <div className="space-y-4">
-                            <div className="flex gap-2">
-                                <input ref={sizeInputRef} type="number" step="0.5" placeholder="Medida (cm)" value={pendingSize}
-                                    onChange={e => setPendingSize(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
-                                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-center outline-none focus:ring-2 focus:ring-blue-500/50" />
-                                <button onClick={handleAddRisk} className="w-14 bg-blue-500 hover:bg-blue-400 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-blue-500/20">
-                                    <Plus className="w-6 h-6" />
-                                </button>
-                            </div>
-                            <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
-                                className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black rounded-xl shadow-lg shadow-green-600/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-30">
-                                Adicionar Dobra
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => { setChangingGroupId(bend.id); setTempGroupName(bend.group_name || ''); }}
+                                                className="w-10 h-10 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl active:bg-slate-100 transition-all border border-slate-100"
+                                            >
+                                                <List className="w-5 h-5" />
+                                            </button>
+                                            <button
+                                                onClick={() => setBends(prev => prev.filter(b => b.id !== bend.id))}
+                                                className="w-10 h-10 flex items-center justify-center bg-rose-50 text-rose-500 rounded-xl active:bg-rose-500 active:text-white transition-all border border-rose-100"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Group Editor Inline (Mobile Native Feel) */}
+                                    <AnimatePresence>
+                                        {changingGroupId === bend.id && (
+                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-4">
+                                                <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase">Mover para qual grupo?</p>
+                                                    <div className="flex gap-2 flex-wrap">
+                                                        {Array.from(new Set(bends.map(b => b.group_name).filter(Boolean))).map(g => (
+                                                            <button key={g} onClick={() => {
+                                                                setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: g } : b));
+                                                                setChangingGroupId(null);
+                                                            }} className="px-3 py-2 bg-white text-slate-700 border border-slate-200 rounded-xl text-xs font-bold active:bg-slate-100 transition-colors">
+                                                                {g}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <input type="text" placeholder="Novo nome..." value={tempGroupName} onChange={e => setTempGroupName(e.target.value)}
+                                                            className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-brand-primary outline-none" />
+                                                        <button onClick={() => {
+                                                            setBends(prev => prev.map(b => b.id === bend.id ? { ...b, group_name: tempGroupName.trim() || undefined } : b));
+                                                            setChangingGroupId(null);
+                                                        }} className="px-4 py-2 bg-brand-primary text-white font-black rounded-xl text-xs uppercase">Ok</button>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* Piece Content */}
+                                    {isService ? (
+                                        <div className="space-y-4">
+                                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                                <p className="text-slate-600 font-medium text-sm leading-relaxed">{bend.serviceDescription}</p>
+                                            </div>
+
+                                            <div className="flex gap-4">
+                                                <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center border border-slate-100">
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase mb-1">Qtd/Unid</span>
+                                                    <span className="text-lg font-black text-slate-900">{bend.serviceQty}x</span>
+                                                </div>
+                                                <div className="flex-[2] bg-purple-50 rounded-2xl p-3 flex flex-col items-center border border-purple-100">
+                                                    <span className="text-[9px] font-black text-purple-400 uppercase mb-1">Valor do Serviço</span>
+                                                    <span className="text-xl font-black text-purple-700">{fmt((bend.serviceValue || 0) * (bend.serviceQty || 1))}</span>
+                                                </div>
+                                            </div>
+
+                                            <button onClick={() => {
+                                                setEditingServiceId(bend.id);
+                                                setEditServiceDesc(bend.serviceDescription || '');
+                                                setEditServiceVal(String(bend.serviceValue || ''));
+                                                setEditServiceQtyStr(String(bend.serviceQty || 1));
+                                            }} className="w-full py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
+                                                <PenLine className="w-4 h-4" /> Editar Detalhes
+                                            </button>
+
+                                            <AnimatePresence>
+                                                {editingServiceId === bend.id && (
+                                                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+                                                        <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl space-y-6">
+                                                            <h3 className="text-xl font-black text-slate-900">Editar Serviço</h3>
+                                                            <textarea rows={3} value={editServiceDesc} onChange={e => setEditServiceDesc(e.target.value)}
+                                                                className="w-full bg-slate-50 border-none rounded-2xl px-5 py-4 text-sm text-slate-900 focus:ring-2 focus:ring-purple-500 transition-all outline-none" placeholder="Descrição..." />
+                                                            <div className="grid grid-cols-2 gap-4">
+                                                                <div>
+                                                                    <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Quant.</label>
+                                                                    <input type="number" value={editServiceQtyStr} onChange={e => setEditServiceQtyStr(e.target.value)}
+                                                                        className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Valor (R$)</label>
+                                                                    <input type="number" step="0.01" value={editServiceVal} onChange={e => setEditServiceVal(e.target.value)}
+                                                                        className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-lg font-black text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex gap-3 pt-2">
+                                                                <button onClick={() => setEditingServiceId(null)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200">Cancelar</button>
+                                                                <button onClick={() => {
+                                                                    const newVal = parseFloat(editServiceVal) || 0;
+                                                                    const newQty = parseFloat(editServiceQtyStr) || 1;
+                                                                    setBends(prev => prev.map(b => b.id === bend.id ? { ...b, serviceDescription: editServiceDesc, serviceValue: newVal, serviceQty: newQty } : b));
+                                                                    setEditingServiceId(null);
+                                                                }} className="flex-[2] py-4 bg-purple-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl shadow-purple-600/20 active:bg-purple-700">Salvar Alterações</button>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-5">
+                                            {/* Visualization (Clean SVG) */}
+                                            <div className="relative group active:scale-95 transition-transform" onClick={() => bend.svgDataUrl && setZoomImg(bend.svgDataUrl)}>
+                                                <div className="w-full h-32 bg-slate-900 rounded-[2rem] overflow-hidden shadow-inner border border-white/5 relative">
+                                                    <BendCanvas
+                                                        risks={(bend.risks || []).map((r, ri) => ri === 0 ? { ...r, executionIdx: getBendExecutionLabels(bend.id, bend.lengths) } : r)}
+                                                        exportMode={true}
+                                                    />
+                                                    <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md p-2 rounded-xl border border-white/10 opacity-60">
+                                                        <ZoomIn className="w-4 h-4 text-white" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Dimensions Info */}
+                                            <div className="flex gap-3">
+                                                <div className="flex-1 bg-slate-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-slate-100">
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase leading-none mb-1">Total Linear</span>
+                                                    <span className="text-base font-black text-slate-900 leading-none">{bend.totalLengthM.toFixed(2)} <span className="text-[10px] font-bold">m</span></span>
+                                                </div>
+                                                <div className="flex-1 bg-brand-primary/5 rounded-2xl p-3 flex flex-col items-center justify-center border border-brand-primary/10">
+                                                    <span className="text-[9px] font-black text-brand-primary uppercase leading-none mb-1">Área M²</span>
+                                                    <span className="text-base font-black text-brand-primary leading-none">{bend.m2.toFixed(2)} <span className="text-[10px] font-bold">m²</span></span>
+                                                </div>
+                                                <div className="flex-1 bg-green-50 rounded-2xl p-3 flex flex-col items-center justify-center border border-green-100">
+                                                    <span className="text-[9px] font-black text-green-500 uppercase leading-none mb-1">Subtotal</span>
+                                                    <span className="text-base font-black text-green-600 leading-none">{fmt(bend.m2 * pricePerM2)}</span>
+                                                </div>
+                                            </div>
+
+                                            {/* METERS INPUTS (Improved for touch) */}
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pt-1">
+                                                        <List className="w-3 h-3" /> Metros Corridos (Cortes)
+                                                    </p>
+                                                    <button onClick={() => {
+                                                        setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: [...b.lengths, ''] } : b));
+                                                        setTimeout(() => document.getElementById(`cut-input-${bend.id}-${bend.lengths.length}`)?.focus(), 100);
+                                                    }} className="text-[10px] font-black text-brand-primary flex items-center gap-1 active:opacity-50">
+                                                        <Plus className="w-3.5 h-3.5" /> NOVO CORTE
+                                                    </button>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
+                                                    {bend.lengths.map((l, li) => (
+                                                        <div key={li} className="relative group">
+                                                            <input
+                                                                type="number"
+                                                                id={`cut-input-${bend.id}-${li}`}
+                                                                min="0.01"
+                                                                step="0.01"
+                                                                placeholder="0.00"
+                                                                value={l}
+                                                                onChange={e => updateLength(bend.id, li, e.target.value)}
+                                                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-4 text-center text-lg font-black text-slate-900 focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
+                                                            />
+                                                            {bend.lengths.length > 1 && (
+                                                                <button
+                                                                    onClick={() => { const ls = bend.lengths.filter((_, i) => i !== li); setBends(prev => prev.map(b => b.id === bend.id ? { ...b, lengths: ls, ...calcM2(b.roundedWidthCm, ls) } : b)); }}
+                                                                    className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm shadow-lg active:scale-75 transition-all z-10"
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            )}
+                                                            {optResult.pieceToSeq && optResult.pieceToSeq[`${bend.id}-${li}`] && (
+                                                                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 pointer-events-none opacity-40">
+                                                                    <span className="text-[7px] font-black text-slate-400 bg-white border border-slate-100 px-1 rounded uppercase tracking-tighter">
+                                                                        C{optResult.pieceToSeq[`${bend.id}-${li}`][0]}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Edit piece action */}
+                                            <button onClick={() => {
+                                                setSelectedProductType(bend.productType || 'product');
+                                                if (bend.product_id) {
+                                                    setSelectedProductId(bend.product_id);
+                                                    const prod = allProducts.find(p => p.id === bend.product_id);
+                                                    if (prod) setSelectedProductName(prod.name);
+                                                }
+                                                setEditingBendLengths([...bend.lengths]);
+                                                setCurrentRisks(bend.risks || []);
+                                                setBends(prev => prev.filter(b => b.id !== bend.id));
+                                                topRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                            }} className="w-full py-4 bg-slate-50 text-slate-400 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:bg-slate-100 transition-all">
+                                                <RefreshCw className="w-4 h-4" /> Modificar Geometria / Produto
+                                            </button>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            );
+                        })}
+
+                        <div className="flex justify-center pt-2">
+                            <button onClick={() => {
+                                if (selectedProductType === 'service') {
+                                    serviceDescRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                    setTimeout(() => serviceDescRef.current?.focus(), 300);
+                                } else {
+                                    topRef.current?.scrollIntoView({ behavior: 'smooth' });
+                                }
+                            }} className="px-8 py-4 bg-brand-primary text-white font-black rounded-[1.8rem] flex items-center gap-3 cursor-pointer shadow-xl shadow-brand-primary/20 active:scale-95 transition-all uppercase text-xs tracking-widest">
+                                <Plus className="w-5 h-5" /> Adicionar Outro Item
                             </button>
                         </div>
                     </div>
+                </div>
+            )
+        }
 
-                    <div className="mt-auto pt-6 border-t border-white/5">
-                        <button onClick={handleSaveDraft} className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
-                            <Save className="w-4 h-4" /> Salvar Rascunho
+        {/* Total sticky bar (Step 1) */ }
+        {
+            bends.length > 0 && (
+                <div className="sticky bottom-6 z-30 px-4">
+                    <div className="bg-slate-900/90 backdrop-blur-3xl border border-white/20 rounded-[2.5rem] p-6 flex flex-col gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                        <div className="flex justify-between items-center w-full bg-white/5 p-4 rounded-2xl border border-white/5">
+                            <div>
+                                <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Total m²</p>
+                                <p className="text-white font-black text-2xl">{totalM2.toFixed(2)}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1">Estimado</p>
+                                <p className="text-brand-primary font-black text-3xl">{fmt(totalValue)}</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 w-full">
+                            <button onClick={handleSaveDraft} disabled={savingDraft}
+                                className="h-16 flex items-center justify-center gap-2 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                                <Save className="w-5 h-5" /> Salvar
+                            </button>
+                            <button onClick={() => setStep('summary')} className="h-16 flex items-center justify-center gap-2 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-lg shadow-brand-primary/20">
+                                Avançar <ChevronRight className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+                            </div >
+                        )
+    }
+
+    {/* ══ STEP 2: SUMMARY ══ */ }
+    {
+        step === 'summary' && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 pb-20">
+                <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl space-y-8" id="quote-print">
+                    <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                            <h2 className="text-2xl font-black text-slate-900 leading-tight">Resumo Geral</h2>
+                            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                        </div>
+                        <div className="bg-blue-50 border border-blue-100 px-4 py-2 rounded-2xl">
+                            <p className="text-blue-600 font-black text-[10px] uppercase tracking-tighter">Versão Final</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Cliente</p>
+                        <p className="text-xl font-black text-slate-900">{user?.name || user?.username || clientName || 'Consumidor Final'}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {(() => {
+                            const grouped = bends.reduce((acc, b) => {
+                                const key = b.group_name || 'Sem Grupo';
+                                if (!acc[key]) acc[key] = [];
+                                acc[key].push(b);
+                                return acc;
+                            }, {} as Record<string, Bend[]>);
+
+                            return Object.entries(grouped).map(([groupName, groupBends]) => (
+                                <div key={groupName} className="space-y-4">
+                                    {Object.keys(grouped).length > 1 && (
+                                        <div className="flex items-center gap-3 pt-4">
+                                            <div className="w-2 h-2 bg-brand-primary rounded-full" />
+                                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">{groupName}</h3>
+                                        </div>
+                                    )}
+                                    {groupBends.map((b) => {
+                                        const globalIdx = bends.findIndex(x => x.id === b.id);
+                                        const isService = b.productType === 'service';
+
+                                        return (
+                                            <div key={b.id} className="bg-slate-50 border border-slate-100 rounded-3xl p-5 flex items-center justify-between gap-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-xs ${isService ? 'bg-purple-500' : 'bg-slate-900'}`}>{globalIdx + 1}</div>
+                                                    <div>
+                                                        <p className="text-slate-900 font-black text-sm">
+                                                            {isService ? 'Serviço' : 'Peça Industrial'} — {b.product_id ? allProducts.find(p => p.id === b.product_id)?.name : 'Geral'}
+                                                        </p>
+                                                        <p className="text-slate-500 text-[10px] font-medium leading-tight line-clamp-1">
+                                                            {isService ? b.serviceDescription : (b.risks || []).map(r => `${r.sizeCm}cm`).join(' · ')}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right shrink-0">
+                                                    <p className="text-slate-900 font-black text-sm">{isService ? `x${b.serviceQty}` : `${b.m2.toFixed(2)}m²`}</p>
+                                                    <p className={`text-[10px] font-black ${isService ? 'text-purple-600' : 'text-brand-primary'}`}>
+                                                        {fmt(isService ? (b.serviceValue || 0) * (b.serviceQty || 1) : b.m2 * pricePerM2)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ));
+                        })()}
+                    </div>
+
+                    <div className="space-y-4 pt-4 border-t border-slate-100">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Venda (m²)</label>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-slate-300 font-black">R$</span>
+                                    <input type="number" value={overridePricePerM2} onChange={e => setOverridePricePerM2(e.target.value)}
+                                        className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
+                                </div>
+                            </div>
+                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                                <label className="text-[10px] font-black text-slate-400 uppercase block mb-2">Custo (m²)</label>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-slate-300 font-black">R$</span>
+                                    <input type="number" value={overrideCostPerM2} onChange={e => setOverrideCostPerM2(e.target.value)}
+                                        className="w-full bg-transparent text-xl font-black text-slate-900 outline-none" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between bg-brand-primary rounded-[2.5rem] p-8 text-white shadow-xl shadow-brand-primary/20">
+                            <div>
+                                <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Total Geral</p>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-4xl font-black tracking-tighter">{fmt(finalWithDiscount)}</h2>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-white/60 text-xs font-black uppercase tracking-widest mb-1">Lucro Est.</p>
+                                <p className="text-2xl font-black">{fmt(profit)}</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Notas / Observações</label>
+                            <textarea rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Endereço, cor, material..."
+                                className="w-full bg-slate-50 border border-slate-100 rounded-[1.8rem] px-6 py-4 text-slate-900 placeholder-slate-300 focus:ring-4 focus:ring-brand-primary/5 focus:border-brand-primary transition-all outline-none text-sm" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Summary Actions Footer */}
+                <div className="grid grid-cols-2 gap-3 pb-8">
+                    <button onClick={() => setStep('bends')}
+                        className="h-16 flex items-center justify-center gap-2 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase active:bg-slate-200 transition-all">
+                        <ChevronLeft className="w-5 h-5" /> Voltar
+                    </button>
+                    <button onClick={handleSubmit} disabled={submitting}
+                        className="h-16 flex items-center justify-center gap-3 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-wider active:scale-95 transition-all shadow-xl shadow-brand-primary/20">
+                        {submitting ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                        {submitting ? 'Enviando...' : 'Finalizar e Enviar'}
+                    </button>
+
+                    <div className="col-span-2 grid grid-cols-3 gap-3">
+                        <button onClick={() => handleViewClientReport({ id: 'PREVIA', clientName }, bends)}
+                            className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
+                            <Printer className="w-5 h-5 text-slate-400" />
+                            <span className="text-[8px] font-black uppercase">Preview</span>
+                        </button>
+                        <button onClick={() => {
+                            const w2 = window.open('', '_blank');
+                            handleDownloadQuoteCompactPDF({ id: 'PREVIA', totalM2: totalM2, totalValue: totalM2 * pricePerM2, clientName }, bends, w2);
+                        }} className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
+                            <FileDown className="w-5 h-5 text-slate-400" />
+                            <span className="text-[8px] font-black uppercase">Obra</span>
+                        </button>
+                        <button onClick={handleDownloadPDF}
+                            className="flex flex-col items-center justify-center gap-2 h-20 bg-white border border-slate-100 rounded-2xl text-slate-400 active:bg-slate-50 shadow-sm transition-all">
+                            <FileDown className="w-5 h-5 text-slate-400" />
+                            <span className="text-[8px] font-black uppercase">Prod.</span>
+                        </button>
+                    </div>
+                </div>
+            </motion.div>
+        )
+    }
+
+    {/* ══ STEP 3: SUCCESS & SHARING ══ */ }
+    {
+        (step === 'success' || step === 'payment') && savedQuote && (() => {
+            const clientPhone = (() => {
+                const linked = allClients.find(c => c.id === selectedClientId || c.id === savedQuote.clientId);
+                const raw = linked?.phone || savedQuote.clientPhone || '';
+                return raw.replace(/[^+\d]/g, '');
+            })();
+
+            const quoteNum = String(savedQuote.id).substring(0, 8).toUpperCase();
+            const reportUrl = `${window.location.origin}/api/quotes/${savedQuote.id}/client-report`;
+            const waMsg = encodeURIComponent(
+                `Olá ${savedQuote.clientName || clientName || ''}! 😊\n\nSegue seu orçamento Nº ${quoteNum} no valor de *${fmt(finalWithDiscount)}*.\n\n📄 Visualize e imprima seu orçamento:\n${reportUrl}\n\nQualquer dúvida estou à disposição!`
+            );
+            const waLink = clientPhone ? `https://wa.me/${clientPhone}?text=${waMsg}` : null;
+
+            return (
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-8 pb-32">
+                    <div className="bg-white rounded-[3rem] p-10 shadow-2xl border border-slate-100 flex flex-col items-center text-center space-y-8 w-full max-w-sm">
+                        <div className="w-24 h-24 bg-green-500 rounded-[2rem] flex items-center justify-center shadow-xl shadow-green-500/20 rotate-3 animate-bounce">
+                            <Check className="w-12 h-12 text-white" />
+                        </div>
+
+                        <div className="space-y-2">
+                            <h2 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{quoteNum}</h2>
+                            <p className="text-slate-500 font-medium px-4">Pronto para ser compartilhado com seu cliente.</p>
+                        </div>
+
+                        <div className="bg-slate-50 rounded-3xl p-6 w-full border border-slate-100 space-y-1">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Valor Final</p>
+                            <p className="text-3xl font-black text-brand-primary">{fmt(finalWithDiscount)}</p>
+                            <div className="pt-3 mt-3 border-t border-slate-200/50">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente</p>
+                                <p className="text-lg font-black text-slate-900 truncate">{savedQuote.clientName || clientName || 'Consumidor Final'}</p>
+                                <p className="text-slate-400 text-xs font-mono">{clientPhone || 'Sem telefone'}</p>
+                            </div>
+                        </div>
+
+                        <div className="w-full space-y-4 pt-4">
+                            {waLink ? (
+                                <a href={waLink} target="_blank" rel="noopener noreferrer"
+                                    className="h-20 w-full bg-[#25D366] text-white rounded-[1.8rem] flex items-center justify-center gap-4 font-black text-lg shadow-xl shadow-green-500/20 active:scale-95 transition-all">
+                                    <Send className="w-6 h-6" /> WhatsApp
+                                </a>
+                            ) : (
+                                <div className="p-4 bg-amber-50 text-amber-700 rounded-2xl text-xs font-bold border border-amber-100">
+                                    ⚠️ Cadastre um telefone para habilitar o envio por WhatsApp
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <button onClick={() => { handleResetQuote(); setStep('bends'); }}
+                                    className="h-16 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                                    <Plus className="w-5 h-5 mx-auto mb-1" /> Novo
+                                </button>
+                                <button onClick={() => setStep('summary')}
+                                    className="h-16 bg-slate-100 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+                                    <RotateCcw className="w-5 h-5 mx-auto mb-1" /> Resumo
+                                </button>
+                            </div>
+
+                            <button onClick={() => {
+                                handleResetQuote();
+                                setBends([]);
+                                setCurrentRisks([]);
+                                setEditingQuoteId(null);
+                                setShowMyQuotes(true);
+                                setStep('bends');
+                            }}
+                                className="w-full h-16 bg-white text-slate-400 border border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest active:bg-slate-50 transition-all">
+                                <List className="w-5 h-5 mx-auto mb-1" /> Ver Histórico de Orçamentos
+                            </button>
+
+                            <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100">
+                                <button onClick={() => handleViewClientReport(savedQuote, bends)}
+                                    className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
+                                    <Printer className="w-5 h-5" />
+                                    <span className="text-[8px] font-black uppercase tracking-tighter">Preview</span>
+                                </button>
+                                <button onClick={() => {
+                                    const w2 = window.open('', '_blank');
+                                    handleDownloadQuoteCompactPDF(savedQuote, bends, w2);
+                                }} className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
+                                    <Printer className="w-5 h-5" />
+                                    <span className="text-[8px] font-black uppercase tracking-tighter">Obra</span>
+                                </button>
+                                <button onClick={handleDownloadPDF}
+                                    className="flex flex-col items-center justify-center gap-1.5 h-20 bg-slate-50 rounded-2xl text-slate-400 active:bg-slate-100 transition-all">
+                                    <FileDown className="w-5 h-5" />
+                                    <span className="text-[8px] font-black uppercase tracking-tighter">Produção</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            );
+        })()
+    }
+                </div >
+            </div >
+        );
+}
+
+function renderDesktopUI() {
+    // Calculate totals for desktop
+    const totalM2 = bends.reduce((acc, b) => acc + (b.m2 || 0), 0);
+    const totalPrice = totalM2 * pricePerM2;
+    const totalWeight = bends.reduce((acc, b) => {
+        const prod = allProducts.find(p => p.id === b.product_id);
+        if (!prod || !prod.weight) return acc;
+        return acc + (parseFloat(prod.weight) * b.totalLengthM);
+    }, 0);
+
+    return (
+        <div className="flex min-h-screen bg-slate-50 pt-20">
+            {/* Desktop Sidebar: Controls */}
+            <div className="w-96 bg-slate-900 border-r border-white/10 p-6 overflow-y-auto max-h-[calc(100vh-80px)] sticky top-20 flex flex-col gap-6">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Plus className="w-5 h-5 text-blue-400" />
+                        <h2 className="text-white font-black uppercase tracking-widest text-sm">Novo Item</h2>
+                    </div>
+
+                    {/* Client Search */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cliente</label>
+                        <input type="text" value={clientSearch} onChange={e => { setClientSearch(e.target.value); setShowClientDropdown(true); }}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
+                            placeholder="Pesquisar cliente..." />
+                    </div>
+
+                    {/* Product Selector */}
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-white/40 uppercase tracking-widest">Material</label>
+                        <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-blue-500/50">
+                            <option value="">Selecione o Material</option>
+                            {allProducts.filter(p => p.type === 'product').map(p => <option key={p.id} value={p.id} className="bg-slate-800">{p.name}</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Bend Builder Controls */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
+                    <BendCanvas risks={currentRisks} svgRef={svgRef} />
+
+                    <div className="grid grid-cols-3 gap-2">
+                        {DIR_GRID.map(d => (
+                            <DirBtnDesktop key={d.dir} d={d} active={pendingDir === d.dir} onClick={() => selectDirection(d.dir)} />
+                        ))}
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex gap-2">
+                            <input ref={sizeInputRef} type="number" step="0.5" placeholder="Medida (cm)" value={pendingSize}
+                                onChange={e => setPendingSize(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddRisk()}
+                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-bold text-center outline-none focus:ring-2 focus:ring-blue-500/50" />
+                            <button onClick={handleAddRisk} className="w-14 bg-blue-500 hover:bg-blue-400 text-white rounded-xl flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-blue-500/20">
+                                <Plus className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <button onClick={handleConfirmBend} disabled={!currentRisks.length || isOver}
+                            className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black rounded-xl shadow-lg shadow-green-600/20 active:scale-95 transition-all text-xs uppercase tracking-widest disabled:opacity-30">
+                            Adicionar Dobra
                         </button>
                     </div>
                 </div>
 
-                {/* Main Content: Table and Totals */}
-                <div className="flex-1 p-8 space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
-                    <div className="flex justify-between items-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                        <div>
-                            <h1 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{uid().toUpperCase()}</h1>
-                            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Status: {STATUS_LABELS.draft.label}</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Valor Total</p>
-                            <p className="text-4xl font-black text-blue-600 leading-none">R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                        </div>
-                    </div>
-
-                    {/* Desktop Table */}
-                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-widest text-left">
-                                    <th className="px-6 py-4">#</th>
-                                    <th className="px-6 py-4">Representação</th>
-                                    <th className="px-6 py-4">Desenvolvimento</th>
-                                    <th className="px-6 py-4">Metros</th>
-                                    <th className="px-6 py-4">Área (m²)</th>
-                                    <th className="px-6 py-4 text-right">Subtotal</th>
-                                    <th className="px-6 py-4 text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {bends.map((b, i) => (
-                                    <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
-                                        <td className="px-6 py-6 font-bold text-slate-400">{i + 1}</td>
-                                        <td className="px-6 py-6">
-                                            <div className="w-24 h-12 bg-slate-900 rounded-lg overflow-hidden border border-slate-200">
-                                                <BendCanvas risks={b.risks} exportMode={true} />
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-6">
-                                            <div className="flex flex-wrap gap-1">
-                                                {b.risks.map((r, ri) => (
-                                                    <span key={ri} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">
-                                                        {DIRECTION_ICONS[r.direction]}{r.sizeCm}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                            <p className="text-[10px] font-black text-blue-500 mt-1 uppercase tracking-tighter">Total: {b.roundedWidthCm}cm</p>
-                                        </td>
-                                        <td className="px-6 py-6 font-bold text-slate-700">{b.totalLengthM.toFixed(2)}m</td>
-                                        <td className="px-6 py-6 font-bold text-slate-700">{b.m2.toFixed(2)}m²</td>
-                                        <td className="px-6 py-6 text-right font-black text-slate-900">R$ {(b.m2 * pricePerM2).toFixed(2)}</td>
-                                        <td className="px-6 py-6 text-center">
-                                            <button onClick={() => setBends(prev => prev.filter(item => item.id !== b.id))}
-                                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer">
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {bends.length === 0 && (
-                                    <tr>
-                                        <td colSpan={7} className="px-6 py-20 text-center">
-                                            <ShoppingCart className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                                            <p className="text-slate-400 font-medium">Nenhuma dobra adicionada ao orçamento.</p>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className="flex justify-end gap-3 pt-4 pb-20">
-                        <button onClick={handleResetQuote} className="px-8 py-4 bg-white border border-slate-200 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
-                            Reiniciar Orçamento
-                        </button>
-                        <button onClick={handleSubmit} className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2">
-                            <Send className="w-5 h-5" /> Finalizar e Gerar PDF
-                        </button>
-                    </div>
+                <div className="mt-auto pt-6 border-t border-white/5">
+                    <button onClick={handleSaveDraft} className="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                        <Save className="w-4 h-4" /> Salvar Rascunho
+                    </button>
                 </div>
             </div>
-        );
-    }
+
+            {/* Main Content: Table and Totals */}
+            <div className="flex-1 p-8 space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
+                <div className="flex justify-between items-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                    <div>
+                        <h1 className="text-3xl font-black text-slate-900 leading-tight">Orçamento #{uid().toUpperCase()}</h1>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-1">Status: {STATUS_LABELS.draft.label}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Valor Total</p>
+                        <p className="text-4xl font-black text-blue-600 leading-none">R$ {totalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    </div>
+                </div>
+
+                {/* Desktop Table */}
+                <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-widest text-left">
+                                <th className="px-6 py-4">#</th>
+                                <th className="px-6 py-4">Representação</th>
+                                <th className="px-6 py-4">Desenvolvimento</th>
+                                <th className="px-6 py-4">Metros</th>
+                                <th className="px-6 py-4">Área (m²)</th>
+                                <th className="px-6 py-4 text-right">Subtotal</th>
+                                <th className="px-6 py-4 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {bends.map((b, i) => (
+                                <tr key={b.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <td className="px-6 py-6 font-bold text-slate-400">{i + 1}</td>
+                                    <td className="px-6 py-6">
+                                        <div className="w-24 h-12 bg-slate-900 rounded-lg overflow-hidden border border-slate-200">
+                                            <BendCanvas risks={b.risks} exportMode={true} />
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-6">
+                                        <div className="flex flex-wrap gap-1">
+                                            {b.risks.map((r, ri) => (
+                                                <span key={ri} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">
+                                                    {DIRECTION_ICONS[r.direction]}{r.sizeCm}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <p className="text-[10px] font-black text-blue-500 mt-1 uppercase tracking-tighter">Total: {b.roundedWidthCm}cm</p>
+                                    </td>
+                                    <td className="px-6 py-6 font-bold text-slate-700">{b.totalLengthM.toFixed(2)}m</td>
+                                    <td className="px-6 py-6 font-bold text-slate-700">{b.m2.toFixed(2)}m²</td>
+                                    <td className="px-6 py-6 text-right font-black text-slate-900">R$ {(b.m2 * pricePerM2).toFixed(2)}</td>
+                                    <td className="px-6 py-6 text-center">
+                                        <button onClick={() => setBends(prev => prev.filter(item => item.id !== b.id))}
+                                            className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-all cursor-pointer">
+                                            <Trash2 className="w-5 h-5" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {bends.length === 0 && (
+                                <tr>
+                                    <td colSpan={7} className="px-6 py-20 text-center">
+                                        <ShoppingCart className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                                        <p className="text-slate-400 font-medium">Nenhuma dobra adicionada ao orçamento.</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 pb-20">
+                    <button onClick={handleResetQuote} className="px-8 py-4 bg-white border border-slate-200 text-slate-500 font-bold rounded-2xl hover:bg-slate-50 transition-all cursor-pointer">
+                        Reiniciar Orçamento
+                    </button>
+                    <button onClick={handleSubmit} className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-2">
+                        <Send className="w-5 h-5" /> Finalizar e Gerar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
 }
