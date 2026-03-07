@@ -139,7 +139,7 @@ export default function Navbar() {
                 <div className="flex flex-col">
                   <span className={cn(
                     "text-xl font-black tracking-tighter transition-colors leading-none",
-                    isScrolledOrNotHome ? "text-brand-dark" : "text-brand-dark md:text-white"
+                    isScrolledOrNotHome ? "text-brand-dark" : "text-white"
                   )}>
                     FERREIRA
                   </span>
@@ -161,10 +161,10 @@ export default function Navbar() {
                 key={link.path}
                 to={link.path}
                 className={cn(
-                  'text-sm font-bold uppercase tracking-wider transition-colors hover:text-brand-primary',
+                  'text-sm font-bold uppercase tracking-wider transition-colors hover:text-brand-primary shadow-sm',
                   location.pathname === link.path
                     ? 'text-brand-primary'
-                    : isScrolledOrNotHome ? 'text-slate-600' : 'text-slate-600 md:text-white/90'
+                    : isScrolledOrNotHome ? 'text-slate-700' : 'text-white drop-shadow-md'
                 )}
               >
                 {link.name}
@@ -176,10 +176,10 @@ export default function Navbar() {
               <div className="relative" ref={menuRef}>
                 <button onClick={() => setShowUserMenu(v => !v)}
                   className={cn(
-                    "flex items-center gap-2 text-[11px] uppercase tracking-widest font-black transition-colors border rounded-lg px-3 py-1.5 cursor-pointer",
+                    "flex items-center gap-2 text-[11px] uppercase tracking-widest font-black transition-colors border rounded-lg px-3 py-1.5 cursor-pointer bg-white/5 backdrop-blur-sm",
                     isScrolledOrNotHome
-                      ? "text-slate-600 border-slate-200 hover:text-brand-primary hover:border-brand-primary"
-                      : "text-white/80 border-white/30 hover:text-white hover:border-white"
+                      ? "text-slate-700 border-slate-200 hover:text-brand-primary hover:border-brand-primary"
+                      : "text-white border-white/40 hover:text-brand-primary hover:bg-white"
                   )}>
                   <UserIcon className="w-3.5 h-3.5" />
                   {user.name || 'Usuário'}
