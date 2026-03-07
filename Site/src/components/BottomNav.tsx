@@ -17,6 +17,11 @@ export default function BottomNav() {
             path: '/admin',
         },
         {
+            label: 'Financeiro',
+            icon: ClipboardList,
+            path: '/admin?tab=revenue',
+        },
+        {
             label: 'Clientes',
             icon: Users,
             path: '/admin?tab=clients',
@@ -27,14 +32,9 @@ export default function BottomNav() {
             path: '/admin?tab=products',
         },
         {
-            label: 'Usuários',
+            label: 'Parâmetros',
             icon: UserCircle,
-            path: '/admin?tab=users',
-        },
-        {
-            label: 'Sair',
-            icon: User,
-            path: '/login',
+            path: '/admin?tab=settings',
         },
     ];
 
