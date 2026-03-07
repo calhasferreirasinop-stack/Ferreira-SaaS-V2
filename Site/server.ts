@@ -269,36 +269,32 @@ const parseSession = async (req: any): Promise<AuthUser | null> => {
 };
 
 // --- Auth Middlewares ---
-const requireAuth = (req: any, res: any, next: any) => {
-  if (req.cookies.sb_user) {
-    try {
-      req.user = JSON.parse(req.cookies.sb_user);
-      if (req.user.authenticated) return next();
-    } catch { }
+const requireAuth = async (req: any, res: any, next: any) => {
+  const user = await parseSession(req);
+  if (user) {
+    req.user = user;
+    return next();
   }
   res.status(401).json({ error: 'Não autenticado' });
 };
 
-const requireSuperAdmin = (req: any, res: any, next: any) => {
-  if (req.cookies.sb_user) {
-    try {
-      const u = JSON.parse(req.cookies.sb_user);
-      if (u.authenticated && (u.role === 'SUPER_ADMIN' || u.role === 'master')) return next();
-    } catch { }
+const requireSuperAdmin = async (req: any, res: any, next: any) => {
+  const user = await parseSession(req);
+  if (user && (user.role === 'SUPER_ADMIN' || user.role === 'master')) {
+    req.user = user;
+    return next();
   }
   res.status(403).json({ error: 'Acesso negado: Requer SUPER_ADMIN' });
 };
 
-// Replaces existing requireMaster
-const requireAdminOrOwner = (req: any, res: any, next: any) => {
-  if (req.cookies.sb_user) {
-    try {
-      const u = JSON.parse(req.cookies.sb_user);
-      const allowed = ['SUPER_ADMIN', 'OWNER', 'ADMIN', 'master', 'admin'];
-      if (u.authenticated && allowed.includes(u.role)) return next();
-    } catch { }
+const requireAdminOrOwner = async (req: any, res: any, next: any) => {
+  const user = await parseSession(req);
+  const allowed = ['SUPER_ADMIN', 'OWNER', 'ADMIN', 'master', 'admin'];
+  if (user && allowed.includes(user.role)) {
+    req.user = user;
+    return next();
   }
-  res.status(403).json({ error: 'Acesso negado' });
+  res.status(403).json({ error: 'Acesso negado: Requer privilégios administrativos' });
 };
 
 // =====================
@@ -509,8 +505,11 @@ app.post('/api/login', async (req, res) => {
   const email = username.includes('@') ? username : `${username}@ferreiracalhas.com`;
 
   try {
-    // Create a temporary client to avoid mutating the global service-role client's state with the user session
-    const tempClient = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY! || process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    // Use sanitized variables to avoid crash on Vercel if process.env is missing at this point
+    const clientUrl = supabaseUrl || 'https://placeholder.supabase.co';
+    const clientKey = supabaseAnonKey || supabaseServiceKey || 'placeholder';
+
+    const tempClient = createClient(clientUrl, clientKey, {
       auth: { persistSession: false, autoRefreshToken: false }
     });
 
