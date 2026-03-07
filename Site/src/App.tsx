@@ -75,7 +75,7 @@ function AppContent() {
       {/* Show Navbar on Public/Site pages (Desktop) */}
       {!isMobile && !isInternal && !isLoginPage && <Navbar />}
 
-      <main className={`flex-grow ${isMobile ? 'pt-[env(safe-area-inset-top)] pb-24' : (isInternal || isLoginPage ? 'pt-0' : 'pt-20 md:pb-0')}`}>
+      <main className={`flex-grow ${isMobile ? 'pt-[env(safe-area-inset-top)] pb-24' : (isInternal || isLoginPage || location.pathname === '/' ? 'pt-0' : 'pt-20 md:pb-0')}`}>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
